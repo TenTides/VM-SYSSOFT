@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #define ARRAY_SIZE 500
+
 //initalize base
 int base( int BP, int L);
 //initalize pas array of ARRAY_SIZE
