@@ -40,14 +40,64 @@ int main()
           break;
         case 2: 
           //not done yet, the ariethmetic needs to be implemented
-
-          //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
-          if(L == 0)
-          {
-            SP = BP+1;
-            BP = pas[SP+2];
-            PC = pas[SP+3];
-            pas[SP] = M;
+          switch(M) {
+            //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
+            case 0:
+              SP = BP+1;
+              BP = pas[SP+2];
+              PC = pas[SP+3];
+              pas[SP] = M;
+              break;
+            //ADD addition
+            case 1:
+              pas[SP+1]= pas[SP+1] + pas[SP];
+              SP = SP+1;
+              break;
+            //SUB subtraction
+            case 2:
+              pas[SP+1]= pas[SP+1] - pas[SP];
+              SP = SP+1;
+              break;
+            //MUL multiplication
+            case 3:
+              pas[SP+1]= pas[SP+1] * pas[SP];
+              SP = SP+1;
+              break;
+            //DIV division
+            case 4:
+              pas[SP+1]= pas[SP+1] / pas[SP];
+              SP = SP+1;
+              break;
+            //EQL equality 
+            case 5:
+              pas[SP+1]= (pas[SP+1] == pas[SP]);
+              SP = SP+1;            
+              break;
+            //NEQ not equal
+            case 6:
+              pas[SP+1]= (pas[SP+1] != pas[SP]);
+              SP = SP+1;
+              break;
+            //LSS less than
+            case 7:
+              pas[SP+1]= (pas[SP+1] < pas[SP]);
+              SP = SP+1;
+              break;
+            //LEQ less than or equal to
+            case 8:
+              pas[SP+1]= (pas[SP+1] <= pas[SP]);
+              SP = SP+1;
+              break;
+            //GTR greater than 
+            case 9:
+              pas[SP+1]= (pas[SP+1] > pas[SP]);
+              SP = SP+1;
+              break;
+            //GEQ greater than or equal to
+            case 10:
+              pas[SP+1]= (pas[SP+1] >= pas[SP]);
+              SP = SP+1;
+              break;
           }
         // LOD load value to top of the stack from location at offset M from L
         // lexicographical levels down of the stack
