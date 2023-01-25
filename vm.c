@@ -6,36 +6,42 @@
 int base( int BP, int L);
 //initalize pas array of ARRAY_SIZE
 int pas[ARRAY_SIZE];
+//instruction register
 int IR[3]; //IR  = 0 0 0
- 
-int base( int BP, int L)
-{
-  int arb = BP; // arb = activation record base
-  while (L > 0)     //find base L levels down
-  {
-    arb = pas[arb];
-    L--;
-  }
-  return arb;
-}
+
+//pointer and halt initalization
+int BP = 499; 
+int SP = 500; 
+int PC = 0;
+int OP, M, L;
+int halt = 1;
+
 int main()
 {
-  
-    int BP = 499; 
-    int SP = BP + 1; 
-    int PC = 0;
-    int OP, M, L;
-    
-    while (scanf("%d %d %d",&OP,&M, &L) !=EOF) // stops scanning when no inputs are detected
+    while(1)
     {
+      scanf("%d %d %d",&OP,&M, &L);
+      pas[PC+1] = OP;
+      pas[PC+2] = M;
+      pas[PC+3] = L;
+      PC= PC +3;
+      if(OP == 9 && L ==3) break;
+    }
+    PC = 0;
+
+    while (halt) // stops scanning when no inputs are detected
+    {
+      IR[0] = pas[PC]; 
+      IR[1] = pas[PC + 1];  
+      IR[2] = pas[PC + 2];
       //use nested swtich statemnts
-      switch(OP) {
+      switch(IR[0]) {
         //LIT, Literal push
         case 1:
           if(L == 0)
           {
             SP = SP-1;
-            pas[SP] = M;
+            pas[SP] = IR[1];
           }
           break;
         case 2: 
@@ -44,9 +50,9 @@ int main()
             //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
             case 0:
               SP = BP+1;
-              BP = pas[SP+2];
-              PC = pas[SP+3];
-              pas[SP] = M;
+              BP = pas[SP-2];
+              PC = pas[SP-3];
+              pas[SP] = IR[1];
               break;
             //ADD addition
             case 1:
@@ -103,27 +109,27 @@ int main()
         // lexicographical levels down of the stack
         case 3:
           SP = SP-1;
-          pas[SP] = pas[base(BP,L)-M];
+          pas[SP] = pas[base(BP,IR[2])-IR[1]];
           break;
         // STO Store value at top of the stack in the ocation at offset M from L
         // lexicographical levels down of the stack
         case 4:
-          pas[SP] = pas[base(BP,L)-M];
+          pas[SP] = pas[base(BP,IR[2])-IR[1]];
           SP = SP+1;
           break;
         // CAL Call the procedure at code index p, 
         // generating a new activation record and 
         // setting PC to M
         case 5:
-          pas[SP - 1]  =  base(BP, L); 
+          pas[SP - 1]  =  base(BP, IR[2]); 
           pas[SP - 2]  = BP; 
           pas[SP - 3]  = PC;  
           BP = SP - 1;
-          PC = M;
+          PC = IR[1];
           break;
         // INC allocate M locals on the stack 
         case 6:
-          SP = SP-M;
+          SP = SP-IR[1];
           break;
         // JMP jump to the address in stack and pop
         case 7:
@@ -135,38 +141,43 @@ int main()
         case 8:
           if (pas[SP] == 0)
           { 
-            PC = M; 
+            PC = IR[1]; 
           } 
           SP = SP+1;
           break;
-        // GENERAL SYSTEM [SYS]
+        // GENERAL SYSTEM [SYS] 
         case 9:
           // SOU Output of the value in stack[SP] to standard 
           // output as a character and pop:
-          if(L == 1)
+          if(IR[2] == 1)
           {
-            putc(pas[SP]); // I don't understand this
+            printf("%d",pas[SP]); // 
             SP = SP+1;
           }
           // SIN Read in input from the user and store it on top of the stack
-          else if(L == 2)
+          else if(IR[2] == 2)
           {
             SP = SP-1;
-            pas[SP] = getc(); // or this, they supposedly need to 
-                              // connect with a file pointer
+            scanf("%d",&pas[SP]);
           }
           // EOP End of program (Set “eop” flag to zero)
-          if(L == 3)
+          if(IR[2] == 3)
           {
-            //"eop" flag ?? how do this, exit() is not allowed
+            halt = 0;//"eop" flag ?? how do this, exit() is not allowed
           }
           break;
       }
-      //fetch cycle, but I don't understand why an instruction register is even needed
-      IR[0] = pas[PC]; 
-      IR[1] = pas[PC + 1];  
-      IR[2] = pas[PC + 2];
+      //fetch cycle
       PC = PC +3;
-    }
-    
+    } 
+}
+int base( int BP, int L)
+{
+  int arb = BP; // arb = activation record base
+  while (L > 0)     //find base L levels down
+  {
+    arb = pas[arb];
+    L--;
+  }
+  return arb;
 }
