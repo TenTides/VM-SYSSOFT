@@ -151,7 +151,7 @@ int main()
           // output as a character and pop:
           if(IR[2] == 1)
           {
-            printf("%d",pas[SP]); // 
+            printf("%d",pas[SP]); 
             SP = SP+1;
           }
           // SIN Read in input from the user and store it on top of the stack
