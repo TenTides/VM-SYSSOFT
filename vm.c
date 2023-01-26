@@ -6,6 +6,7 @@
 int base( int BP, int L);
 //initalize pas array of ARRAY_SIZE
 int pas[ARRAY_SIZE];
+int arBarZeroOne[ARRAY_SIZE];
 //instruction register
 int IR[3]; //IR  = 0 0 0
 
@@ -31,9 +32,11 @@ int main()
 
     while (halt) // stops scanning when no inputs are detected
     {
-      IR[0] = pas[PC]; 
-      IR[1] = pas[PC + 1];  
-      IR[2] = pas[PC + 2];
+      //fetch cycle
+      IR[0] = pas[PC]; //op
+      IR[1] = pas[PC + 1];  // m
+      IR[2] = pas[PC + 2]; // l
+      PC = PC +3;
       //use nested swtich statemnts
       switch(IR[0]) {
         //LIT, Literal push
@@ -45,8 +48,7 @@ int main()
           }
           break;
         case 2: 
-          //not done yet, the ariethmetic needs to be implemented
-          switch(M) {
+          switch(IR[1]) {
             //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
             case 0:
               SP = BP+1;
@@ -131,10 +133,9 @@ int main()
         case 6:
           SP = SP-IR[1];
           break;
-        // JMP jump to the address in stack and pop
+        // JMP jump to the address in stack
         case 7:
-          PC = pas[SP-1];
-          SP = SP-1;
+          PC = IR[1];
           break;
         // JPC jump conditionally if index SP is zero
         // jump to index m and pop
@@ -167,8 +168,6 @@ int main()
           }
           break;
       }
-      //fetch cycle
-      PC = PC +3;
     } 
 }
 int base( int BP, int L)
