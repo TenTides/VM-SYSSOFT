@@ -14,22 +14,39 @@ int IR[3]; //IR  = 0 0 0
 int BP = 499; 
 int SP = 500; 
 int PC = 0;
-int OP, M, L;
+int OP = 0; 
+int M = 0; 
+int L = 0;
 int halt = 1;
 
 int main()
 {
+    //scanning method may have to change if file pointers are used 
+
+    //The input file name should be read as a command line argument at runtime, for 
+    //example: $ ./a.out input.txt (A deduction of 5 points will be applied to submissions 
+    //that do not implement this).
+
+   
+
+    //Initial values: 0 499 500
     while(1)
     {
       scanf("%d %d %d",&OP,&M, &L);
-      pas[PC+1] = OP;
-      pas[PC+2] = M;
-      pas[PC+3] = L;
+      pas[PC] = OP;
+      pas[PC+1] = M;
+      pas[PC+2] = L;
       PC= PC +3;
+      // upon finding the halt code, scanning stops
       if(OP == 9 && L ==3) break;
     }
+    //for(int i = 0;i<9;i++){
+   //   printf("%d ",pas[i]);
+    //}
+    //printf("\n");
     PC = 0;
-
+    printf("                  PC     BP     SP     stack\n");
+    printf("inital values:     %d     %d     %d\n",PC,BP,SP);
     while (halt) // stops scanning when no inputs are detected
     {
       //fetch cycle
@@ -41,11 +58,23 @@ int main()
       switch(IR[0]) {
         //LIT, Literal push
         case 1:
-          if(L == 0)
-          {
+            // Test case u can use to see how this works out
+            //  6 0 5
+            //  1 0 4
+            //  9 0 3
             SP = SP-1;
-            pas[SP] = IR[1];
-          }
+            pas[SP] = IR[2];
+            printf("LIT 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+            //for loop to print stack with check for activation bars
+            for(int i = BP; i>SP-1;i--)
+            {
+              printf("%d ",pas[i]);
+              if(arBarZeroOne[i])
+              {
+                printf("| ");
+              }
+            }
+            printf("\n");
           break;
         case 2: 
           switch(IR[1]) {
@@ -131,7 +160,7 @@ int main()
           break;
         // INC allocate M locals on the stack 
         case 6:
-          SP = SP-IR[1];
+          SP = SP-IR[2];
           break;
         // JMP jump to the address in stack
         case 7:
@@ -152,7 +181,7 @@ int main()
           // output as a character and pop:
           if(IR[2] == 1)
           {
-            printf("%d",pas[SP]); 
+            printf("Output result is: %d",pas[SP]); 
             SP = SP+1;
           }
           // SIN Read in input from the user and store it on top of the stack
