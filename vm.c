@@ -32,27 +32,30 @@ int main()
     //Initial values: 0 499 500
     while(1)
     {
-      scanf("%d %d %d",&OP,&M, &L);
+      scanf("%d %d %d",&OP,&L, &M);
       pas[PC] = OP;
-      pas[PC+1] = M;
-      pas[PC+2] = L;
+      pas[PC+1] = L;
+      pas[PC+2] = M;
       PC= PC +3;
       // upon finding the halt code, scanning stops
-      if(OP == 9 && L ==3) break;
+      //printf("PRIIINT\n");
+      //printf("%d %d %d \n",OP,L,M);
+      if(OP == 9 && M ==3) break;
     }
-    //for(int i = 0;i<9;i++){
-   //   printf("%d ",pas[i]);
-    //}
-    //printf("\n");
+    // printf("PRIIINT\n");
+    // for(int i = 0;i<9;i++){
+    //   printf("%d ",pas[i]);
+    // }
+    printf("\n");
     PC = 0;
     printf("                  PC     BP     SP     stack\n");
     printf("inital values:     %d     %d     %d\n",PC,BP,SP);
     while (halt) // stops scanning when no inputs are detected
     {
       //fetch cycle
-      IR[0] = pas[PC]; //op
-      IR[1] = pas[PC + 1];  // m
-      IR[2] = pas[PC + 2]; // l
+      IR[0] = pas[PC]; // OP
+      IR[1] = pas[PC + 1];  // L
+      IR[2] = pas[PC + 2]; // M
       PC = PC +3;
       //use nested swtich statemnts
       switch(IR[0]) {
@@ -77,13 +80,12 @@ int main()
             printf("\n");
           break;
         case 2: 
-          switch(IR[1]) {
+          switch(IR[2]) {
             //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
             case 0:
               SP = BP+1;
               BP = pas[SP-2];
               PC = pas[SP-3];
-              pas[SP] = IR[1];
               break;
             //ADD addition
             case 1:
@@ -140,23 +142,23 @@ int main()
         // lexicographical levels down of the stack
         case 3:
           SP = SP-1;
-          pas[SP] = pas[base(BP,IR[2])-IR[1]];
+          pas[SP] = pas[base(BP,IR[1])-IR[2]];
           break;
         // STO Store value at top of the stack in the ocation at offset M from L
         // lexicographical levels down of the stack
         case 4:
-          pas[SP] = pas[base(BP,IR[2])-IR[1]];
+          pas[base(BP,IR[1])-IR[2]] = pas[SP];
           SP = SP+1;
           break;
         // CAL Call the procedure at code index p, 
         // generating a new activation record and 
         // setting PC to M
         case 5:
-          pas[SP - 1]  =  base(BP, IR[2]); 
+          pas[SP - 1]  =  base(BP, IR[1]); 
           pas[SP - 2]  = BP; 
           pas[SP - 3]  = PC;  
           BP = SP - 1;
-          PC = IR[1];
+          PC = IR[2];
           break;
         // INC allocate M locals on the stack 
         case 6:
@@ -164,14 +166,14 @@ int main()
           break;
         // JMP jump to the address in stack
         case 7:
-          PC = IR[1];
+          PC = IR[2];
           break;
         // JPC jump conditionally if index SP is zero
         // jump to index m and pop
         case 8:
           if (pas[SP] == 0)
           { 
-            PC = IR[1]; 
+            PC = IR[2]; 
           } 
           SP = SP+1;
           break;
