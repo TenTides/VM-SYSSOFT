@@ -25,9 +25,7 @@ int main()
 
     //The input file name should be read as a command line argument at runtime, for 
     //example: $ ./a.out input.txt (A deduction of 5 points will be applied to submissions 
-    //that do not implement this).
-
-   
+    //that do not implement this). 
 
     //Initial values: 0 499 500
     while(1)
@@ -38,19 +36,13 @@ int main()
       pas[PC+2] = M;
       PC= PC +3;
       // upon finding the halt code, scanning stops
-      //printf("PRIIINT\n");
-      //printf("%d %d %d \n",OP,L,M);
       if(OP == 9 && M ==3) break;
     }
-    // printf("PRIIINT\n");
-    // for(int i = 0;i<9;i++){
-    //   printf("%d ",pas[i]);
-    // }
     printf("\n");
     PC = 0;
-    printf("                  PC     BP     SP     stack\n");
-    printf("inital values:     %d     %d     %d\n",PC,BP,SP);
-    while (halt) // stops scanning when no inputs are detected
+    printf("                 PC     BP     SP     stack\n");
+    printf("inital values:   %d     %d     %d\n",PC,BP,SP);
+    while (halt) 
     {
       //fetch cycle
       IR[0] = pas[PC]; // OP
@@ -86,69 +78,111 @@ int main()
               SP = BP+1;
               BP = pas[SP-2];
               PC = pas[SP-3];
+              printf("RTN 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //ADD addition
             case 1:
               pas[SP+1]= pas[SP+1] + pas[SP];
               SP = SP+1;
+              printf("ADD 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //SUB subtraction
             case 2:
               pas[SP+1]= pas[SP+1] - pas[SP];
               SP = SP+1;
+              printf("SUB 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //MUL multiplication
             case 3:
               pas[SP+1]= pas[SP+1] * pas[SP];
               SP = SP+1;
+              printf("MUL 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //DIV division
             case 4:
               pas[SP+1]= pas[SP+1] / pas[SP];
               SP = SP+1;
+              printf("DIV 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //EQL equality 
             case 5:
               pas[SP+1]= (pas[SP+1] == pas[SP]);
-              SP = SP+1;            
+              SP = SP+1; 
+              printf("EQL 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+           
               break;
             //NEQ not equal
             case 6:
               pas[SP+1]= (pas[SP+1] != pas[SP]);
               SP = SP+1;
+              printf("NEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //LSS less than
             case 7:
               pas[SP+1]= (pas[SP+1] < pas[SP]);
               SP = SP+1;
+              printf("LSS 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //LEQ less than or equal to
             case 8:
               pas[SP+1]= (pas[SP+1] <= pas[SP]);
               SP = SP+1;
+              printf("LEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //GTR greater than 
             case 9:
               pas[SP+1]= (pas[SP+1] > pas[SP]);
               SP = SP+1;
+              printf("GTR 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
             //GEQ greater than or equal to
             case 10:
               pas[SP+1]= (pas[SP+1] >= pas[SP]);
               SP = SP+1;
+              printf("GEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
           }
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
+          break;
         // LOD load value to top of the stack from location at offset M from L
         // lexicographical levels down of the stack
         case 3:
           SP = SP-1;
           pas[SP] = pas[base(BP,IR[1])-IR[2]];
+          printf("LOD %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // STO Store value at top of the stack in the ocation at offset M from L
         // lexicographical levels down of the stack
         case 4:
           pas[base(BP,IR[1])-IR[2]] = pas[SP];
           SP = SP+1;
+          printf("STO %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // CAL Call the procedure at code index p, 
         // generating a new activation record and 
@@ -159,14 +193,45 @@ int main()
           pas[SP - 3]  = PC;  
           BP = SP - 1;
           PC = IR[2];
+          printf("CAL %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          // HAS TO BE CHANGED TO MARK WHERE THE AR IS CREATED IN arBarZeroOne
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // INC allocate M locals on the stack 
         case 6:
           SP = SP-IR[2];
+          printf("INC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // JMP jump to the address in stack
         case 7:
           PC = IR[2];
+          printf("JMP 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // JPC jump conditionally if index SP is zero
         // jump to index m and pop
@@ -176,6 +241,16 @@ int main()
             PC = IR[2]; 
           } 
           SP = SP+1;
+          printf("JPC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
         // GENERAL SYSTEM [SYS] 
         case 9:
@@ -190,6 +265,7 @@ int main()
           else if(IR[2] == 2)
           {
             SP = SP-1;
+            printf("Enter an integer: "); 
             scanf("%d",&pas[SP]);
           }
           // EOP End of program (Set “eop” flag to zero)
@@ -197,6 +273,16 @@ int main()
           {
             halt = 0;//"eop" flag ?? how do this, exit() is not allowed
           }
+          printf("SYS 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          for(int i = BP; i>SP-1;i--)
+          {
+            printf("%d ",pas[i]);
+            if(arBarZeroOne[i])
+            {
+              printf("| ");
+            }
+          }
+          printf("\n");
           break;
       }
     } 
