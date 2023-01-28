@@ -193,9 +193,8 @@ int main()
           pas[SP - 3]  = PC;  
           BP = SP - 1;
           PC = IR[2];
-          arBarZeroOne[BP] = 1;
+          arBarZeroOne[BP+1] = 1;
           printf("CAL %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
-          // HAS TO BE CHANGED TO MARK WHERE THE AR IS CREATED IN arBarZeroOne
           for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
