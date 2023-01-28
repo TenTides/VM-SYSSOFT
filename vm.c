@@ -23,8 +23,11 @@ int M = 0;
 int L = 0;
 int halt = 1;
 
-int main()
+int main(int argc, char *argv[])
 {
+    FILE *fp;
+    fp = fopen(argv[1], "r");
+
     //scanning method may have to change if file pointers are used 
 
     //The input file name should be read as a command line argument at runtime, for 
@@ -34,7 +37,8 @@ int main()
     //Initial values: 0 499 500
     while(1)
     {
-      scanf("%d %d %d",&OP,&L, &M);
+      fscanf(fp, "%d %d %d", &OP,&L, &M);
+      
       pas[PC] = OP;
       pas[PC+1] = L;
       pas[PC+2] = M;
@@ -42,6 +46,8 @@ int main()
       // upon finding the halt code, scanning stops
       if(OP == 9 && M ==3) break;
     }
+    fclose(fp);
+    
     printf("\n");
     PC = 0;
     printf("                 PC   BP   SP   stack\n");
