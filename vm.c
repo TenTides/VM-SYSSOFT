@@ -1,3 +1,7 @@
+// Tyler Crawford, Nelson Herrera Gamboa
+// COP3402
+// Date: 1/27/2023
+
 #include <stdio.h>
 #include <stdlib.h> 
 #define ARRAY_SIZE 500
@@ -44,12 +48,13 @@ int main()
     printf("inital values:   %d     %d     %d\n",PC,BP,SP);
     while (halt) 
     {
-      //fetch cycle
+      //Fetch Cycle
       IR[0] = pas[PC]; // OP
       IR[1] = pas[PC + 1];  // L
       IR[2] = pas[PC + 2]; // M
       PC = PC +3;
-      //use nested swtich statemnts
+
+      //use nested swtich statements for instuctions
       switch(IR[0]) {
         //LIT, Literal push
         case 1:
