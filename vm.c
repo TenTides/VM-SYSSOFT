@@ -44,8 +44,8 @@ int main()
     }
     printf("\n");
     PC = 0;
-    printf("                 PC     BP     SP     stack\n");
-    printf("inital values:   %d     %d     %d\n",PC,BP,SP);
+    printf("                 PC   BP   SP   stack\n");
+    printf("inital values:    %d   %d  %d\n",PC,BP,SP);
     while (halt) 
     {
       //Fetch Cycle
@@ -59,14 +59,26 @@ int main()
         case 1:
             SP = SP-1;
             pas[SP] = IR[2];
-            printf("LIT 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+            printf("    LIT 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
             //for loop to print stack with check for activation bars
             for(int i = 499; i>SP-1;i--)
             {
-              printf("%d ",pas[i]);
+              if (pas[i] < 10)
+              {
+                printf("%3d",pas[i]);
+              }
+              else if (pas[i] < 100)
+              {
+                printf("%4d",pas[i]);
+              } 
+              else
+              {
+              printf("%5d",pas[i]);
+              }
+
               if(arBarZeroOne[i])
               {
-                printf("| ");
+                printf(" | ");
               }
             }
             printf("\n");
@@ -78,76 +90,88 @@ int main()
               SP = BP+1;
               BP = pas[SP-2];
               PC = pas[SP-3];
-              printf("RTN 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    RTN 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //ADD addition
             case 1:
               pas[SP+1]= pas[SP+1] + pas[SP];
               SP = SP+1;
-              printf("ADD 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    ADD 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //SUB subtraction
             case 2:
               pas[SP+1]= pas[SP+1] - pas[SP];
               SP = SP+1;
-              printf("SUB 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    SUB 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //MUL multiplication
             case 3:
               pas[SP+1]= pas[SP+1] * pas[SP];
               SP = SP+1;
-              printf("MUL 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    MUL 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //DIV division
             case 4:
               pas[SP+1]= pas[SP+1] / pas[SP];
               SP = SP+1;
-              printf("DIV 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    DIV 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //EQL equality 
             case 5:
               pas[SP+1]= (pas[SP+1] == pas[SP]);
               SP = SP+1; 
-              printf("EQL 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    EQL 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
            
               break;
             //NEQ not equal
             case 6:
               pas[SP+1]= (pas[SP+1] != pas[SP]);
               SP = SP+1;
-              printf("NEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    NEQ 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //LSS less than
             case 7:
               pas[SP+1]= (pas[SP+1] < pas[SP]);
               SP = SP+1;
-              printf("LSS 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    LSS 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //LEQ less than or equal to
             case 8:
               pas[SP+1]= (pas[SP+1] <= pas[SP]);
               SP = SP+1;
-              printf("LEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    LEQ 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //GTR greater than 
             case 9:
               pas[SP+1]= (pas[SP+1] > pas[SP]);
               SP = SP+1;
-              printf("GTR 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    GTR 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
             //GEQ greater than or equal to
             case 10:
               pas[SP+1]= (pas[SP+1] >= pas[SP]);
               SP = SP+1;
-              printf("GEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+              printf("    GEQ 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
               break;
           }
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -157,13 +181,25 @@ int main()
         case 3:
           SP = SP-1;
           pas[SP] = pas[base(BP,IR[1])-IR[2]];
-          printf("LOD %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          printf("    LOD%2d%5d%5d%6d%5d",IR[1],IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -173,13 +209,25 @@ int main()
         case 4:
           pas[base(BP,IR[1])-IR[2]] = pas[SP];
           SP = SP+1;
-          printf("STO %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          printf("    STO%2d%5d%5d%6d%5d",IR[1],IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -194,13 +242,25 @@ int main()
           BP = SP - 1;
           PC = IR[2];
           arBarZeroOne[BP+1] = 1;
-          printf("CAL %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
+          printf("    CAL%2d%5d%5d%6d%5d",IR[1],IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -208,13 +268,25 @@ int main()
         // INC allocate M locals on the stack 
         case 6:
           SP = SP-IR[2];
-          printf("INC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          printf("    INC 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -222,13 +294,25 @@ int main()
         // JMP jump to the address in stack
         case 7:
           PC = IR[2];
-          printf("JMP 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          printf("    JMP 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -241,13 +325,25 @@ int main()
             PC = IR[2]; 
           } 
           SP = SP+1;
-          printf("JPC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          printf("    JPC 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
@@ -258,14 +354,14 @@ int main()
           // output as a character and pop:
           if(IR[2] == 1)
           {
-            printf("Output result is: %d\n",pas[SP]); 
+            printf("Output result is:  %d\n",pas[SP]); 
             SP = SP+1;
           }
           // SIN Read in input from the user and store it on top of the stack
           else if(IR[2] == 2)
           {
             SP = SP-1;
-            printf("Enter an integer: "); 
+            printf("Please Enter an integer:  "); 
             scanf("%d",&pas[SP]);
           }
           // EOP End of program (Set “eop” flag to zero)
@@ -273,13 +369,25 @@ int main()
           {
             halt = 0;//"eop" flag ?? how do this, exit() is not allowed
           }
-          printf("SYS 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
+          printf("    SYS 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
           for(int i = 499; i>SP-1;i--)
           {
-            printf("%d ",pas[i]);
+            if (pas[i] < 10)
+            {
+              printf("%3d",pas[i]);
+            }
+            else if (pas[i] < 100)
+            {
+              printf("%4d",pas[i]);
+            } 
+            else
+            {
+            printf("%5d",pas[i]);
+            }
+
             if(arBarZeroOne[i])
             {
-              printf("| ");
+              printf(" | ");
             }
           }
           printf("\n");
