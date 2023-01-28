@@ -53,20 +53,15 @@ int main()
       IR[1] = pas[PC + 1];  // L
       IR[2] = pas[PC + 2]; // M
       PC = PC +3;
-
       //use nested swtich statements for instuctions
       switch(IR[0]) {
         //LIT, Literal push
         case 1:
-            // Test case u can use to see how this works out
-            //  6 0 5
-            //  1 0 4
-            //  9 0 3
             SP = SP-1;
             pas[SP] = IR[2];
             printf("LIT 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
             //for loop to print stack with check for activation bars
-            for(int i = BP; i>SP-1;i--)
+            for(int i = 499; i>SP-1;i--)
             {
               printf("%d ",pas[i]);
               if(arBarZeroOne[i])
@@ -147,7 +142,7 @@ int main()
               printf("GEQ 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
               break;
           }
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -163,7 +158,7 @@ int main()
           SP = SP-1;
           pas[SP] = pas[base(BP,IR[1])-IR[2]];
           printf("LOD %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -179,7 +174,7 @@ int main()
           pas[base(BP,IR[1])-IR[2]] = pas[SP];
           SP = SP+1;
           printf("STO %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -200,7 +195,7 @@ int main()
           PC = IR[2];
           printf("CAL %d    %d       %d     %d     %d     ",IR[1],IR[2],PC,BP,SP);
           // HAS TO BE CHANGED TO MARK WHERE THE AR IS CREATED IN arBarZeroOne
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -214,7 +209,7 @@ int main()
         case 6:
           SP = SP-IR[2];
           printf("INC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -228,7 +223,7 @@ int main()
         case 7:
           PC = IR[2];
           printf("JMP 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -247,7 +242,7 @@ int main()
           } 
           SP = SP+1;
           printf("JPC 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])
@@ -263,7 +258,7 @@ int main()
           // output as a character and pop:
           if(IR[2] == 1)
           {
-            printf("Output result is: %d",pas[SP]); 
+            printf("Output result is: %d\n",pas[SP]); 
             SP = SP+1;
           }
           // SIN Read in input from the user and store it on top of the stack
@@ -279,7 +274,7 @@ int main()
             halt = 0;//"eop" flag ?? how do this, exit() is not allowed
           }
           printf("SYS 0    %d       %d     %d     %d     ",IR[2],PC,BP,SP);
-          for(int i = BP; i>SP-1;i--)
+          for(int i = 499; i>SP-1;i--)
           {
             printf("%d ",pas[i]);
             if(arBarZeroOne[i])

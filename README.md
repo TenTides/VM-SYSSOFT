@@ -1,3 +1,4 @@
 # VM-SYSSOFT
-Repository containing vm.c and associated input and read me files
-this is a project for systems software.
+Tyler Crawford, Nelson Herrera Gamboa
+COP3402
+Date: 1/27/2023
