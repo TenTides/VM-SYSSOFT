@@ -1,20 +1,22 @@
-// Tyler Crawford, Nelson Herrera Gamboa
-// COP3402
-// Date: 1/27/2023
-
+// Team Leader: Tyler Crawford   
+// Member: Nelson Herrera Gamboa
+// Class: COP3402    
+// Date of Last Edit: 1/27/2023
 #include <stdio.h>
 #include <stdlib.h> 
 #define ARRAY_SIZE 500
 
-//initalize base
+// initalize base
 int base( int BP, int L);
-//initalize pas array of ARRAY_SIZE
+// initalize pas array of ARRAY_SIZE
 int pas[ARRAY_SIZE];
+// arBarZeroOne array is used to mark where
+// the activation bars on print go
 int arBarZeroOne[ARRAY_SIZE];
-//instruction register
+// instruction register
 int IR[3]; //IR  = 0 0 0
 
-//pointer and halt initalization
+// pointer and halt initalization
 int BP = 499; 
 int SP = 500; 
 int PC = 0;
@@ -25,15 +27,9 @@ int halt = 1;
 
 int main(int argc, char *argv[])
 {
+    //Reads in input file from cmd line
     FILE *fp;
     fp = fopen(argv[1], "r");
-
-    //scanning method may have to change if file pointers are used 
-
-    //The input file name should be read as a command line argument at runtime, for 
-    //example: $ ./a.out input.txt (A deduction of 5 points will be applied to submissions 
-    //that do not implement this). 
-
     //Initial values: 0 499 500
     while(1)
     {
@@ -61,7 +57,7 @@ int main(int argc, char *argv[])
       PC = PC +3;
       //use nested swtich statements for instuctions
       switch(IR[0]) {
-        //LIT, Literal push
+        //LIT, Pushes a constant value (literal) M onto the stack
         case 1:
             SP = SP-1;
             pas[SP] = IR[2];
@@ -79,9 +75,8 @@ int main(int argc, char *argv[])
               } 
               else
               {
-              printf("%5d",pas[i]);
+                printf("%5d",pas[i]);
               }
-
               if(arBarZeroOne[i])
               {
                 printf(" | ");
@@ -90,6 +85,7 @@ int main(int argc, char *argv[])
             printf("\n");
           break;
         case 2: 
+          //Operation to be performed on the data at the top of the stack.(or return from function)
           switch(IR[2]) {
             //RTN Returns from a subroutine is encoded 0 0 0 and restores the caller’s AR
             case 0:
@@ -172,9 +168,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -200,9 +195,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -210,8 +204,8 @@ int main(int argc, char *argv[])
           }
           printf("\n");
           break;
-        // STO Store value at top of the stack in the ocation at offset M from L
-        // lexicographical levels down of the stack
+        // Store value at top of stack in the stack location at offset M 
+        // from L lexicographical levels down
         case 4:
           pas[base(BP,IR[1])-IR[2]] = pas[SP];
           SP = SP+1;
@@ -228,9 +222,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -261,9 +254,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -271,7 +263,9 @@ int main(int argc, char *argv[])
           }
           printf("\n");
           break;
-        // INC allocate M locals on the stack 
+        // INC Allocate  M  memory  words  (increment  SP  by  M).  First  four  
+        // are  reserved  to      Static  Link  (SL),  Dynamic  Link  (DL),                     
+        // and Return Address (RA)
         case 6:
           SP = SP-IR[2];
           printf("    INC 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
@@ -297,7 +291,7 @@ int main(int argc, char *argv[])
           }
           printf("\n");
           break;
-        // JMP jump to the address in stack
+        // JMP Jump to instruction M (PC <- M)
         case 7:
           PC = IR[2];
           printf("    JMP 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
@@ -313,9 +307,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -323,8 +316,8 @@ int main(int argc, char *argv[])
           }
           printf("\n");
           break;
-        // JPC jump conditionally if index SP is zero
-        // jump to index m and pop
+        // JPC jump conditionally,  Jump to instruction M 
+        // if top stack element is 0
         case 8:
           if (pas[SP] == 0)
           { 
@@ -344,9 +337,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
@@ -356,21 +348,21 @@ int main(int argc, char *argv[])
           break;
         // GENERAL SYSTEM [SYS] 
         case 9:
-          // SOU Output of the value in stack[SP] to standard 
+          // Output of the value in stack[SP] to standard 
           // output as a character and pop:
           if(IR[2] == 1)
           {
             printf("Output result is:  %d\n",pas[SP]); 
             SP = SP+1;
           }
-          // SIN Read in input from the user and store it on top of the stack
+          // Read in input from the user and store it on top of the stack
           else if(IR[2] == 2)
           {
             SP = SP-1;
             printf("Please Enter an integer:  "); 
             scanf("%d",&pas[SP]);
           }
-          // EOP End of program (Set “eop” flag to zero)
+          // End of program (Set “eop” flag to zero)
           if(IR[2] == 3)
           {
             halt = 0;//"eop" flag ?? how do this, exit() is not allowed
@@ -388,9 +380,8 @@ int main(int argc, char *argv[])
             } 
             else
             {
-            printf("%5d",pas[i]);
+              printf("%5d",pas[i]);
             }
-
             if(arBarZeroOne[i])
             {
               printf(" | ");
