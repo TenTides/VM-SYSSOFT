@@ -354,6 +354,28 @@ int main(int argc, char *argv[])
           {
             printf("Output result is:  %d\n",pas[SP]); 
             SP = SP+1;
+            printf("    SOU 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
+            for(int i = 499; i>SP-1;i--)
+            {
+              if (pas[i] < 10)
+              {
+                printf("%3d",pas[i]);
+              }
+              else if (pas[i] < 100)
+              {
+                printf("%4d",pas[i]);
+              } 
+              else
+              {
+                printf("%5d",pas[i]);
+              }
+              if(arBarZeroOne[i])
+              {
+                printf(" | ");
+              }
+            }
+            printf("\n");
+            break;
           }
           // Read in input from the user and store it on top of the stack
           else if(IR[2] == 2)
@@ -361,34 +383,55 @@ int main(int argc, char *argv[])
             SP = SP-1;
             printf("Please Enter an integer:  "); 
             scanf("%d",&pas[SP]);
+            printf("    SIN 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
+            for(int i = 499; i>SP-1;i--)
+            {
+              if (pas[i] < 10)
+              {
+                printf("%3d",pas[i]);
+              }
+              else if (pas[i] < 100)
+              {
+                printf("%4d",pas[i]);
+              } 
+              else
+              {
+                printf("%5d",pas[i]);
+              }
+              if(arBarZeroOne[i])
+              {
+                printf(" | ");
+              }
+            }
+            printf("\n");
+            break;
           }
           // End of program (Set “eop” flag to zero)
           if(IR[2] == 3)
           {
             halt = 0;//"eop" flag ?? how do this, exit() is not allowed
+            printf("    EOP 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
+            for(int i = 499; i>SP-1;i--)
+            {
+              if (pas[i] < 10)
+              {
+                printf("%3d",pas[i]);
+              }
+              else if (pas[i] < 100)
+              {
+                printf("%4d",pas[i]);
+              } 
+              else
+              {
+                printf("%5d",pas[i]);
+              }
+              if(arBarZeroOne[i])
+              {
+                printf(" | ");
+              }
+            }
+            printf("\n");
           }
-          printf("    SYS 0%5d%5d%6d%5d",IR[2],PC,BP,SP);
-          for(int i = 499; i>SP-1;i--)
-          {
-            if (pas[i] < 10)
-            {
-              printf("%3d",pas[i]);
-            }
-            else if (pas[i] < 100)
-            {
-              printf("%4d",pas[i]);
-            } 
-            else
-            {
-              printf("%5d",pas[i]);
-            }
-            if(arBarZeroOne[i])
-            {
-              printf(" | ");
-            }
-          }
-          printf("\n");
-          break;
       }
     } 
 }
