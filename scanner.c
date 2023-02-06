@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <limits.h>
+#include <string.h>
 typedef enum {  
-    int skipsym = 1, 
+    skipsym = 1, 
     identsym = 2, 
     numbersym = 3, 
     plussym = 4 , 
@@ -42,25 +43,26 @@ int main(int argc, char *argv[])
     FILE *fp;
     fp = fopen(argv[1], "r");
     int numLines = 0;
+    char ch = ' ';
     while ((ch = fgetc(fp)) != EOF)
     {
       if (ch == '\n')
       {
-            lines++;
+            numLines++;
       }
     }
     fclose(fp);
-    char* codePL = malloc(sizeOf(char)*LINE_MAX*numLines);
+    char* codePL = malloc(sizeof(char)*LINE_MAX*numLines);
     codePL[0] = '\0';
     fp = fopen(argv[1], "r");
     while(1)
     {
-        char* line = malloc(sizeOf(char)*LINE_MAX);
+        char* line = malloc(sizeof(char)*LINE_MAX);
         if(fscanf(fp, "%[^\n]", line) == EOF)
         {
             break;
         }
-        line = realloc(sizeOf(char)*line.length());
+        line = realloc(line,sizeof(char)*strlen(line));
         strcat(codePL,line);
         free(line);
     }
