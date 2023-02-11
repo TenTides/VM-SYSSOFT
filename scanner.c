@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
-#define  NORW      15       // number of reserved words (not very useful)
 #define  IMAX   32767       // maximum integer value 
 #define  CMAX      11       // maximum number of chars for idents 
-#define  STRMAX   256       // maximum length of strings (when to use this?)
+#define  STRMAX   50    
 
-char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
+char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",``
                  "odd", "procedure", "read", "then", "var", "while", "write"}; 
 //Symbol table isn't in order of ascii, cannot be used with a hash search method yet.
 char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
@@ -58,6 +57,7 @@ typedef enum {
 //and thereafter return that string
 char* lexicalParse(char* codeLine)
 {
+
     return codeLine; //temp return statement
 }
 int main(int argc, char *argv[])
