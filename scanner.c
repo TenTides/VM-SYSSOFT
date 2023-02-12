@@ -268,27 +268,37 @@ int main(int argc, char *argv[])
 {
     int numLines = numberOfFileLines(argv[1]);
     //Initalize input file for viewing
-    FILE *fp;
-    fp = fopen(argv[1], "r");
-    //Initalize main code array
-    char* codePL = malloc(sizeof(char)*STRMAX*numLines);
-    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+    // FILE *fp;
+    // fp = fopen(argv[1], "r");
+    // //Initalize main code array
+    // char* codePL = malloc(sizeof(char)*STRMAX*numLines);
+    // codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
-    //This while loop doesn't ommit comments 
-    while(halt_flag)
-    {
-        char* line = malloc(sizeof(char)*STRMAX);
-        if(fscanf(fp, "%[^\n]s", line) == EOF)
-        {
-            halt_flag = 0;
-            break;
-        }
-        line = realloc(line,sizeof(char)*strlen(line));
-        line = lexicalParse(line); // lex parse
-        if(strlen(line) >= 0)//
-        { 
-            strcat(codePL,line);
-        } 
-        free(line);
-    }   
+    // //This while loop doesn't ommit comments 
+    // while(halt_flag)
+    // {
+    //     char* line = malloc(sizeof(char)*STRMAX);
+    //     if(fscanf(fp, "%[^\n]s", line) == EOF)
+    //     {
+    //         halt_flag = 0;
+    //         break;
+    //     }
+    //     line = realloc(line,sizeof(char)*strlen(line));
+    //     line = lexicalParse(line); // lex parse
+    //     if(strlen(line) >= 0)//
+    //     { 
+    //         strcat(codePL,line);
+    //     } 
+    //     free(line);
+    // }   
+    //TEST LEX PARSE FRAMEWORK
+    char* line = malloc(sizeof(char)*STRMAX);
+    printf("Enter a line of text: ");
+    fgets(line, sizeof(line), stdin);
+    line = realloc(line,sizeof(char)*strlen(line));
+    printf("You entered: %s", line);
+    line = lexicalParse(line);
+    line = realloc(line,sizeof(char)*strlen(line));
+    printf("You parsed: %s", line);
+
 }
