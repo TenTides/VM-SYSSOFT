@@ -7,11 +7,30 @@
 
 char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
                  "odd", "procedure", "read", "then", "var", "while", "write"}; 
+                 
+int reservedWordSumTable[] = {309, 331, 377, 393, 414, 446, 451, 482, 492, 466, 534, 554, 607, 671, 851};
+
+// null: 466
+// begin: 607
+// call: 482
+// const: 534
+// do: 309
+// else: 492
+// end: 414
+// if: 331
+// odd: 377
+// procedure: 851
+// read: 451
+// then: 446
+// var: 393
+// while: 671
+// write: 554
+
 //Symbol table isn't in order of ascii, cannot be used with binary search
 // char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
 //                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
 //                         '=', '>', ':','.' , ',' , ';' }; 
-                        
+
 char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
@@ -19,7 +38,7 @@ char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3'
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 //char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
 char specialTerminalSymbolsOrdered[] = {'*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; 
-                               
+int halt_flag = 1;                               
               
 char* lexicalParse(char* codeLine);
 int numberOfFileLines(char* filename);
@@ -111,7 +130,6 @@ int main(int argc, char *argv[])
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
     //This while loop doesn't ommit comments 
-    int halt_flag = 1;
     while(halt_flag)
     {
         char* line = malloc(sizeof(char)*STRMAX);
@@ -121,7 +139,7 @@ int main(int argc, char *argv[])
             break;
         }
         line = realloc(line,sizeof(char)*strlen(line));
-        line = lexicalParse(line);
+        line = lexicalParse(line); // lex parse
         if(strlen(line) >= 0)// Because a line, or a part of it, can be a comment
         { 
             strcat(codePL,line);
