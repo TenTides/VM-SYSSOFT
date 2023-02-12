@@ -5,17 +5,25 @@
 #define  CMAX      11       // maximum number of chars for idents 
 #define  STRMAX   50    
 
-char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",``
+char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
                  "odd", "procedure", "read", "then", "var", "while", "write"}; 
-//Symbol table isn't in order of ascii, cannot be used with a hash search method yet.
-char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
-                        'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
-                        '=', '>', ':','.' , ',' , ';' };   
+//Symbol table isn't in order of ascii, cannot be used with binary search
+// char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+//                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
+//                         '=', '>', ':','.' , ',' , ';' }; 
+                        
+char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
+                        '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+                        'v', 'w', 'x', 'y', 'z'};   
+
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
-char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
-                            
+//char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
+char specialTerminalSymbolsOrdered[] = {'*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; 
+                               
               
 char* lexicalParse(char* codeLine);
+int numberOfFileLines(char* filename);
+int characterInSymbolTableBS(char c, char* symTbl);
               
 typedef enum {  
     nulsym = 1, //was skipsys, but skip isn't in PL/0, this must be null
@@ -57,13 +65,14 @@ typedef enum {
 //and thereafter return that string
 char* lexicalParse(char* codeLine)
 {
+    //will return 
 
     return codeLine; //temp return statement
 }
-int main(int argc, char *argv[])
+
+int numberOfFileLines(char* filename)
 {
-    FILE *fp;
-    fp = fopen(argv[1], "r");
+    FILE *fp = fopen(filename, "r");
     int numLines = 0;
     char ch = ' ';
     while ((ch = fgetc(fp)) != EOF)
@@ -74,15 +83,41 @@ int main(int argc, char *argv[])
       }
     }
     fclose(fp);
+    return numLines;
+}
+
+int characterInSymbolTableBS(char c, char* symTbl)
+{
+    int low = 0;
+    int high = strlen(symTbl)-1; 
+    while (low <= high) 
+    {
+        int mid = (high + low) / 2;
+        if (symTbl[mid] == c) return mid;
+        else if (symTbl[mid] > c) high = mid - 1;
+        else low = mid + 1;
+    }
+    return -1;
+}
+
+int main(int argc, char *argv[])
+{
+    int numLines = numberOfFileLines(argv[1]);
+    //Initalize input file for viewing
+    FILE *fp;
+    fp = fopen(argv[1], "r");
+    //Initalize main code array
     char* codePL = malloc(sizeof(char)*STRMAX*numLines);
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
-    fp = fopen(argv[1], "r");
-    while(1)
+    //This while loop doesn't ommit comments 
+    int halt_flag = 1;
+    while(halt_flag)
     {
         char* line = malloc(sizeof(char)*STRMAX);
-        if(fscanf(fp, "%[^\n]", line) == EOF)
+        if(fscanf(fp, "%[^\n]s", line) == EOF)
         {
+            halt_flag = 0;
             break;
         }
         line = realloc(line,sizeof(char)*strlen(line));
@@ -91,10 +126,6 @@ int main(int argc, char *argv[])
         { 
             strcat(codePL,line);
         } 
-        else
-        {
-            break; // an error was encountered prematurely
-        }
         free(line);
     }   
 }
