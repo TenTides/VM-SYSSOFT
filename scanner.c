@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
-#define  IMAX   32767       // maximum integer value 
-#define  CMAX      11       // maximum number of chars for idents 
+#define  IMAX   99999       // maximum integer value 
+#define  CMAX     11       // maximum number of chars for idents 
 #define  STRMAX   50    
 
-char* word[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
+char* resWords[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
                  "odd", "procedure", "read", "then", "var", "while", "write"}; 
                  
 int reservedWordSumTable[] = {309, 331, 377, 393, 414, 446, 451, 482, 492, 466, 534, 554, 607, 671, 851};
@@ -37,13 +37,16 @@ char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3'
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 //char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
-char specialTerminalSymbolsOrdered[] = {'*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; 
+char specialTerminalSymbolsOrdered[] = {' ','*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; // ' ' isn't a term sym, it was put here
 int halt_flag = 1;                               
               
 char* lexicalParse(char* codeLine);
 int numberOfFileLines(char* filename);
 int characterInSymbolTableBS(char c, char* symTbl);
-              
+int isStatementReserved(char* word);            
+char* subString(int start, int end,char* line);  
+int isWordValid(char* word);
+
 typedef enum {  
     nulsym = 1, //was skipsys, but skip isn't in PL/0, this must be null
     identsym = 2, 
@@ -84,9 +87,111 @@ typedef enum {
 //and thereafter return that string
 char* lexicalParse(char* codeLine)
 {
-    //will return 
-
+    char* parsedString = malloc(sizeof(codeLine));
+    parsedString[0] = '\0';
+    int start = 0;
+    for(int i = 0; i<strlen(codeLine)-1;i++)
+    {
+        if(characterInSymbolTableBS(codeLine[i], symbolTableOrdered) != -1)
+        {
+            int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
+            if(lookAhead != -1 )
+            {
+               char* word = subString(start, i+1,codeLine);
+               if(word != NULL)
+               {
+                    int valid  = isWordValid(word);
+                    int reservedInt = -1; 
+                    int token = identsym;
+                    switch(valid) 
+                    {
+                        case -1:
+                            printf("%s is an invalid Identifier, exceeds maxLength of 11", word);
+                            break;
+                        case -2:
+                            printf("%s is an invalid Identifier, starts with an Integer", word);
+                            break;
+                        case -3:
+                            printf("%s is an invalid integer, exceeds the maximum number of digits of 5", word);
+                            break;
+                        case 1:
+                            reservedInt = isStatementReserved(word);
+                            if(reservedInt != -1)
+                            {
+                                // determine which token to add into the parsed string
+                            }
+                            break;
+                        case 2:
+                            token = numbersym;
+                            break;
+                    }       
+               }
+               //if null add the special character to the parsed string
+               //this is where the check for comments would be
+            }
+        }
+    }
     return codeLine; //temp return statement
+}
+int isStatementReserved(char* word)
+{
+    int retval = -1;
+    for(int x = 0; x < 15; x++)
+    {
+        if(strcmp(word,resWords[x]) == 0)
+        {
+            retval = x;
+            break;
+        }
+    }
+    return retval;
+}
+int isWordValid(char* word)
+{
+    int retval = 1;
+    //If it starts with an integer make sure it only has integers
+    if(word[0] >= '0' && word[0] <= '9')
+    {
+        for(int x = 1; x < strlen(word); x++)
+        {
+            if(word[x] < '0' && word[x] > '9')
+            {
+                retval = -2;
+                break;
+            }
+        }
+        //If the integer is longer than 5 digits
+        if(retval != -2)
+        {
+            if(strlen(word)>5)
+            {
+                retval = -3;
+            }
+            else
+            {   
+                retval = 2;
+            }
+        }
+    }
+    //If the word is longer than 11 characters
+    if(strlen(word) > 11)
+    {
+        retval = -1;
+    }
+    return retval;
+}
+
+char* subString(int start, int end,char* line)
+{
+    if(characterInSymbolTableBS(line[0], specialTerminalSymbolsOrdered)) return NULL;
+    char* word = malloc(sizeof(char)*(end-start));
+    word[0] = '\0';
+    for(int i = start; i<end;i++)
+    {
+        word[strlen(word)] = line[i];
+        word[strlen(word) + 1] = '\0';
+    }
+    return word;
 }
 
 int numberOfFileLines(char* filename)
@@ -140,7 +245,7 @@ int main(int argc, char *argv[])
         }
         line = realloc(line,sizeof(char)*strlen(line));
         line = lexicalParse(line); // lex parse
-        if(strlen(line) >= 0)// Because a line, or a part of it, can be a comment
+        if(strlen(line) >= 0)//
         { 
             strcat(codePL,line);
         } 
