@@ -4,42 +4,7 @@
 #define  IMAX   99999       // maximum integer value 
 #define  CMAX     11       // maximum number of chars for idents 
 #define  STRMAX   50    
-
-char* resWords[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
-                 "odd", "procedure", "read", "then", "var", "while", "write"}; 
-                 
-int reservedWordSumTable[] = {309, 331, 377, 393, 414, 446, 451, 482, 492, 466, 534, 554, 607, 671, 851};
-
-// null: 466
-// begin: 607
-// call: 482
-// const: 534
-// do: 309
-// else: 492
-// end: 414
-// if: 331
-// odd: 377
-// procedure: 851
-// read: 451
-// then: 446
-// var: 393
-// while: 671
-// write: 554
-
-//Symbol table isn't in order of ascii, cannot be used with binary search
-// char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
-//                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
-//                         '=', '>', ':','.' , ',' , ';' }; 
-
-char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
-                        '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
-                        'v', 'w', 'x', 'y', 'z'};   
-
-//Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
-//char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
-char specialTerminalSymbolsOrdered[] = {' ','*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; // ' ' isn't a term sym, it was put here
-int halt_flag = 1;                               
-              
+      
 char* lexicalParse(char* codeLine);
 int numberOfFileLines(char* filename);
 int characterInSymbolTableBS(char c, char* symTbl);
@@ -82,6 +47,28 @@ typedef enum {
     readsym = 32, 
     elsesym = 33  
 }token_type; 
+
+char* resWords[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
+                 "odd", "procedure", "read", "then", "var", "while", "write"}; 
+int resWordsTokens[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, endsym, ifsym,
+                        oddsym, procsym, readsym, thensym, varsym, whilesym, writesym};           
+
+//Symbol table isn't in order of ascii, cannot be used with binary search
+// char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+//                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
+//                         '=', '>', ':','.' , ',' , ';' }; 
+
+char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
+                        '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+                        'v', 'w', 'x', 'y', 'z'};   
+
+//Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
+//char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
+char specialTerminalSymbolsOrdered[] = {' ','*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; // ' ' isn't a term sym, it was put here
+int specialTerminalSymbolsTokens[] = {-1, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons, there is no
+                                                                                                                                               // colonsym, so I assume it can only be within eqlsym
+int halt_flag = 1;    
+
 //Intent is to iterate character by character from a given
 //line of code to produce the token version of that code 
 //and thereafter return that string
@@ -95,37 +82,83 @@ char* lexicalParse(char* codeLine)
         if(characterInSymbolTableBS(codeLine[i], symbolTableOrdered) != -1)
         {
             int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
-            if(lookAhead != -1 )
+            if(lookAhead != -1)
             {
                char* word = subString(start, i+1,codeLine);
+               int token = identsym;
                if(word != NULL)
                {
                     int valid  = isWordValid(word);
-                    int reservedInt = -1; 
-                    int token = identsym;
+                    int reservedIndex = -1; 
                     switch(valid) 
                     {
                         case -1:
-                            printf("%s is an invalid Identifier, exceeds maxLength of 11", word);
+                            printf("%s is an invalid Identifier, exceeds maxLength of 11\n", word);
+                            halt_flag = 0;
                             break;
                         case -2:
-                            printf("%s is an invalid Identifier, starts with an Integer", word);
+                            printf("%s is an invalid Identifier, starts with an Integer\n", word);
+                            halt_flag = 0;
                             break;
                         case -3:
-                            printf("%s is an invalid integer, exceeds the maximum number of digits of 5", word);
+                            printf("%s is an invalid integer, exceeds the maximum number of digits of 5\n", word);
+                            halt_flag = 0;
                             break;
                         case 1:
-                            reservedInt = isStatementReserved(word);
-                            if(reservedInt != -1)
+                            reservedIndex = isStatementReserved(word);
+                            if(reservedIndex != -1)
                             {
-                                // determine which token to add into the parsed string
+                                token = resWordsTokens[reservedIndex];
                             }
                             break;
                         case 2:
                             token = numbersym;
                             break;
-                    }       
+                    }
+                    start = i + 1;       
                }
+               else
+               {
+                    int specialIndex = characterInSymbolTableBS(codeLine[i], specialTerminalSymbolsOrdered);
+                    token =  specialTerminalSymbolsTokens[specialIndex];
+                    //Switch onwards could become its own method
+                    switch(token)
+                    {
+                        case 0:
+                            if(codeLine[i+1] == '=') token = eqsym;
+                            break;
+                        case lessym:
+                            if(codeLine[i+1] == '=') token = leqsym;
+                            break;
+                        case gtrsym:
+                            if(codeLine[i+1] == '=') token = geqsym;
+                            break;
+                        case slashsym: //checking for comments
+                            if(codeLine[i+1] == '*')
+                            {
+                                token = -1;
+                                int commentError = 1;
+                                if((strlen(codeLine) - (i+1))>=2)
+                                {
+                                    for(int x = i+2; x<strlen(codeLine)-1;x++)
+                                    {
+                                        char twoChars[] = {codeLine[x],codeLine[x+1]};
+                                        if(twoChars[0] == '*' && twoChars[1]== '/')
+                                        {
+                                            commentError = 0;
+                                        }
+                                    }
+                                }
+                                if(commentError)
+                                {
+                                    halt_flag = 0;
+                                    printf("%s has an unresolved comment, not ended with '*/' \n", codeLine);
+                                }
+                                
+                            }
+                    }                    
+               }
+               
                //if null add the special character to the parsed string
                //this is where the check for comments would be
             }
