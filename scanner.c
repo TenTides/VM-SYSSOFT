@@ -58,14 +58,14 @@ int resWordsTokens[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, end
 //                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
 //                         '=', '>', ':','.' , ',' , ';' }; 
 
-char  symbolTableOrdered[] = {' ','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
+char  symbolTableOrdered[] = {' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 //char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
-char specialTerminalSymbolsOrdered[] = {' ','*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; // ' ' isn't a term sym, it was put here
-int specialTerminalSymbolsTokens[] = {-1, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons, there is no
+char specialTerminalSymbolsOrdered[] = {' ','(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=', '>'}; // ' ' isn't a term sym, it was put here
+int specialTerminalSymbolsTokens[] = {-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons, there is no
                                                                                                                                                // colonsym, so I assume it can only be within eqlsym
 int halt_flag = 1;    
 
@@ -86,10 +86,10 @@ char* lexicalParse(char* codeLine)
             {
                char* word = subString(start, i+1,codeLine);
                int token = identsym;
+               int reservedIndex = -1; 
                if(word != NULL)
                {
                     int valid  = isWordValid(word);
-                    int reservedIndex = -1; 
                     switch(valid) 
                     {
                         case -1:
@@ -151,21 +151,27 @@ char* lexicalParse(char* codeLine)
                                 }
                                 if(commentError)
                                 {
-                                    halt_flag = 0;
+                                    halt_flag = 0; // return NULL as alternative?
                                     printf("%s has an unresolved comment, not ended with '*/' \n", codeLine);
                                 }
-                                
                             }
-                    }                    
+                    }
+                    start = start + 1;                    
                }
-               
-               //if null add the special character to the parsed string
-               //this is where the check for comments would be
+               char int_string[4]; 
+               sprintf(int_string, "%d ",token);
+               strcat(parsedString, int_string);
+               if(token == identsym || token == numbersym || reservedIndex != -1)
+               {
+                    strcat(parsedString, word);
+                    strcat(parsedString, " ");
+               }
             }
         }
     }
     return codeLine; //temp return statement
 }
+
 int isStatementReserved(char* word)
 {
     int retval = -1;
@@ -179,6 +185,7 @@ int isStatementReserved(char* word)
     }
     return retval;
 }
+
 int isWordValid(char* word)
 {
     int retval = 1;
