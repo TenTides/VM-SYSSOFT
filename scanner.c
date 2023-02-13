@@ -133,7 +133,7 @@ char* lexicalParse(char* codeLine)
                     switch(token)
                     {
                         case 0:
-                            if(codeLine[i+1] == '=') token = eqsym;
+                            if(codeLine[i+1] == '=') token = becomessym;
                             break;
                         case lessym:
                             if(codeLine[i+1] == '=') token = leqsym;
