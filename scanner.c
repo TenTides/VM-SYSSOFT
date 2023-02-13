@@ -57,13 +57,10 @@ int resWordsTokens[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, end
 char  symbolTableOrdered[] = {'\t',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
-
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
-//char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
 char specialTerminalSymbolsOrdered[] = {'\t',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
 int specialTerminalSymbolsTokens[] = {-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
-
-//halt flag global is used in main                                                                                                                                                                         // there is no colonsym, so I assume it can only be within becomesym
+//halt flag global is used in main                                                                                                                                       // there is no colonsym, so I assume it can only be within becomesym
 int halt_flag = 1;    
 
 //Intent is to iterate character by character from a given
@@ -255,8 +252,8 @@ int isWordValid(char* word)
             }
         }
     }
-    //If the word is longer than 11 characters
-    if(strlen(word) > 11)
+    //If the word is longer than CMAX characters
+    if(strlen(word) > CMAX)
     {
         retval = -1;
     }
@@ -266,7 +263,6 @@ int isWordValid(char* word)
 char* subString(int start, int end,char* line)
 {
     //printf("%d\n", (end-start));
-
     if((line[start] != ' ') && (line[start] != '\t') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
     //printf("PASS 1\n");
     char* word = malloc(sizeof(char)*(end-start+1));
