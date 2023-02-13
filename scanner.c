@@ -72,6 +72,7 @@ int halt_flag = 1;
 char* lexicalParse(char* codeLine)
 {
     char* parsedString = malloc(sizeof(codeLine));
+    printf("Code line : %s\n", codeLine);
     parsedString[0] = '\0';
     int start = 0;
     for(int i = 0; i<strlen(codeLine);i++)
@@ -92,19 +93,22 @@ char* lexicalParse(char* codeLine)
                if(word != NULL)
                {
                     int valid  = isWordValid(word);
-                    printf("WORD IS valid?: %d\n",valid);
+                    //printf("WORD IS valid?: %d\n",valid);
                     switch(valid) 
                     {
                         case -1:
                             printf("%s is an invalid Identifier, exceeds maxLength of 11\n", word);
+                            free(parsedString);
                             return NULL;
                             break;
                         case -2:
                             printf("%s is an invalid Identifier, starts with an Integer\n", word);
+                            free(parsedString);
                             return NULL;
                             break;
                         case -3:
                             printf("%s is an invalid integer, exceeds the maximum number of digits of 5\n", word);
+                            free(parsedString);
                             return NULL;
                             break;
                         case 1:
@@ -155,16 +159,33 @@ char* lexicalParse(char* codeLine)
                                         if(twoChars[0] == '*' && twoChars[1]== '/')    // instead of checking whole thing
                                         {
                                             commentError = 0;
+                                            if(x+1 == strlen(codeLine)-1)
+                                            {
+                                                halt_flag = 0;
+                                            }
+                                            else
+                                            {
+                                                start = x+1;
+                                                i = x+1;
+                                            }
+                                            
                                         }
                                     }
                                 }
                                 if(commentError)
                                 {
-                                    printf("%s has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    free(parsedString);
                                     return NULL;
                                 }
+                                //start = start + 1; 
                             }
                             break;
+                    }
+                    if(halt_flag == 0)
+                    {
+                        halt_flag = 1;
+                        break;
                     }
                     start = start + 1;                    
                }
@@ -244,6 +265,7 @@ int isWordValid(char* word)
 char* subString(int start, int end,char* line)
 {
     //printf("%d\n", (end-start));
+
     if((line[start] != ' ') && (line[start] != '\t') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
     //printf("PASS 1\n");
     char* word = malloc(sizeof(char)*(end-start+1));
@@ -325,17 +347,15 @@ int main(int argc, char *argv[])
     //     free(line);
     // }   
     //TEST LEX PARSE FRAMEWORK
-    printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
-    printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
-    printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
-    printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
+    //printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
+    //printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
+    //printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
+    //printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
     char* line = malloc(sizeof(char)*STRMAX);
     printf("Enter a line of text: ");
     scanf("%[^\n]%*c", line);
     line = realloc(line,sizeof(char)*strlen(line));
     printf("You entered: %s\n", line);
-    char* newline = lexicalParse(line);
-    newline = realloc(line,sizeof(char)*strlen(newline));
-    printf("You parsed: %s\n", newline);
-    free(newline);
+    printf("You parsed: %s\n", lexicalParse(line));
+    free(line);
 }
