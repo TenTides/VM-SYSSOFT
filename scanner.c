@@ -182,7 +182,7 @@ char* lexicalParse(char* codeLine)
                     if(halt_flag == 0)
                     {
                         halt_flag = 1;
-                        printf("PARSE STRING On halt: %s\n",parsedString);
+                        //printf("PARSE STRING On halt: %s\n",parsedString);
                         break;
                     }
                     start = start + 1;                    
@@ -203,8 +203,13 @@ char* lexicalParse(char* codeLine)
                             
                     }
                }
-               
             }
+        }
+        else
+        {
+            printf(" %c is an invalid Symbol, for the line: %s\n", codeLine[i], codeLine);
+            free(parsedString);
+            return NULL;  
         }
     }
     //printf("PARSE STRING: %s\n",parsedString);
