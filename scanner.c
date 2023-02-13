@@ -72,7 +72,7 @@ int halt_flag = 1;
 char* lexicalParse(char* codeLine)
 {
     char* parsedString = malloc(sizeof(codeLine));
-    printf("Code line : %s\n", codeLine);
+    //printf("Code line : %s\n", codeLine);
     parsedString[0] = '\0';
     int start = 0;
     for(int i = 0; i<strlen(codeLine);i++)
@@ -174,7 +174,7 @@ char* lexicalParse(char* codeLine)
                                 }
                                 if(commentError)
                                 {
-                                    printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    //printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
                                     free(parsedString);
                                     return NULL;
                                 }
@@ -210,7 +210,7 @@ char* lexicalParse(char* codeLine)
             }
         }
     }
-    printf("PARSE STRING: %s\n",parsedString);
+    //printf("PARSE STRING: %s\n",parsedString);
     return parsedString; //temp return statement
 }
 
