@@ -53,20 +53,17 @@ char* resWords[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
 int resWordsTokens[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, endsym, ifsym,
                         oddsym, procsym, readsym, thensym, varsym, whilesym, writesym};           
 
-//Symbol table isn't in order of ascii, cannot be used with binary search
-// char  symbolTable[] = {'a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
-//                         'w', 'x', 'y', 'z', '0', '1', '2','3', '4', '5', '6', '7', '8', '9',' ', '+', '-', '*', '/', '<', 
-//                         '=', '>', ':','.' , ',' , ';','(',')'}; 
-
-char  symbolTableOrdered[] = {' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
+//Symbol table is in order of ascii value, can be used with binary search
+char  symbolTableOrdered[] = {'\t',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 //char specialTerminalSymbols[] = {'+', '-', '*', '/', '<', '=', '>', ':','.' , ',' , ';'};    
-char specialTerminalSymbolsOrdered[] = {' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
-int specialTerminalSymbolsTokens[] = {-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons, there is no
-                                                                                                                                               // colonsym, so I assume it can only be within eqlsym
+char specialTerminalSymbolsOrdered[] = {'\t',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
+int specialTerminalSymbolsTokens[] = {-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
+
+//halt flag global is used in main                                                                                                                                                                         // there is no colonsym, so I assume it can only be within becomesym
 int halt_flag = 1;    
 
 //Intent is to iterate character by character from a given
@@ -85,12 +82,12 @@ char* lexicalParse(char* codeLine)
         if(characterInSymbolTableBS(codeLine[i], symbolTableOrdered) != -1)
         {
             int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
-            printf("Look ahead '%c' %d\n",codeLine[i],lookAhead);
+            //printf("Look ahead '%c' %d\n",codeLine[i],lookAhead);
             int reservedIndex = -1; 
             if(lookAhead != -1 || i == strlen(codeLine)-1)
             {
                char* word = subString(start, i+1,codeLine);
-               printf("WORD: %s\n",word);
+               //printf("WORD: %s\n",word);
                int token = identsym;
                if(word != NULL)
                {
@@ -100,21 +97,21 @@ char* lexicalParse(char* codeLine)
                     {
                         case -1:
                             printf("%s is an invalid Identifier, exceeds maxLength of 11\n", word);
-                            halt_flag = 0;
+                            return NULL;
                             break;
                         case -2:
                             printf("%s is an invalid Identifier, starts with an Integer\n", word);
-                            halt_flag = 0;
+                            return NULL;
                             break;
                         case -3:
                             printf("%s is an invalid integer, exceeds the maximum number of digits of 5\n", word);
-                            halt_flag = 0;
+                            return NULL;
                             break;
                         case 1:
                             reservedIndex = isStatementReserved(word);
                             if(reservedIndex != -1)
                             {
-                                printf("RES WORD: %s\n",word);
+                                //printf("RES WORD: %s\n",word);
                                 token = resWordsTokens[reservedIndex];
                             }
                             break;
@@ -127,13 +124,17 @@ char* lexicalParse(char* codeLine)
                else
                {
                     int specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered);
-                    printf("Special Symbol When word null %d\n",specialIndex);
+                    //printf("Special Symbol When word null %d\n",specialIndex);
                     token =  specialTerminalSymbolsTokens[specialIndex];
                     //Switch onwards could become its own method
                     switch(token)
                     {
                         case 0:
-                            if(codeLine[i+1] == '=') token = becomessym;
+                            if(codeLine[i+1] == '=')
+                            {
+                                token = becomessym;
+                                start = start + 1;
+                            } 
                             break;
                         case lessym:
                             if(codeLine[i+1] == '=') token = leqsym;
@@ -150,8 +151,8 @@ char* lexicalParse(char* codeLine)
                                 {
                                     for(int x = i+2; x<strlen(codeLine)-1;x++)
                                     {
-                                        char twoChars[] = {codeLine[x],codeLine[x+1]};
-                                        if(twoChars[0] == '*' && twoChars[1]== '/')
+                                        char twoChars[] = {codeLine[x],codeLine[x+1]}; // probably needs to change to checking only last two chars, 
+                                        if(twoChars[0] == '*' && twoChars[1]== '/')    // instead of checking whole thing
                                         {
                                             commentError = 0;
                                         }
@@ -159,27 +160,31 @@ char* lexicalParse(char* codeLine)
                                 }
                                 if(commentError)
                                 {
-                                    halt_flag = 0; // return NULL as alternative?
                                     printf("%s has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    return NULL;
                                 }
                             }
                             break;
                     }
                     start = start + 1;                    
                }
-               char int_string[4]; 
-               sprintf(int_string, "%d ",token);
-               printf("INT STRING: %s\n",int_string);
-               strcat(parsedString, int_string);
-               if(token == identsym || token == numbersym || reservedIndex != -1)
-               {    
-                    if(reservedIndex == -1)
-                    {
-                        strcat(parsedString, word);
-                        strcat(parsedString, " ");
+               if(token > -1)
+               {
+                    char int_string[4]; 
+                    sprintf(int_string, "%d ",token);
+                    //printf("INT STRING: %s\n",int_string);
+                    strcat(parsedString, int_string);
+                    if(token == identsym || token == numbersym || reservedIndex != -1)
+                    {    
+                            if(reservedIndex == -1)
+                            {
+                                strcat(parsedString, word);
+                                strcat(parsedString, " ");
+                            }
+                            
                     }
-                    
                }
+               
             }
         }
     }
@@ -239,26 +244,33 @@ int isWordValid(char* word)
 char* subString(int start, int end,char* line)
 {
     //printf("%d\n", (end-start));
-    if((line[start] != ' ') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
+    if((line[start] != ' ') && (line[start] != '\t') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
     //printf("PASS 1\n");
     char* word = malloc(sizeof(char)*(end-start+1));
     //printf("PASS 2\n");
     word[0] = '\0';
     for(int i = start; i<end;i++)
     {
-        if(line[i] != ' ')
+        if(line[i] != ' ' && (line[i] != '\t'))
         {
             word[strlen(word)] = line[i];
             word[strlen(word) + 1] = '\0';
         }
     }
-    return word;
+    if(word[0] == '\0')
+    {
+        return NULL;
+    } 
+    else
+    {
+        return word;
+    }
 }
 
 int numberOfFileLines(char* filename)
 {
     FILE *fp = fopen(filename, "r");
-    int numLines = 0;
+    int numLines = 1;
     char ch = ' ';
     while ((ch = fgetc(fp)) != EOF)
     {
@@ -313,9 +325,10 @@ int main(int argc, char *argv[])
     //     free(line);
     // }   
     //TEST LEX PARSE FRAMEWORK
-    // printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
-    // printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
-     printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
+    printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
+    printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
+    printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
+    printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
     char* line = malloc(sizeof(char)*STRMAX);
     printf("Enter a line of text: ");
     scanf("%[^\n]%*c", line);
@@ -325,5 +338,4 @@ int main(int argc, char *argv[])
     newline = realloc(line,sizeof(char)*strlen(newline));
     printf("You parsed: %s\n", newline);
     free(newline);
-
 }
