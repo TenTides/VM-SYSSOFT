@@ -139,6 +139,7 @@ char* lexicalParse(char* codeLine)
                             break;
                         case lessym:
                             if(codeLine[i+1] == '=') token = leqsym;
+                            else if(codeLine[i+1] == '>') token = neqsym;
                             break;
                         case gtrsym:
                             if(codeLine[i+1] == '=') token = geqsym;
@@ -171,7 +172,7 @@ char* lexicalParse(char* codeLine)
                                 }
                                 if(commentError)
                                 {
-                                    //printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
                                     free(parsedString);
                                     return NULL;
                                 }
