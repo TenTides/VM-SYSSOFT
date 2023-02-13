@@ -166,9 +166,9 @@ char* lexicalParse(char* codeLine)
                                             else
                                             {
                                                 start = x+1;
-                                                i = x+1;
+                                                i = x+1; 
                                             }
-                                            
+                                            break;
                                         }
                                     }
                                 }
@@ -185,6 +185,7 @@ char* lexicalParse(char* codeLine)
                     if(halt_flag == 0)
                     {
                         halt_flag = 1;
+                        printf("PARSE STRING On halt: %s\n",parsedString);
                         break;
                     }
                     start = start + 1;                    
