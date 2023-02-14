@@ -1,9 +1,12 @@
+// Team Leader: Tyler Crawford   
+// Member: Nelson Herrera Gamboa
+// Class: COP3402    
+// Date of Last Edit: 2/213/2023
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
-#define  IMAX   99999       // maximum integer value 
 #define  CMAX     11       // maximum number of chars for idents 
-#define  STRMAX   50    
+#define  STRMAX   50       // Assuming max codeline length is 50
       
 char* lexicalParse(char* codeLine);
 int numberOfFileLines(char* filename);
