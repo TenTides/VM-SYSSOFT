@@ -2,7 +2,6 @@
 // Member: Nelson Herrera Gamboa
 // Class: COP3402    
 // Date of Last Edit: 2/213/2023
-// COMENTARIO
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
