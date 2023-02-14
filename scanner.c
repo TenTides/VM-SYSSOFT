@@ -189,7 +189,7 @@ char* lexicalParse(char* codeLine)
                         case 0:
                             if(codeLine[start+1] == '=')
                             {
-                                token = becomessym;
+                                token = becomessym; // :=
                                 start = start + 1;
                                 i++;
                             } 
@@ -197,13 +197,13 @@ char* lexicalParse(char* codeLine)
                         case lessym:
                             if(codeLine[start+1] == '=')
                             {
-                                token = leqsym;
+                                token = leqsym; // <=
                                 start = start + 1;
                                 i++;
                             } 
                             else if(codeLine[start+1] == '>')
                             {
-                                token = neqsym;
+                                token = neqsym; // <>
                                 start = start + 1;
                                 i++;
                             } 
@@ -211,7 +211,7 @@ char* lexicalParse(char* codeLine)
                         case gtrsym:
                             if(codeLine[start+1] == '=') 
                             {   
-                                token = geqsym;
+                                token = geqsym; // >=
                                 start = start + 1;
                                 i++;
                             }
