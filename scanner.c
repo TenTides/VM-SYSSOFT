@@ -86,14 +86,18 @@ char* lexicalParse(char* codeLine)
             if(lookAhead != -1 || i == strlen(codeLine)-1)
             {
                //printf("start %d\n",start);
-               // Substrin
+               // Substring attempts to create a word that is either a reserved word or 
+               // identifier. The substring will return null if the start is a special character
+
                char* word = subString(start, i+1 ,codeLine);
                //printf("WORD: %s\n",word);
+               //token is set as default to the identifier value
                int token = identsym;
                if(word != NULL)
                {
+                    //checks if word is valid, errors will return null
                     int valid  = isWordValid(word);
-                    printf("WORD IS valid?: %d\n",valid);
+                    //printf("WORD IS valid?: %d\n",valid);
                     switch(valid) 
                     {
                         case -1:
@@ -297,7 +301,8 @@ char* subString(int start, int end,char* line)
     word[0] = '\0';
     for(int i = start; i<end;i++)
     {
-        if(characterInSymbolTableBS(line[i], specialTerminalSymbolsOrdered) == -1)
+        //characterInSymbolTableBS(line[i], specialTerminalSymbolsOrdered) == -1
+        if((line[i] != ' ') && (line[i] != '\t'))
         {
             word[strlen(word)] = line[i];
             word[strlen(word) + 1] = '\0';
