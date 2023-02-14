@@ -407,7 +407,7 @@ int main(int argc, char *argv[])
         printf("we entered the loop\n");
         length = strlen(buffer);
         printf("buffer-> %s\n", buffer);
-        
+
         if(EndProgramFlag == 0)
         {
             break;
@@ -426,6 +426,8 @@ int main(int argc, char *argv[])
 
         free(line);
     }   
+
+    printf("%s\n",codePL);
 
     // //TEST LEX PARSE FRAMEWORK
     // printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
