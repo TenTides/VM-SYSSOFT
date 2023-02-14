@@ -67,6 +67,18 @@ int halt_flag = 1;
 //line of code to produce the token version of that code 
 //and thereafter return that string
 
+// Example run for a given line
+// var x,y;
+// start = 0   
+// sub (0,3) var i+1
+// i = 2    start = 3
+// i = 3    space so no token start = 4
+// i = 4    sub(4,i+1(5)) x start = 5
+// i = 5    sub(5, i+1(6)) fail ret null , 17 start = 6 
+// i = 6    sub(6,7) y start = 7
+// i = 7    sub(7,8) fail ret null , 18 
+        
+
 char* lexicalParse(char* codeLine)
 {
     //Copy space of parent string
