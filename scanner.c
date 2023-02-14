@@ -66,6 +66,7 @@ int halt_flag = 1;
 //Intent is to iterate character by character from a given
 //line of code to produce the token version of that code 
 //and thereafter return that string
+
 char* lexicalParse(char* codeLine)
 {
     //Copy space of parent string
@@ -75,24 +76,33 @@ char* lexicalParse(char* codeLine)
     int start = 0;
     for(int i = 0; i<strlen(codeLine);i++)
     {
-        //Check if character is valid
+        //Check if character is valid within the symbol table
         if(characterInSymbolTableBS(codeLine[i], symbolTableOrdered) != -1)
         {
-            //check if the next character is a special symbol
+            //Check if the next character from current index is a special symbol
             int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
-            //printf("Look ahead '%c' %d\n",codeLine[i],lookAhead);
-            //reserved index set to -1, used only if a reserved word is deteced in deeper code
+            //Check if the current character from current index is a special symbol
+            int specialIndex = characterInSymbolTableBS(codeLine[i], specialTerminalSymbolsOrdered);
+            // reserved index set to -1, used only if a reserved word is detected in deeper code
+            // where it would take up the index of a reserved word in resWords that connects to 
+            // resWordsTokens in a 1 to 1 relationship.
             int reservedIndex = -1; 
-            if(lookAhead != -1 || i == strlen(codeLine)-1)
+            // If look ahead is a special character or i is on the last iteration
+            // try to make a word from indexes start to i+1 exclusively (i+1 is where the 
+            // special char is)                                                             
+            if(lookAhead != -1 || i == strlen(codeLine)-1 || (lookAhead == -1 && specialIndex != -1))
             {
-               //printf("start %d\n",start);
                // Substring attempts to create a word that is either a reserved word or 
                // identifier. The substring will return null if the start is a special character
-
+               
                char* word = subString(start, i+1 ,codeLine);
-               //printf("WORD: %s\n",word);
-               //token is set as default to the identifier value
+               //token is set as default to the identifier token value
                int token = identsym;
+               // If the word exists check if the word is both valid or a reserved word.
+               // If it is a resseved word, tokenize it, if it is not valid, stop the parse,
+               // free the WIP parse string and entirely and return null from the entire function 
+               // to indicate an error occured. Prints out to console on what type of error occured
+               // on the given line, before exiting on error.
                if(word != NULL)
                {
                     //checks if word is valid, errors will return null
@@ -119,7 +129,6 @@ char* lexicalParse(char* codeLine)
                             reservedIndex = isStatementReserved(word);
                             if(reservedIndex != -1)
                             {
-                                //printf("RES WORD: %s\n",word);
                                 token = resWordsTokens[reservedIndex];
                             }
                             break;
@@ -127,15 +136,26 @@ char* lexicalParse(char* codeLine)
                             token = numbersym;
                             break;
                     }
+                    // Start is set to where the special lookahead character was detected at.
+                    // It will be there were the parser will continue to try to make words. It will
+                    // fail to produce a word at i +1 always as it is a special char, but by failing to do so
+                    // that special char is tokenized and not considered for words to come.
                     start = i + 1;       
                }
                else
-               {
-                    int specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered); // start bc start would be a special char
-                    printf("Special Symbol When word null %d\n",specialIndex);
+               {    
+                    // Take the index of the special character in the codeline (that failed to create a word) and 
+                    // find what special char token it corresponds to
+                    specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered);
                     token =  specialTerminalSymbolsTokens[specialIndex];
-                    printf("Special Symbol When word null TOKEN %d\n",token);
-                    //Switch onwards could become its own method
+                    // Some tokens can merge with other tokens to create special cases.
+                    // This checks for those and merges the tokens accordingly and shifts the 
+                    // start and i by 1, as in this case we "truncate" the string by one char
+                    // when completeing a merge.
+                    
+                    //  The switch also tests for comments to ignore when tokenizing, IT DOESN'T CHECK CONTENT 
+                    //  of comments. Invalid characters could be inside the commments. Also, it doesn't assume
+                    //  there to be nested comments like: /*/**/*/
                     switch(token)
                     {
                         case 0:
@@ -170,19 +190,24 @@ char* lexicalParse(char* codeLine)
                                 i++;
                             }
                             break;
-                        case slashsym: //checking for comments
-                            if(codeLine[start+1] == '*')
+                        case slashsym:                   // Slashsym is for /
+                            if(codeLine[start+1] == '*') // checks for a /* case to indicate a comment start
                             {
-                                token = -1;
+                                token = -1; // From comment start onwards is to be ignored, so token is set to -1
                                 int commentError = 1;
+                                // Check to see if based on where the comment start is, if it would be 
+                                // possible to have a */ in the remaining space of the codeLine passed in
                                 if((strlen(codeLine) - (i+1))>=2)
                                 {
+                                    //Loop through and check to find if a corresponding */ exists
                                     for(int x = start+2; x<strlen(codeLine)-1;x++)
                                     {
                                         char twoChars[] = {codeLine[x],codeLine[x+1]}; // probably needs to change to checking only last two chars, 
                                         if(twoChars[0] == '*' && twoChars[1]== '/')    // instead of checking whole thing
                                         {
                                             commentError = 0;
+                                            //  if the comment ends on the last character of the codeLine
+                                            //  break out and end the parse.
                                             if(x+1 == strlen(codeLine)-1)
                                             {
                                                 halt_flag = 0;
@@ -196,7 +221,7 @@ char* lexicalParse(char* codeLine)
                                         }
                                     }
                                 }
-                                if(commentError)
+                                if(commentError) // no end of comment was found, return an error
                                 {
                                     printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
                                     free(parsedString);
@@ -207,18 +232,16 @@ char* lexicalParse(char* codeLine)
                     }
                     if(halt_flag == 0)
                     {
-                        halt_flag = 1;
-                        //printf("PARSE STRING On halt: %s\n",parsedString);
+                        halt_flag = 1; // reset the halt flag
                         break;
                     }
-                    start = start + 1;
-                    //printf("The start is %d\n", start);                    
+                    start = start + 1; // increment start
                }
-               if(token > 0)
+               // Negative tokens are to be ignored, only positive are to be added on the string
+               if(token > 0) 
                {
                     char int_string[4]; 
                     sprintf(int_string, "%d ",token);
-                    //printf("INT STRING: %s\n",int_string);
                     strcat(parsedString, int_string);
                     if(token == identsym || token == numbersym || reservedIndex != -1)
                     {    
@@ -234,13 +257,13 @@ char* lexicalParse(char* codeLine)
         }
         else
         {
+            //Invalid symbol, return error null
             printf(" %c is an invalid Symbol, for the line: %s\n", codeLine[i], codeLine);
             free(parsedString);
             return NULL;  
         }
     }
-    //printf("PARSE STRING: %s\n",parsedString);
-    return parsedString; //temp return statement
+    return parsedString; 
 }
 
 int isStatementReserved(char* word)
@@ -256,7 +279,6 @@ int isStatementReserved(char* word)
     }
     return retval;
 }
-
 int isWordValid(char* word)
 {
     int retval = 1;
@@ -291,17 +313,13 @@ int isWordValid(char* word)
     }
     return retval;
 }
-
 char* subString(int start, int end,char* line)
 {   
     if((line[start] != ' ') && (line[start] != '\t') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
-    //printf("PASS 1\n");
     char* word = malloc(sizeof(char)*(end-start+1));
-    //printf("PASS 2\n");
     word[0] = '\0';
     for(int i = start; i<end;i++)
     {
-        //characterInSymbolTableBS(line[i], specialTerminalSymbolsOrdered) == -1
         if((line[i] != ' ') && (line[i] != '\t'))
         {
             word[strlen(word)] = line[i];
@@ -350,32 +368,32 @@ int characterInSymbolTableBS(char c, char* symTbl)
 
 int main(int argc, char *argv[])
 {
-    int numLines = numberOfFileLines(argv[1]); 
+    // int numLines = numberOfFileLines(argv[1]); 
 
-    //Initalize input file for viewing
-    FILE *fp;
-    fp = fopen(argv[1], "r");
-    //Initalize main code array
-    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*numLines));
-    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+    // //Initalize input file for viewing
+    // FILE *fp;
+    // fp = fopen(argv[1], "r");
+    // //Initalize main code array
+    // char* codePL = (char*) malloc(sizeof(char)* (STRMAX*numLines));
+    // codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
-    //This while loop doesn't ommit comments 
-    while(1)
-    {
-        char* line = malloc(sizeof(char)*STRMAX);
-        if(fscanf(fp, "%[^\n]s", line) == EOF)
-        {
-            halt_flag = 0;
-            break;
-        }
-        line = realloc(line,sizeof(char)*strlen(line));
-        line = lexicalParse(line); // lex parse
-        if(strlen(line) >= 0)
-        { 
-            strcat(codePL,line);
-        } 
-        free(line);
-    }   
+    // //This while loop doesn't ommit comments 
+    // while(1)
+    // {
+    //     char* line = malloc(sizeof(char)*STRMAX);
+    //     if(fscanf(fp, "%[^\n]s", line) == EOF)
+    //     {
+    //         halt_flag = 0;
+    //         break;
+    //     }
+    //     line = realloc(line,sizeof(char)*strlen(line));
+    //     line = lexicalParse(line); // lex parse
+    //     if(strlen(line) >= 0)
+    //     { 
+    //         strcat(codePL,line);
+    //     } 
+    //     free(line);
+    // }   
     //TEST LEX PARSE FRAMEWORK
     //printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
     //printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
@@ -385,9 +403,10 @@ int main(int argc, char *argv[])
     line[0]= '\0';  //VERY IMPORTANT it can create junk if not careful
     printf("Enter a line of text: ");
     scanf("%[^\n]%*c", line);
-    printf("Length: %ld\n",strlen(line));
     line = realloc(line,sizeof(char)*strlen(line));
     printf("You entered: %s\n", line);
-    printf("You parsed: %s\n", lexicalParse(line));
+    char* line2 = lexicalParse(line);
+    printf("You parsed: %s\n", line2);
+    free(line2);
     free(line);
 }
