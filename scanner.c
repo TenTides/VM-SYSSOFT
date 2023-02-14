@@ -285,7 +285,7 @@ int isWordValid(char* word)
     {
         for(int x = 1; x < strlen(word); x++)
         {
-            if(word[x] < '0' && word[x] > '9')
+            if(word[x] < '0' || word[x] > '9')
             {
                 retval = -2;
                 break;
