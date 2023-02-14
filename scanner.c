@@ -385,6 +385,7 @@ int main(int argc, char *argv[])
     // int numLines = numberOfFileLines(argv[1]); 
     char buffer[STRMAX];
     int length;
+    char tyler;
 
     //Initalize input file for viewing
     FILE *fp;
@@ -400,11 +401,13 @@ int main(int argc, char *argv[])
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
     //This while loop doesn't ommit comments 
-    while(fgets(buffer, sizeof(buffer), fp))
+    while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
+        fscanf(fp, "%c", &tyler);
         printf("we entered the loop\n");
         length = strlen(buffer);
-        printf("buffer-> %s", buffer);
+        printf("buffer-> %s\n", buffer);
+        
         if(EndProgramFlag == 0)
         {
             break;
@@ -413,7 +416,7 @@ int main(int argc, char *argv[])
         char* line = (char*) malloc(sizeof(char) * (length+ 1));
         line[0] = '\0';
         strcpy(line, buffer);
-        printf("line-> %s", line);
+        printf("line-> %s\n", line);
         line = lexicalParse(line); // lex parse
 
         if(line != NULL)
