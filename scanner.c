@@ -167,7 +167,6 @@ char* lexicalParse(char* codeLine)
                             } 
                             break;
                         case lessym:
-                            printf("Entered 1 \n");
                             if(codeLine[start+1] == '=')
                             {
                                 token = leqsym;
@@ -176,7 +175,6 @@ char* lexicalParse(char* codeLine)
                             } 
                             else if(codeLine[start+1] == '>')
                             {
-                                printf("Entered 2 \n");
                                 token = neqsym;
                                 start = start + 1;
                                 i++;
