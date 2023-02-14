@@ -68,29 +68,32 @@ int halt_flag = 1;
 //and thereafter return that string
 char* lexicalParse(char* codeLine)
 {
+    //Copy space of parent string
     char* parsedString = malloc(sizeof(codeLine));
-    //printf("Code line : %s\n", codeLine);
     parsedString[0] = '\0';
+    //Start is set to zero as no special characters have been detected yet
     int start = 0;
     for(int i = 0; i<strlen(codeLine);i++)
     {
-        //printf("%c ",codeLine[i]);
-        //int key = characterInSymbolTableBS(codeLine[i], symbolTableOrdered);
-        //printf("%d\n",key);
+        //Check if character is valid
         if(characterInSymbolTableBS(codeLine[i], symbolTableOrdered) != -1)
         {
+            //check if the next character is a special symbol
             int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
             //printf("Look ahead '%c' %d\n",codeLine[i],lookAhead);
+            //reserved index set to -1, used only if a reserved word is deteced in deeper code
             int reservedIndex = -1; 
             if(lookAhead != -1 || i == strlen(codeLine)-1)
             {
-               char* word = subString(start, i+1,codeLine);
+               //printf("start %d\n",start);
+               // Substrin
+               char* word = subString(start, i+1 ,codeLine);
                //printf("WORD: %s\n",word);
                int token = identsym;
                if(word != NULL)
                {
                     int valid  = isWordValid(word);
-                    //printf("WORD IS valid?: %d\n",valid);
+                    printf("WORD IS valid?: %d\n",valid);
                     switch(valid) 
                     {
                         case -1:
@@ -124,33 +127,53 @@ char* lexicalParse(char* codeLine)
                }
                else
                {
-                    int specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered);
-                    //printf("Special Symbol When word null %d\n",specialIndex);
+                    int specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered); // start bc start would be a special char
+                    printf("Special Symbol When word null %d\n",specialIndex);
                     token =  specialTerminalSymbolsTokens[specialIndex];
+                    printf("Special Symbol When word null TOKEN %d\n",token);
                     //Switch onwards could become its own method
                     switch(token)
                     {
                         case 0:
-                            if(codeLine[i+1] == '=')
+                            if(codeLine[start+1] == '=')
                             {
                                 token = becomessym;
                                 start = start + 1;
+                                i++;
                             } 
                             break;
                         case lessym:
-                            if(codeLine[i+1] == '=') token = leqsym;
+                            printf("Entered 1 \n");
+                            if(codeLine[start+1] == '=')
+                            {
+                                token = leqsym;
+                                start = start + 1;
+                                i++;
+                            } 
+                            else if(codeLine[start+1] == '>')
+                            {
+                                printf("Entered 2 \n");
+                                token = neqsym;
+                                start = start + 1;
+                                i++;
+                            } 
                             break;
                         case gtrsym:
-                            if(codeLine[i+1] == '=') token = geqsym;
+                            if(codeLine[start+1] == '=') 
+                            {   
+                                token = geqsym;
+                                start = start + 1;
+                                i++;
+                            }
                             break;
                         case slashsym: //checking for comments
-                            if(codeLine[i+1] == '*')
+                            if(codeLine[start+1] == '*')
                             {
                                 token = -1;
                                 int commentError = 1;
                                 if((strlen(codeLine) - (i+1))>=2)
                                 {
-                                    for(int x = i+2; x<strlen(codeLine)-1;x++)
+                                    for(int x = start+2; x<strlen(codeLine)-1;x++)
                                     {
                                         char twoChars[] = {codeLine[x],codeLine[x+1]}; // probably needs to change to checking only last two chars, 
                                         if(twoChars[0] == '*' && twoChars[1]== '/')    // instead of checking whole thing
@@ -171,11 +194,10 @@ char* lexicalParse(char* codeLine)
                                 }
                                 if(commentError)
                                 {
-                                    //printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
+                                    printf("Code line: '%s' has an unresolved comment, not ended with '*/' \n", codeLine);
                                     free(parsedString);
                                     return NULL;
                                 }
-                                //start = start + 1; 
                             }
                             break;
                     }
@@ -185,9 +207,10 @@ char* lexicalParse(char* codeLine)
                         //printf("PARSE STRING On halt: %s\n",parsedString);
                         break;
                     }
-                    start = start + 1;                    
+                    start = start + 1;
+                    //printf("The start is %d\n", start);                    
                }
-               if(token > -1)
+               if(token > 0)
                {
                     char int_string[4]; 
                     sprintf(int_string, "%d ",token);
@@ -266,8 +289,7 @@ int isWordValid(char* word)
 }
 
 char* subString(int start, int end,char* line)
-{
-    //printf("%d\n", (end-start));
+{   
     if((line[start] != ' ') && (line[start] != '\t') && characterInSymbolTableBS(line[start], specialTerminalSymbolsOrdered) != -1) return NULL;
     //printf("PASS 1\n");
     char* word = malloc(sizeof(char)*(end-start+1));
@@ -275,7 +297,7 @@ char* subString(int start, int end,char* line)
     word[0] = '\0';
     for(int i = start; i<end;i++)
     {
-        if(line[i] != ' ' && (line[i] != '\t'))
+        if(characterInSymbolTableBS(line[i], specialTerminalSymbolsOrdered) == -1)
         {
             word[strlen(word)] = line[i];
             word[strlen(word) + 1] = '\0';
@@ -355,8 +377,10 @@ int main(int argc, char *argv[])
     //printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
     //printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
     char* line = malloc(sizeof(char)*STRMAX);
+    line[0]= '\0';  //VERY IMPORTANT it can create junk if not careful
     printf("Enter a line of text: ");
     scanf("%[^\n]%*c", line);
+    printf("Length: %ld\n",strlen(line));
     line = realloc(line,sizeof(char)*strlen(line));
     printf("You entered: %s\n", line);
     printf("You parsed: %s\n", lexicalParse(line));
