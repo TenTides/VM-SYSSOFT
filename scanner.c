@@ -64,7 +64,8 @@ char  symbolTableOrdered[] = {'\t',' ','(',')','*', '+',',', '-' ,'.', '/', '0',
 char specialTerminalSymbolsOrdered[] = {'\t',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
 int specialTerminalSymbolsTokens[] = {-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
 //halt flag global is used in main                                                                                                                                       // there is no colonsym, so I assume it can only be within becomesym
-int halt_flag = 1;    
+int halt_flag = 1; 
+int EndProgramFlag = 1;   
 
 //Intent is to iterate character by character from a given
 //line of code to produce the token version of that code 
@@ -382,44 +383,63 @@ int characterInSymbolTableBS(char c, char* symTbl)
 int main(int argc, char *argv[])
 {
     // int numLines = numberOfFileLines(argv[1]); 
+    char buffer[STRMAX];
+    int length;
 
-    // //Initalize input file for viewing
-    // FILE *fp;
-    // fp = fopen(argv[1], "r");
-    // //Initalize main code array
-    // char* codePL = (char*) malloc(sizeof(char)* (STRMAX*numLines));
-    // codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+    //Initalize input file for viewing
+    FILE *fp;
+    fp = fopen(argv[1], "r");
 
-    // //This while loop doesn't ommit comments 
-    // while(1)
-    // {
-    //     char* line = malloc(sizeof(char)*STRMAX);
-    //     if(fscanf(fp, "%[^\n]s", line) == EOF)
-    //     {
-    //         halt_flag = 0;
-    //         break;
-    //     }
-    //     line = realloc(line,sizeof(char)*strlen(line));
-    //     line = lexicalParse(line); // lex parse
-    //     if(strlen(line) >= 0)
-    //     { 
-    //         strcat(codePL,line);
-    //     } 
-    //     free(line);
-    // }   
-    //TEST LEX PARSE FRAMEWORK
-    //printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
-    //printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
-    //printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
-    //printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
-    char* line = malloc(sizeof(char)*STRMAX);
-    line[0]= '\0';  //VERY IMPORTANT it can create junk if not careful
-    printf("Enter a line of text: ");
-    scanf("%[^\n]%*c", line);
-    line = realloc(line,sizeof(char)*strlen(line));
-    printf("You entered: %s\n", line);
-    char* line2 = lexicalParse(line);
-    printf("You parsed: %s\n", line2);
-    free(line2);
-    free(line);
+    if (fp == NULL) {
+        printf("Error opening file. \n");
+        return 1;
+    }
+
+    //Initalize main code array
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*6));
+    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+
+    //This while loop doesn't ommit comments 
+    while(fgets(buffer, sizeof(buffer), fp))
+    {
+        printf("we entered the loop\n");
+        length = strlen(buffer);
+        printf("buffer-> %s", buffer);
+        if(EndProgramFlag == 0)
+        {
+            break;
+        }
+
+        char* line = (char*) malloc(sizeof(char) * (length+ 1));
+        line[0] = '\0';
+        strcpy(line, buffer);
+        printf("line-> %s", line);
+        line = lexicalParse(line); // lex parse
+
+        if(line != NULL)
+        { 
+            strcat(codePL,line);
+        } 
+
+        free(line);
+    }   
+
+    // //TEST LEX PARSE FRAMEWORK
+    // printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
+    // printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
+    // printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
+    // printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
+
+
+
+    // char* line = malloc(sizeof(char)*STRMAX);
+    // line[0]= '\0';  //VERY IMPORTANT it can create junk if not careful
+    // printf("Enter a line of text: ");
+    // scanf("%[^\n]%*c", line);
+    // line = realloc(line,sizeof(char)*strlen(line));
+    // printf("You entered: %s\n", line);
+    // char* line2 = lexicalParse(line);
+    // printf("You parsed: %s\n", line2);
+    // free(line2);
+    // free(line);
 }
