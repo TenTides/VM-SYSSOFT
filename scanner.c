@@ -323,31 +323,32 @@ int characterInSymbolTableBS(char c, char* symTbl)
 
 int main(int argc, char *argv[])
 {
-    //int numLines = numberOfFileLines(argv[1]);
-    //Initalize input file for viewing
-    // FILE *fp;
-    // fp = fopen(argv[1], "r");
-    // //Initalize main code array
-    // char* codePL = malloc(sizeof(char)*STRMAX*numLines);
-    // codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+    int numLines = numberOfFileLines(argv[1]); 
 
-    // //This while loop doesn't ommit comments 
-    // while(halt_flag)
-    // {
-    //     char* line = malloc(sizeof(char)*STRMAX);
-    //     if(fscanf(fp, "%[^\n]s", line) == EOF)
-    //     {
-    //         halt_flag = 0;
-    //         break;
-    //     }
-    //     line = realloc(line,sizeof(char)*strlen(line));
-    //     line = lexicalParse(line); // lex parse
-    //     if(strlen(line) >= 0)//
-    //     { 
-    //         strcat(codePL,line);
-    //     } 
-    //     free(line);
-    // }   
+    //Initalize input file for viewing
+    FILE *fp;
+    fp = fopen(argv[1], "r");
+    //Initalize main code array
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*numLines));
+    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+
+    //This while loop doesn't ommit comments 
+    while(1)
+    {
+        char* line = malloc(sizeof(char)*STRMAX);
+        if(fscanf(fp, "%[^\n]s", line) == EOF)
+        {
+            halt_flag = 0;
+            break;
+        }
+        line = realloc(line,sizeof(char)*strlen(line));
+        line = lexicalParse(line); // lex parse
+        if(strlen(line) >= 0)
+        { 
+            strcat(codePL,line);
+        } 
+        free(line);
+    }   
     //TEST LEX PARSE FRAMEWORK
     //printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
     //printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
