@@ -2,7 +2,6 @@
 // Member: Nelson Herrera Gamboa
 // Class: COP3402    
 // Date of Last Edit: 2/213/2023
-
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
@@ -405,9 +404,9 @@ int main(int argc, char *argv[])
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
         fscanf(fp, "%c", &tyler);
-        printf("we entered the loop\n");
+        // printf("we entered the loop\n");
         length = strlen(buffer);
-        printf("buffer-> %s\n", buffer);
+        // printf("buffer-> %s\n", buffer);
 
         if(EndProgramFlag == 0)
         {
