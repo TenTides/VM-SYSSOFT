@@ -51,18 +51,30 @@ typedef enum {
     elsesym = 33  
 }token_type; 
 
-char* resWords[] = {"null", "begin", "call", "const", "do", "else", "end", "if",
-                 "odd", "procedure", "read", "then", "var", "while", "write"}; 
-int resWordsTokens[] = {nulsym, beginsym, callsym, constsym, dosym, elsesym, endsym, ifsym,
-                        oddsym, procsym, readsym, thensym, varsym, whilesym, writesym};           
+char* resWords[] = {"null", "odd", "begin", "end", "if", "then", "while", "do", "call", "const",  "var", "procedure",  "write", "read", "else"}; 
 
+int resWordsTokens[] = {nulsym, oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym,  writesym , readsym , elsesym};   
 //Symbol table is in order of ascii value, can be used with binary search
 char  symbolTableOrdered[] = {'\t',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
+
+
+
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 char specialTerminalSymbolsOrdered[] = {'\t',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
+
 int specialTerminalSymbolsTokens[] = {-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
+
+// //=======new=======//
+// //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
+// char specialTerminalSymbolsOrdered[] = {'\t',' ', ':', '+', '-', '*', '/', '=', '<', '>','(',')', ',',';', '.'}; // ' ' isn't a term sym, it was put here
+// int specialTerminalSymbolsTokens[] = {-2,-1, 0, plussym, minussym , multsym, slashsym,  eqsym, lessym, gtrsym, lparentsym, rparentsym,  commasym, semicolonsym, periodsym }; // -1 is for spaces and 0 is for colons and -2 for tabs, 
+
+
+
+
+
 //halt flag global is used in main                                                                                                                                       // there is no colonsym, so I assume it can only be within becomesym
 int halt_flag = 1; 
 int EndProgramFlag = 1;   
@@ -380,6 +392,27 @@ int characterInSymbolTableBS(char c, char* symTbl)
     return -1;
 }
 
+int binarySearch(int arr[], int left, int right, int x) {
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+
+        // Check if x is present at mid
+        if (arr[mid] == x)
+            return mid;
+
+        // If x greater, ignore left half
+        if (arr[mid] < x)
+            left = mid + 1;
+
+        // If x is smaller, ignore right half
+        else
+            right = mid - 1;
+    }
+
+    // If we reach here, then element was not present
+    return -1;
+}
+
 int main(int argc, char *argv[])
 {
     // int numLines = numberOfFileLines(argv[1]); 
@@ -400,6 +433,7 @@ int main(int argc, char *argv[])
     char* codePL = (char*) malloc(sizeof(char)* (STRMAX*6));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
+    printf("Source Program:\n");
     //This while loop doesn't ommit comments 
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
@@ -416,7 +450,7 @@ int main(int argc, char *argv[])
         char* line = (char*) malloc(sizeof(char) * (length+ 1));
         line[0] = '\0';
         strcpy(line, buffer);
-        printf("line-> %s\n", line);
+        printf("%s\n", line);
         line = lexicalParse(line); // lex parse
 
         if(line != NULL)
@@ -426,9 +460,104 @@ int main(int argc, char *argv[])
 
         free(line);
     }   
+    printf("\n\nlexeme      token type\n");
+     
 
-    printf("%s\n",codePL);
+    length = strlen(codePL);
+    char* token = (char*) malloc(sizeof(char) * 1000);
+    token[0] = '\0';
+    char* word = (char*) malloc(sizeof(char) * 1000);
+    word[0] = '\0';
+    char specialCharacter;
+    int index = 0;
+    int tokenToInt;
+    char stopChar = ' ';
 
+    for (int i = 0; i < length; i++) {
+        if (codePL[i] == ' ')
+        {
+            continue;
+        }
+
+        strncat(token, codePL + i, 1);
+        // printf("we've entered the for loop when i is %d and TOKEN is %s and WORD is %s\n", i, token, word);
+
+        if (codePL[i+1] != ' ') {
+            continue;
+        }
+
+        if (strcmp(token, "20") == 0) {
+            // printf("we've enterd the token, := if statement\n");
+            printf("%-9s%5s\n", ":=",token);
+            memset(token, '\0', 1000);
+            continue;
+        }
+
+        if (strcmp(token, "3") == 0) {
+            // printf("we've enterd the token, 3 if statement\n");
+            char* pos = strchr(codePL + i + 2, ' ');
+            int num_chars = pos - (codePL + i + 2);// 1
+            // printf("num_chars is equal to %d\n", num_chars);
+            strncpy(word, codePL + i + 2, num_chars);
+            printf("%-9s%5s\n", word, token);
+            memset(token, '\0', 1000);
+            memset(word, '\0', 1000);
+            i += num_chars + 1;
+            continue;
+        }
+    
+
+        if (strcmp(token, "2") == 0) {
+            // printf("we've enterd the token, 2 if statement\n");
+            char* pos = strchr(codePL + i + 2, ' ');
+            int num_chars = pos - (codePL + i + 2);// 1
+            // printf("num_chars is equal to %d\n", num_chars);
+            strncpy(word, codePL + i + 2, num_chars);
+            printf("%-9s%5s\n", word, token);
+            memset(token, '\0', 1000);
+            memset(word, '\0', 1000);
+            i += num_chars + 1;
+            continue;
+        }
+
+
+        index = -1;
+        tokenToInt = atoi(token);
+        for (int j = 0; j < 15; j++) {
+            if (specialTerminalSymbolsTokens[j] == tokenToInt) {
+                index = j;
+                break;
+            }
+        }
+
+
+        if (index != -1) {
+            // printf("we've enterd the SPECIALTERMINAL IF if statement\n");
+            specialCharacter = specialTerminalSymbolsOrdered[index];
+            printf("%c%13s\n", specialCharacter, token);
+            memset(token, '\0', 1000);
+            continue;
+        }
+        // printf("PASSING\n");
+        index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
+        if(index != -1) {
+            // printf("we've enterd the RESWORD if statement\n");
+            strcat(word, resWords[index]);
+            printf("%-9s%5s\n", word, token);
+            memset(token, '\0', 1000);
+            memset(word, '\0', 1000);
+            continue;
+        }
+        // printf("PASSING\n");
+    }
+
+    printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
+
+    free(token);
+    free(word);
+    free(codePL);
+
+    //============================//
     // //TEST LEX PARSE FRAMEWORK
     // printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
     // printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
