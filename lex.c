@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
     char buffer[STRMAX];
     int length;
     char tyler;
-    int errorFlag = 0;
+    int errorFlag = 1;
 
 // =========================================
     //Initalize input file for viewing
