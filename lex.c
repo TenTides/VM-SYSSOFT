@@ -414,16 +414,63 @@ int binarySearch(int arr[], int left, int right, int x) {
     return -1;
 }
 
-int main(int argc, char *argv[])
-{
-    // int numLines = numberOfFileLines(argv[1]); 
+
+void printSourceCode(char* filename) {
+
+    // Initializing variables
     char buffer[STRMAX];
     int length;
     char tyler;
 
+    // =========================================
+    //Initalize input file for viewing
+    int lines = numberOfFileLines(filename);
+    FILE *fp;
+    fp = fopen(filename, "r");
+
+    if (fp == NULL) {
+        printf("Error opening file. \n");
+        return;
+    }
+
+    // =========================================
+    // =========================================
+    //Initalize main code array
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
+    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+
+    printf("Source Program:\n");
+    //This while loop doesn't ommit comments 
+    //int errorFlag = 1;
+    while(fscanf(fp, "%[^\n]s", buffer) != EOF)
+    {
+        fscanf(fp, "%c", &tyler);
+        
+        length = strlen(buffer);
+        
+
+        char* line = (char*) malloc(sizeof(char) * (length+ 1));
+        line[0] = '\0';
+        strcpy(line, buffer);
+        printf("%s\n", line);
+        free(line);
+    }  
+
+    return; 
+}
+
+
+int main(int argc, char *argv[])
+{
+    // Initializing variables
+    char buffer[STRMAX];
+    int length;
+    char tyler;
+    int errorFlag = 0;
+
+// =========================================
     //Initalize input file for viewing
     int lines = numberOfFileLines(argv[1]);
-    printf("%d\n",lines);
     FILE *fp;
     fp = fopen(argv[1], "r");
 
@@ -432,43 +479,48 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+// =========================================
+// =========================================
     //Initalize main code array
     char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
-    printf("Source Program:\n");
+
+    printSourceCode(argv[1]);
+
+
     //This while loop doesn't ommit comments 
-    //int errorDetect = 0;
+    //int errorFlag = 1;
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
         fscanf(fp, "%c", &tyler);
-        // printf("we entered the loop\n");
         length = strlen(buffer);
-        // printf("buffer-> %s\n", buffer);
-
-        if(EndProgramFlag == 0)
-        {
-            break;
-        }
 
         char* line = (char*) malloc(sizeof(char) * (length+ 1));
         line[0] = '\0';
         strcpy(line, buffer);
-        printf("%s\n", line);
-        if (EndProgramFlag) { // && errorDetect == 0
-            line = lexicalParse(line); // lex parse
-        }
+
+        line = lexicalParse(line); // lex parse
+
         if(line != NULL) // && errorDetect == 0
         { 
             strcat(codePL,line);
         }
-        // else
-        // {
-        //     errorDetect = 1;
-        // }
+        else
+        {
+            errorFlag = 0;
+        }
+
         free(line);
     }   
-    printf("\n\nLexeme      Token Type\n");
+
+// =========================================
+// =========================================
+
+    if (errorFlag != 0) {
+        printf("\n\nLexeme      Token Type\n"); 
+    }
+
      
 
     length = strlen(codePL);
@@ -583,29 +635,16 @@ int main(int argc, char *argv[])
             printf("Token %s NOT FOUND", token);
         }
     }
-    printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
+
+// =========================================
+// =========================================
+
+    if (errorFlag != 0) {
+        printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
+    }
+   
 
     free(token);
     free(word);
     free(codePL);
-
-    //============================//
-    // //TEST LEX PARSE FRAMEWORK
-    // printf(" ' ' %d ",characterInSymbolTableBS(' ', specialTerminalSymbolsOrdered));
-    // printf(" > %d ",characterInSymbolTableBS('>', specialTerminalSymbolsOrdered));
-    // printf(" , %d\n",characterInSymbolTableBS(',', specialTerminalSymbolsOrdered));
-    // printf(" Tab %d\n",characterInSymbolTableBS('\t', specialTerminalSymbolsOrdered));
-
-
-
-    // char* line = malloc(sizeof(char)*STRMAX);
-    // line[0]= '\0';  //VERY IMPORTANT it can create junk if not careful
-    // printf("Enter a line of text: ");
-    // scanf("%[^\n]%*c", line);
-    // line = realloc(line,sizeof(char)*strlen(line));
-    // printf("You entered: %s\n", line);
-    // char* line2 = lexicalParse(line);
-    // printf("You parsed: %s\n", line2);
-    // free(line2);
-    // free(line);
 }
