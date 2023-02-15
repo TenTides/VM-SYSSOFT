@@ -502,24 +502,24 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            // if (strcmp(token, "10") == 0) {
-            //     // printf("we've enterd the token, <> if statement\n");
-            //     printf("%-9s%5s\n", "<>",token);
-            //     memset(token, '\0', 1000);
-            //     continue;
-            // }
-            // if (strcmp(token, "12") == 0) {
-            //     // printf("we've enterd the token, <= if statement\n");
-            //     printf("%-9s%5s\n", "<=",token);
-            //     memset(token, '\0', 1000);
-            //     continue;
-            // }
-            // if (strcmp(token, "14") == 0) {
-            //     // printf("we've enterd the token, >= if statement\n");
-            //     printf("%-9s%5s\n", ">=",token);
-            //     memset(token, '\0', 1000);
-            //     continue;
-            // }
+            if (strcmp(token, "10") == 0) {
+                // printf("we've enterd the token, <> if statement\n");
+                printf("%-9s%5s\n", "<>",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
+            if (strcmp(token, "12") == 0) {
+                // printf("we've enterd the token, <= if statement\n");
+                printf("%-9s%5s\n", "<=",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
+            if (strcmp(token, "14") == 0) {
+                // printf("we've enterd the token, >= if statement\n");
+                printf("%-9s%5s\n", ">=",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
 
             if (strcmp(token, "3") == 0) {
                 // printf("we've enterd the token, 3 if statement\n");
