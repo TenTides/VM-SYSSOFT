@@ -519,132 +519,128 @@ int main(int argc, char *argv[])
 
     if (errorFlag != 0) {
         printf("\n\nLexeme      Token Type\n"); 
-    }
-
-     
-
-    length = strlen(codePL);
-    char* token = (char*) malloc(sizeof(char) * 1000);
-    token[0] = '\0';
-    char* word = (char*) malloc(sizeof(char) * 1000);
-    word[0] = '\0';
-    char specialCharacter;
-    int index = 0;
-    int tokenToInt;
-    char stopChar = ' ';
-
-    if (EndProgramFlag) {
-        for (int i = 0; i < length; i++) {
-            if (codePL[i] == ' ')
-            {
-                continue;
-            }
-
-            strncat(token, codePL + i, 1);
-            // printf("we've entered the for loop when i is %d and TOKEN is %s and WORD is %s\n", i, token, word);
-
-            if (codePL[i+1] != ' ') {
-                continue;
-            }
-
-            if (strcmp(token, "20") == 0) {
-                // printf("we've enterd the token, := if statement\n");
-                printf("%-9s%5s\n", ":=",token);
-                memset(token, '\0', 1000);
-                continue;
-            }
-
-            if (strcmp(token, "10") == 0) {
-                // printf("we've enterd the token, <> if statement\n");
-                printf("%-9s%5s\n", "<>",token);
-                memset(token, '\0', 1000);
-                continue;
-            }
-
-            if (strcmp(token, "12") == 0) {
-                // printf("we've enterd the token, <= if statement\n");
-                printf("%-9s%5s\n", "<=",token);
-                memset(token, '\0', 1000);
-                continue;
-            }
-
-            if (strcmp(token, "14") == 0) {
-                // printf("we've enterd the token, >= if statement\n");
-                printf("%-9s%5s\n", ">=",token);
-                memset(token, '\0', 1000);
-                continue;
-            }
-
-            if (strcmp(token, "3") == 0) {
-                // printf("we've enterd the token, 3 if statement\n");
-                char* pos = strchr(codePL + i + 2, ' ');
-                int num_chars = pos - (codePL + i + 2);// 1
-                // printf("num_chars is equal to %d\n", num_chars);
-                strncpy(word, codePL + i + 2, num_chars);
-                printf("%-9s%5s\n", word, token);
-                memset(token, '\0', 1000);
-                memset(word, '\0', 1000);
-                i += num_chars + 1;
-                continue;
-            }
         
 
-            if (strcmp(token, "2") == 0) {
-                // printf("we've enterd the token, 2 if statement\n");
-                char* pos = strchr(codePL + i + 2, ' ');
-                int num_chars = pos - (codePL + i + 2);// 1
-                // printf("num_chars is equal to %d\n", num_chars);
-                strncpy(word, codePL + i + 2, num_chars);
-                printf("%-9s%5s\n", word, token);
-                memset(token, '\0', 1000);
-                memset(word, '\0', 1000);
-                i += num_chars + 1;
-                continue;
-            }
+        
 
+        length = strlen(codePL);
+        char* token = (char*) malloc(sizeof(char) * 1000);
+        token[0] = '\0';
+        char* word = (char*) malloc(sizeof(char) * 1000);
+        word[0] = '\0';
+        char specialCharacter;
+        int index = 0;
+        int tokenToInt;
+        char stopChar = ' ';
 
-            index = -1;
-            tokenToInt = atoi(token);
-            for (int j = 0; j < 15; j++) {
-                if (specialTerminalSymbolsTokens[j] == tokenToInt) {
-                    index = j;
-                    break;
+        if (EndProgramFlag) {
+            for (int i = 0; i < length; i++) {
+                if (codePL[i] == ' ')
+                {
+                    continue;
                 }
-            }
+
+                strncat(token, codePL + i, 1);
+                // printf("we've entered the for loop when i is %d and TOKEN is %s and WORD is %s\n", i, token, word);
+
+                if (codePL[i+1] != ' ') {
+                    continue;
+                }
+
+                if (strcmp(token, "20") == 0) {
+                    // printf("we've enterd the token, := if statement\n");
+                    printf("%-9s%5s\n", ":=",token);
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "10") == 0) {
+                    // printf("we've enterd the token, <> if statement\n");
+                    printf("%-9s%5s\n", "<>",token);
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "12") == 0) {
+                    // printf("we've enterd the token, <= if statement\n");
+                    printf("%-9s%5s\n", "<=",token);
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "14") == 0) {
+                    // printf("we've enterd the token, >= if statement\n");
+                    printf("%-9s%5s\n", ">=",token);
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "3") == 0) {
+                    // printf("we've enterd the token, 3 if statement\n");
+                    char* pos = strchr(codePL + i + 2, ' ');
+                    int num_chars = pos - (codePL + i + 2);// 1
+                    // printf("num_chars is equal to %d\n", num_chars);
+                    strncpy(word, codePL + i + 2, num_chars);
+                    printf("%-9s%5s\n", word, token);
+                    memset(token, '\0', 1000);
+                    memset(word, '\0', 1000);
+                    i += num_chars + 1;
+                    continue;
+                }
+            
+
+                if (strcmp(token, "2") == 0) {
+                    // printf("we've enterd the token, 2 if statement\n");
+                    char* pos = strchr(codePL + i + 2, ' ');
+                    int num_chars = pos - (codePL + i + 2);// 1
+                    // printf("num_chars is equal to %d\n", num_chars);
+                    strncpy(word, codePL + i + 2, num_chars);
+                    printf("%-9s%5s\n", word, token);
+                    memset(token, '\0', 1000);
+                    memset(word, '\0', 1000);
+                    i += num_chars + 1;
+                    continue;
+                }
 
 
-            if (index != -1) {
-                // printf("we've enterd the SPECIALTERMINAL IF if statement\n");
-                specialCharacter = specialTerminalSymbolsOrdered[index];
-                printf("%c%13s\n", specialCharacter, token);
-                memset(token, '\0', 1000);
-                continue;
-            }
-            // printf("PASSING\n");
-            index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
-            if(index != -1) {
-                // printf("we've enterd the RESWORD if statement\n");
-                strcat(word, resWords[index]);
-                printf("%-9s%5s\n", word, token);
-                memset(token, '\0', 1000);
-                memset(word, '\0', 1000);
-                continue;
-            }
-            // printf("PASSING\n");
+                index = -1;
+                tokenToInt = atoi(token);
+                for (int j = 0; j < 15; j++) {
+                    if (specialTerminalSymbolsTokens[j] == tokenToInt) {
+                        index = j;
+                        break;
+                    }
+                }
 
-            printf("Token %s NOT FOUND", token);
+
+                if (index != -1) {
+                    // printf("we've enterd the SPECIALTERMINAL IF if statement\n");
+                    specialCharacter = specialTerminalSymbolsOrdered[index];
+                    printf("%c%13s\n", specialCharacter, token);
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+                // printf("PASSING\n");
+                index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
+                if(index != -1) {
+                    // printf("we've enterd the RESWORD if statement\n");
+                    strcat(word, resWords[index]);
+                    printf("%-9s%5s\n", word, token);
+                    memset(token, '\0', 1000);
+                    memset(word, '\0', 1000);
+                    continue;
+                }
+                // printf("PASSING\n");
+
+                printf("Token %s NOT FOUND", token);
+            }
         }
-    }
-
-// =========================================
-// =========================================
-
-    if (errorFlag != 0) {
         printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
-    }
-   
+        free(token);
+        free(word);
+        free(codePL);
+    }   
 
-    free(token);
-    free(word);
-    free(codePL);
+// =========================================
+// =========================================
 }
