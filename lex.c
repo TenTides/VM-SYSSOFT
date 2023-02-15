@@ -334,7 +334,7 @@ int isWordValid(char* word)
         }
     }
     //If the word is longer than CMAX characters
-    if(strlen(word) > CMAX)
+    if(strlen(word) > CMAX && retval == 1)
     {
         retval = -1;
     }
