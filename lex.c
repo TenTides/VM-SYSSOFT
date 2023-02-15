@@ -509,6 +509,7 @@ int main(int argc, char *argv[])
         else
         {
             errorFlag = 0;
+            break;
         }
 
         free(line);
