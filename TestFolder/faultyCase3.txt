@@ -1,4 +1,5 @@
-var xx123456, y;
- begin asdfg 
+%var 22xx123456, y; %%
+22233
+% %%begin%% asdfg 
             x := y dfadsat* 2;
 end.
