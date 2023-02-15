@@ -20,4 +20,4 @@ begin
 	y := n;
 	yall ( > + <  )/
 	call mult;
-end	
+end
