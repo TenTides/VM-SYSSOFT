@@ -487,6 +487,7 @@ int main(int argc, char *argv[])
 
 
     printSourceCode(argv[1]);
+    printf("\n");
 
 
     //This while loop doesn't ommit comments 
@@ -519,10 +520,7 @@ int main(int argc, char *argv[])
 // =========================================
 
     if (errorFlag != 0) {
-        printf("\n\nLexeme      Token Type\n"); 
-        
-
-        
+        printf("\nLexeme      Token Type\n"); 
 
         length = strlen(codePL);
         char* token = (char*) malloc(sizeof(char) * 1000);
