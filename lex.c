@@ -6,7 +6,7 @@
 #include <stdlib.h> 
 #include <string.h>
 #define  CMAX     11       // maximum number of chars for idents 
-#define  STRMAX   50       // Assuming max codeline length is 50
+#define  STRMAX   125       // Assuming max codeline length is 50
       
 char* lexicalParse(char* codeLine);
 int numberOfFileLines(char* filename);
@@ -284,7 +284,8 @@ char* lexicalParse(char* codeLine)
         else
         {
             //Invalid symbol, return error null
-            printf(" %c is an invalid Symbol, for the line: %s\n", codeLine[i], codeLine);
+            printf(" '%c' is an invalid Symbol, for the line: %s\n", codeLine[i], codeLine);
+            //printf(" %d ",codeLine[i]);
             free(parsedString);
             return NULL;  
         }
@@ -421,6 +422,8 @@ int main(int argc, char *argv[])
     char tyler;
 
     //Initalize input file for viewing
+    int lines = numberOfFileLines(argv[1]);
+    printf("%d\n",lines);
     FILE *fp;
     fp = fopen(argv[1], "r");
 
@@ -430,11 +433,12 @@ int main(int argc, char *argv[])
     }
 
     //Initalize main code array
-    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*24));
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
     printf("Source Program:\n");
     //This while loop doesn't ommit comments 
+    //int errorDetect = 0;
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
         fscanf(fp, "%c", &tyler);
@@ -451,25 +455,20 @@ int main(int argc, char *argv[])
         line[0] = '\0';
         strcpy(line, buffer);
         printf("%s\n", line);
-        // parses only when this is 1. 
-        if (EndProgramFlag){
+        if (EndProgramFlag) { // && errorDetect == 0
             line = lexicalParse(line); // lex parse
         }
-
-        // if there is an error in lexicalParse -> line will be null
-        if(line != NULL)
+        if(line != NULL) // && errorDetect == 0
         { 
             strcat(codePL,line);
-        }else {
-            EndProgramFlag = 0;
         }
-
+        // else
+        // {
+        //     errorDetect = 1;
+        // }
         free(line);
     }   
-    if (EndProgramFlag) {
-        printf("\n\nlexeme      token type\n");  
-    }
-    
+    printf("\n\nLexeme      Token Type\n");
      
 
     length = strlen(codePL);
@@ -482,7 +481,6 @@ int main(int argc, char *argv[])
     int tokenToInt;
     char stopChar = ' ';
 
-    // runs only if this is 1 and line never returned null when passed into lexicalParse. 
     if (EndProgramFlag) {
         for (int i = 0; i < length; i++) {
             if (codePL[i] == ' ')
@@ -500,6 +498,27 @@ int main(int argc, char *argv[])
             if (strcmp(token, "20") == 0) {
                 // printf("we've enterd the token, := if statement\n");
                 printf("%-9s%5s\n", ":=",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
+
+            if (strcmp(token, "10") == 0) {
+                // printf("we've enterd the token, <> if statement\n");
+                printf("%-9s%5s\n", "<>",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
+
+            if (strcmp(token, "12") == 0) {
+                // printf("we've enterd the token, <= if statement\n");
+                printf("%-9s%5s\n", "<=",token);
+                memset(token, '\0', 1000);
+                continue;
+            }
+
+            if (strcmp(token, "14") == 0) {
+                // printf("we've enterd the token, >= if statement\n");
+                printf("%-9s%5s\n", ">=",token);
                 memset(token, '\0', 1000);
                 continue;
             }
@@ -564,11 +583,7 @@ int main(int argc, char *argv[])
             printf("Token %s NOT FOUND", token);
         }
     }
-    
-    if (EndProgramFlag) {
-        printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19   
-    }
-  
+    printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
 
     free(token);
     free(word);
