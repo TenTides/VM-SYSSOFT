@@ -55,16 +55,16 @@ char* resWords[] = {"null", "odd", "begin", "end", "if", "then", "while", "do", 
 
 int resWordsTokens[] = {nulsym, oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym,  writesym , readsym , elsesym};   
 //Symbol table is in order of ascii value, can be used with binary search
-char  symbolTableOrdered[] = {'\t',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
+char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                         'v', 'w', 'x', 'y', 'z'};   
 
 
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
-char specialTerminalSymbolsOrdered[] = {'\t',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
+char specialTerminalSymbolsOrdered[] = {'\t','\r',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
 
-int specialTerminalSymbolsTokens[] = {-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
+int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
 
 // //=======new=======//
 // //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
@@ -285,7 +285,7 @@ char* lexicalParse(char* codeLine)
         {
             //Invalid symbol, return error null
             printf(" '%c' is an invalid Symbol, for the line: %s\n", codeLine[i], codeLine);
-            //printf(" %d ",codeLine[i]);
+            //printf(" %d \n",codeLine[i]);
             free(parsedString);
             return NULL;  
         }
@@ -630,7 +630,11 @@ int main(int argc, char *argv[])
                     continue;
                 }
                 // printf("PASSING\n");
-
+                if(strcmp(token, "13") == 0)
+                {
+                    memset(token, '\0', 1000);
+                    continue;
+                }
                 printf("Token %s NOT FOUND", token);
             }
         }
