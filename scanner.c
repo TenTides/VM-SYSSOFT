@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
     }
 
     //Initalize main code array
-    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*6));
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*24));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
     printf("Source Program:\n");
@@ -451,17 +451,25 @@ int main(int argc, char *argv[])
         line[0] = '\0';
         strcpy(line, buffer);
         printf("%s\n", line);
-        if (EndProgramFlag) {
+        // parses only when this is 1. 
+        if (EndProgramFlag){
             line = lexicalParse(line); // lex parse
         }
+
+        // if there is an error in lexicalParse -> line will be null
         if(line != NULL)
         { 
             strcat(codePL,line);
-        } 
+        }else {
+            EndProgramFlag = 0;
+        }
 
         free(line);
     }   
-    printf("\n\nlexeme      token type\n");
+    if (EndProgramFlag) {
+        printf("\n\nlexeme      token type\n");  
+    }
+    
      
 
     length = strlen(codePL);
@@ -474,6 +482,7 @@ int main(int argc, char *argv[])
     int tokenToInt;
     char stopChar = ' ';
 
+    // runs only if this is 1 and line never returned null when passed into lexicalParse. 
     if (EndProgramFlag) {
         for (int i = 0; i < length; i++) {
             if (codePL[i] == ' ')
@@ -555,7 +564,11 @@ int main(int argc, char *argv[])
             printf("Token %s NOT FOUND", token);
         }
     }
-    printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
+    
+    if (EndProgramFlag) {
+        printf("\n\nLexeme List:\n%s\n\n",codePL);//29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19   
+    }
+  
 
     free(token);
     free(word);
