@@ -1,5 +1,6 @@
-var if abcabcabacabcabc end % var /*       
-89898989
+var if abcabcabacabcabc end % var /*   
+%%%    
+%8989%8989%
 */
 5tyty
 &&
