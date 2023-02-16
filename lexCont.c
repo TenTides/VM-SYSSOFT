@@ -575,15 +575,15 @@ int main(int argc, char *argv[])
                     // printf("num_chars is equal to %d\n", num_chars);
                     strncpy(word, codePL + i + 2, num_chars);
                     int valid  = isWordValid(word);
-                        switch(valid) 
-                        {
-                            case -3:
-                                printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
-                                break;
-                            case 2:
-                                printf("%-9s%5s\n", word, token);
-                                break;
-                        }
+                    switch(valid) 
+                    {
+                        case -3:
+                            printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
+                            break;
+                        case 2:
+                            printf("%-9s%5s\n", word, token);
+                            break;
+                    }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
                     i += num_chars + 1;
@@ -661,19 +661,19 @@ int main(int argc, char *argv[])
                 printf("Token %s NOT FOUND", token);
             }
         }
-        //printf("\n\nLexeme List:\n%s\n\n",codePL);
         printf("\n\nLexeme List:\n%s\n\n",codePL);
         printf("\n\n");
         // for(int i = 0; i<strlen(codePL);i++)
         // {   
 
-        //     if((codePL[i] == '2' || codePL[i] == '3') && (codePL[i-1] == ' ' && i != 0)  && codePL[i+1] == ' ' )
+        //     if((codePL[i] == '2' || codePL[i] == '3') && (i != 0 && codePL[i-1] == ' ')  && (i == strlen(codePL)-1 codePL[i+1] == ' ')  )
         //     {
         //         int start = i;
         //         char* tempWord = malloc(sizeof(char)*(1000));
         //         tempWord[0] = '\0';
         //         for(int x = i+2; x<strlen(codePL);x++)
         //         {   
+
         //             tempWord[strlen(tempWord)] = codePL[x];
         //             tempWord[strlen(tempWord)+1] = '\0';
         //         }
