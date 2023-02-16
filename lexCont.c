@@ -467,6 +467,9 @@ int main(int argc, char *argv[])
     char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
+    char* EditedcodePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
+    EditedcodePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+
 
     printSourceCode(argv[1]);
     printf("\n");
@@ -618,7 +621,6 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
-
                 index = -1;
                 tokenToInt = atoi(token);
                 for (int j = 0; j < 15; j++) {
@@ -657,6 +659,9 @@ int main(int argc, char *argv[])
         }
         printf("\n\nLexeme List:\n%s\n\n",codePL);
         printf("\n\n");
+
+        memset(token, '\0', 1000);
+        memset(word, '\0', 1000);
         // for(int i = 0; i<strlen(codePL);i++)
         // {   
         //     if((codePL[i] == '2' || codePL[i] == '3') && (i != 0 && codePL[i-1] == ' ')  && (i == strlen(codePL)-1 codePL[i+1] == ' ')  )
@@ -667,26 +672,128 @@ int main(int argc, char *argv[])
         //         for(int x = i+2; x<strlen(codePL);x++)
         //         {   
 
-        //             tempWord[strlen(tempWord)] = codePL[x];
-        //             tempWord[strlen(tempWord)+1] = '\0';
-        //         }
 
-        //         if(isWordValid(tempWord) >= 1)
-        //         {
+        for(int i = 0; i<strlen(codePL);i++)
+        {   
+            // continue if we see a space
+            if (codePL[i] == ' ')
+            {
+                continue;
+            }
 
-        //             i = i + strlen(tempWord);
-        //         }
-        //         free(tempWord);
-        //     }
-        //     else if(codePL[i] == '-' && codePL[i+1] == '5')
-        //     {
-        //         i = i+2;
-        //     }
-        //     else
-        //     {
-        //         printf("%c",codePL[i]);
-        //     }
-        // }
+            strncat(token, codePL + i, 1);
+
+            // continue if we have multiple numbers 
+            if (codePL[i+1] != ' ') {
+                continue;
+            }
+
+            // done
+            if (strcmp(token, "3") == 0) {
+                char buffer;
+                int value;
+                // printf("we've enterd the token, 2 if statement\n");
+                char* pos = strchr(codePL + i + 2, ' ');
+                int num_chars = pos - (codePL + i + 2);// 1
+                // printf("num_chars is equal to %d\n", num_chars);
+                strncpy(word, codePL + i + 2, num_chars);
+
+                value = isWordValid(word);
+                if (value >= 0){
+                    strcat(EditedcodePL, token);
+                    strcat(EditedcodePL, " ");
+                    strcat(EditedcodePL, word);
+                }
+                
+                memset(token, '\0', 1000);
+                memset(word, '\0', 1000);
+                i += num_chars + 1;
+                continue;
+            }
+
+            // done
+            if (strcmp(token, "2") == 0) {
+                char buffer;
+                int value;
+                // printf("we've enterd the token, 2 if statement\n");
+                char* pos = strchr(codePL + i + 2, ' ');
+                int num_chars = pos - (codePL + i + 2);// 1
+                // printf("num_chars is equal to %d\n", num_chars);
+                strncpy(word, codePL + i + 2, num_chars);
+
+                if (num_chars == 1){
+                    buffer = word[0];
+                    value = characterInSymbolTableBS(buffer, symbolTableOrdered);
+                    if (value >= 0){
+                        strcat(EditedcodePL, token);
+                        strcat(EditedcodePL, " ");
+
+                    }
+                }
+                
+                if (num_chars > 1) {
+                    value = isWordValid(word);
+                    if (value >= 0){
+                        strcat(EditedcodePL, token);
+                        strcat(EditedcodePL, " ");
+                    }
+                }
+                
+                memset(token, '\0', 1000);
+                memset(word, '\0', 1000);
+                i += num_chars + 1;
+                continue;
+            }
+
+
+
+            index = -1;
+            tokenToInt = atoi(token);
+            for (int j = 0; j < 15; j++) {
+                if (specialTerminalSymbolsTokens[j] == tokenToInt) {
+                    index = j;
+                    break;
+                }
+            }
+
+            if (index != -1) {
+                // printf("we've enterd the SPECIALTERMINAL IF if statement\n");
+                specialCharacter = specialTerminalSymbolsOrdered[index];
+                strcat(EditedcodePL, token);
+                strcat(EditedcodePL, " ");
+                memset(token, '\0', 1000);
+                continue;
+            }
+
+            // printf("PASSING\n");
+            index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
+            if(index != -1) {
+                // printf("we've enterd the RESWORD if statement\n");
+                strcat(word, resWords[index]);
+                strcat(EditedcodePL, token);
+                strcat(EditedcodePL, " ");
+                memset(token, '\0', 1000);
+                memset(word, '\0', 1000);
+                continue;
+            }
+            // printf("PASSING\n");
+            if(strcmp(token, "13") == 0)
+            {
+                memset(token, '\0', 1000);
+                continue;
+            }
+
+            // printf("Token %s NOT FOUND in Lexeme editor", token);
+
+            memset(token, '\0', 1000);
+            memset(word, '\0', 1000);
+            continue;
+        }
+
+        printf("Edited Lexeme List:\n%s\n\n",EditedcodePL);
+        printf("\n\n");
+
+
         free(token);
         free(word);
         free(codePL);
