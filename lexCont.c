@@ -102,6 +102,7 @@ char* lexicalParse(char* codeLine)
     {
         //Check if character is valid within the symbol table
             //Check if the next character from current index is a special symbol
+            int lookAheadPlus = characterInSymbolTableBS(codeLine[i+1], symbolTableOrdered);
             int lookAhead = characterInSymbolTableBS(codeLine[i+1], specialTerminalSymbolsOrdered);
             //Check if the current character from current index is a special symbol
             int specialIndex = characterInSymbolTableBS(codeLine[i], specialTerminalSymbolsOrdered);
@@ -113,7 +114,7 @@ char* lexicalParse(char* codeLine)
             // If look ahead is a special character or i is on the last iteration
             // try to make a word from indexes start to i+1 exclusively (i+1 is where the 
             // special char is)                                                             
-            if((lookAhead != -1 && current !=-1)|| i == strlen(codeLine)-1 || (lookAhead == -1 && specialIndex != -1))
+            if(((lookAhead != -1 || lookAheadPlus == -1) && current !=-1)|| i == strlen(codeLine)-1 || (lookAhead == -1 && specialIndex != -1))
             {
                // Substring attempts to create a word that is either a reserved word or 
                // identifier. The substring will return null if the start is a special character
@@ -130,7 +131,7 @@ char* lexicalParse(char* codeLine)
                {
                     //checks if word is valid, errors will return null
                     int valid  = isWordValid(word);
-                    //printf("%s\n",word);
+                    printf("%s\n",word);
                     reservedIndex = isStatementReserved(word);
                     if(reservedIndex != -1)
                     {
@@ -275,6 +276,7 @@ char* lexicalParse(char* codeLine)
                     invalid_string[3] = '\0';
                     strcat(parsedString, invalid_string);
                     strcat(parsedString, " ");
+                    //continue;
                 }
             }
     }
@@ -339,6 +341,10 @@ char* subString(int start, int end,char* line)
         {
             word[strlen(word)] = line[i];
             word[strlen(word) + 1] = '\0';
+        }
+        if(characterInSymbolTableBS(line[i], symbolTableOrdered) == -1)
+        {
+            break;
         }
     }
     if(word[0] == '\0')
@@ -668,6 +674,15 @@ int main(int argc, char *argv[])
 
         memset(token, '\0', 1000);
         memset(word, '\0', 1000);
+        // for(int i = 0; i<strlen(codePL);i++)
+        // {   
+        //     if((codePL[i] == '2' || codePL[i] == '3') && (i != 0 && codePL[i-1] == ' ')  && (i == strlen(codePL)-1 codePL[i+1] == ' ')  )
+        //     {
+        //         int start = i;
+        //         char* tempWord = malloc(sizeof(char)*(1000));
+        //         tempWord[0] = '\0';
+        //         for(int x = i+2; x<strlen(codePL);x++)
+        //         {   
 
 
         for(int i = 0; i<strlen(codePL);i++)
