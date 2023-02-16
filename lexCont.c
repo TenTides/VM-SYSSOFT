@@ -578,15 +578,15 @@ int main(int argc, char *argv[])
                     // printf("num_chars is equal to %d\n", num_chars);
                     strncpy(word, codePL + i + 2, num_chars);
                     int valid  = isWordValid(word);
-                        switch(valid) 
-                        {
-                            case -3:
-                                printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
-                                break;
-                            case 2:
-                                printf("%-9s%5s\n", word, token);
-                                break;
-                        }
+                    switch(valid) 
+                    {
+                        case -3:
+                            printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
+                            break;
+                        case 2:
+                            printf("%-9s%5s\n", word, token);
+                            break;
+                    }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
                     i += num_chars + 1;
@@ -663,7 +663,6 @@ int main(int argc, char *argv[])
                 printf("Token %s NOT FOUND", token);
             }
         }
-        //printf("\n\nLexeme List:\n%s\n\n",codePL);
         printf("\n\nLexeme List:\n%s\n\n",codePL);
         printf("\n\n");
 
