@@ -703,6 +703,7 @@ int main(int argc, char *argv[])
                     strcat(EditedcodePL, token);
                     strcat(EditedcodePL, " ");
                     strcat(EditedcodePL, word);
+                    strcat(EditedcodePL, " ");
                 }
                 
                 memset(token, '\0', 1000);
@@ -728,6 +729,7 @@ int main(int argc, char *argv[])
                         strcat(EditedcodePL, token);
                         strcat(EditedcodePL, " ");
                         strcat(EditedcodePL, word);
+                        strcat(EditedcodePL, " ");
                     }
                 }
                 
@@ -737,6 +739,7 @@ int main(int argc, char *argv[])
                         strcat(EditedcodePL, token);
                         strcat(EditedcodePL, " ");
                         strcat(EditedcodePL, word);
+                        strcat(EditedcodePL, " ");
                     }
                 }
                 
