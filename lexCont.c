@@ -739,7 +739,7 @@ int main(int argc, char *argv[])
                     if (value >= 0){
                         strcat(EditedcodePL, token);
                         strcat(EditedcodePL, " ");
-
+                        strcat(EditedcodePL, word);
                     }
                 }
                 
@@ -748,6 +748,7 @@ int main(int argc, char *argv[])
                     if (value >= 0){
                         strcat(EditedcodePL, token);
                         strcat(EditedcodePL, " ");
+                        strcat(EditedcodePL, word);
                     }
                 }
                 
