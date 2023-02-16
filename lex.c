@@ -677,16 +677,6 @@ int main(int argc, char *argv[])
 
         memset(token, '\0', 1000);
         memset(word, '\0', 1000);
-        // for(int i = 0; i<strlen(codePL);i++)
-        // {   
-        //     if((codePL[i] == '2' || codePL[i] == '3') && (i != 0 && codePL[i-1] == ' ')  && (i == strlen(codePL)-1 codePL[i+1] == ' ')  )
-        //     {
-        //         int start = i;
-        //         char* tempWord = malloc(sizeof(char)*(1000));
-        //         tempWord[0] = '\0';
-        //         for(int x = i+2; x<strlen(codePL);x++)
-        //         {   
-
 
         for(int i = 0; i<strlen(codePL);i++)
         {   
@@ -802,15 +792,12 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            // printf("Token %s NOT FOUND in Lexeme editor", token);
-
             memset(token, '\0', 1000);
             memset(word, '\0', 1000);
             continue;
         }
 
         printf("Lexeme List:\n%s\n\n",EditedcodePL);
-        printf("\n\n");
         free(token);
         free(word);
         free(codePL);
