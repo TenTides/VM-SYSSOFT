@@ -17,10 +17,66 @@ $ ./a.out input.txt
 During runtime, insert any required numbers until 
 the program reaches EOP command and halts.
 
-The program will also stop prematurely if an error is detected 
-while tokenizing the code. Hence if an error is detected, the program
-will halt and the output would only be the printed out source code and as well as 
-the error statement dictating the type of error along with the line of code, that
-caused the error.
+The program will not stop when tokenizing the code. Take the following code segment
+for example:
 
+
+```
+var if abcabcabacabss%cabc end % var /*   
+%%%    
+898989%89
+*/
+,ty,ty,
+%tly%tly%
+&&
+```
+
+```
+The output will be:
+
+Source Program:
+var if abcabcabacabss%cabc end % var /*   
+%%%    
+898989%89
+*/
+,ty,ty,
+%tly%tly%
+&&
+
+
+Lexeme      Token Type
+var         29
+if          23
+abcabcabacabss Invalid Identifier, exceeds maxLength of 11
+%         (Invalid Symbol)
+cabc         2
+end         22
+%         (Invalid Symbol)
+var         29
+/*       Unresolved In Line Comment Error
+%         (Invalid Symbol)
+%         (Invalid Symbol)
+%         (Invalid Symbol)
+898989    Invalid Number, exceeds maxDigits of 5
+%         (Invalid Symbol)
+89           3
+*            6
+/            7
+,           17
+ty           2
+,           17
+ty           2
+,           17
+%         (Invalid Symbol)
+tly          2
+%         (Invalid Symbol)
+tly          2
+%         (Invalid Symbol)
+&         (Invalid Symbol)
+&         (Invalid Symbol)
+
+
+Lexeme List:
+29 23 2 cabc 22 29 3 89 6 7 17 2 ty 17 2 ty 17 2 tly 2 tly
+```
 *not passing an input file will result in a segmentation fault*
