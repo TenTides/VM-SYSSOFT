@@ -7,9 +7,8 @@
 /*
     > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark?
 
-    > How will be connecting our vm and our lexeme?
+    > How will be connecting our vm and our lexeme? 
 
-    >
 
 
 
