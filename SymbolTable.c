@@ -3,19 +3,19 @@
 // Class: COP3402    
 // Date of Last Edit: 2/15/2023
 
-//Project Questions//
+//===========Project Questions===========//
 /*
-    > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark?
+    > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark? Answer: we will not be worki
 
-    > How will be connecting our vm and our lexeme? 
+    > How will be connecting our vm and our lexeme? Answer: same program.
 
+    > how exactly should we be changing scanner for the future assignments? answer: remove whatever is not in the grammar and view them as identifiers.  
 
-
-
+    > why is val within the struct an ascii value. 
 
 */
 
-//Project Rules//
+//======================Project Rules======================//
 /*
     // Symbol Table
 
@@ -42,7 +42,7 @@
 
     > basically while parsing the lexeme token by token we will use rules (also known as left most derivation).
 
-    Example code
+    {Example code}
 
     <expr> {
 
@@ -61,6 +61,30 @@
         ...
     }
 
+
+    > Remove any keywords that are not part of  grammer inside of scanner
+
+    > Scanner and Parser should be within the same program. 
+
+
+    {Example Code}
+
+    Begin
+        statement;
+        statment;
+        statment
+    end
+
+    (equals)
+
+    Begin
+        statement;
+        statment;
+        
+    end
+
+    > when we print out the symbol table the mark on everything should be 1
+
 */
 
 
@@ -76,9 +100,11 @@ typedef struct{
 
 const MAX_NAME_TABLE_SIZE = 0;
 
+
+
 int main(int argc, char* argv[]) {
     
-
+    namerecord_t symbolTable[] = (namerecord_t*) malloc(sizeof(namerecord_t)* MAX_NAME_TABLE_SIZE);
 
     return 0;
 }
