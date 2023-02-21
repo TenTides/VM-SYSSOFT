@@ -27,7 +27,7 @@ void STATEMENT();
 void CONDTION();
 void TERM();
 void FACTOR();
-
+namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
 
 typedef enum {  
     identsym = 2, 
