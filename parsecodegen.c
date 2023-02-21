@@ -19,6 +19,15 @@ int characterInSymbolTableBS(char c, char* symTbl);
 int isStatementReserved(char* word);            
 char* subString(int start, int end,char* line);  
 int isWordValid(char* word);
+void PROGRAM();
+void BLOCK();
+int GET_TOKEN();
+void EXPRESSION();
+void STATEMENT();
+void CONDTION();
+void TERM();
+void FACTOR();
+
 
 typedef enum {  
     identsym = 2, 
@@ -52,8 +61,11 @@ typedef enum {
     readsym = 32, 
 }token_type; 
 
-char* resWords[] = {"odd", "begin", "end", "if", "then", "while", "do", "const",  "var",  "write", "read"}; 
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
 
+char* resWords[] = {"odd", "begin", "end", "if", "then", "while", "do", "const",  "var",  "write", "read"}; 
 int resWordsTokens[] = {oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, constsym,  varsym, writesym , readsym};   
 //Symbol table is in order of ascii value, can be used with binary search
 char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
@@ -62,18 +74,27 @@ char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/',
                         'v', 'w', 'x', 'y', 'z'};   
 
 
-
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
 char specialTerminalSymbolsOrdered[] = {'\t','\r',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
-int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
-                                                                                                                                
+int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs,                                                                                                                            
 int halt_flag = 1; 
 int EndProgramFlag = 1;   
 
-//Intent is to iterate character by character from a given
-//line of code to produce the token version of that code 
-//and thereafter return that string
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
+// char  letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+//                         'X', 'Y', 'Z','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+//                         'v', 'w', 'x', 'y', 'z'};   
 
+// char numbers[] = {'0', '1', '2','3', '4', '5', '6', '7', '8', '9'};
+char* relOP[] = {"=","<>","<","<=",">",">="};
+
+int universialIndex = 0;
+
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
+//==================================================================================================================================================================//
 char* lexicalParse(char* codeLine)
 {
     //Copy space of parent string
@@ -256,33 +277,15 @@ char* lexicalParse(char* codeLine)
                             
                     }
                }
-            //    if(token == 2 && characterInSymbolTableBS(word[0], symbolTableOrdered) == -1)
-            //    {
-            //         start = start + 1;
-            //    }
 
             }
-            // else
-            // {
-            //     if(current == -1)
-            //     {
-            //         char invalid_string[4];
-            //         invalid_string[0] = '2';
-            //         invalid_string[1] = ' ';
-            //         invalid_string[2] = codeLine[i];
-            //         invalid_string[3] = '\0';
-            //         strcat(parsedString, invalid_string);
-            //         strcat(parsedString, " ");
-            //         //continue;
-            //     }
-            // }
     }
     return parsedString; 
 }
 int isStatementReserved(char* word)
 {
     int retval = -1;
-    for(int x = 0; x < 15; x++)
+    for(int x = 0; x < 11; x++)
     {
         if(strcmp(word,resWords[x]) == 0)
         {
@@ -416,8 +419,11 @@ int binarySearch(int arr[], int left, int right, int x) {
 
     > how exactly should we be changing scanner for the future assignments? answer: remove whatever is not in the grammar and view them as identifiers.  
 
+    > How many lines of assmebly code will we have? 
+    
+    > Operations MUL 0 3   -OR-  OPP 0 3
 
-
+    > will we have to create a little vm with a stack within this code to keep track of where things are.
 
 */
 
@@ -491,21 +497,205 @@ int binarySearch(int arr[], int left, int right, int x) {
 
     > when we print out the symbol table the mark on everything should be 1
 
-*/
 
+
+    // ASSEMBLY CODE PART
+    
+    > We will have two datastructures one will be the stack that will be linear since there are no 
+        procedures and therefore no jumps and we will also have the text which is the assembly code which we will print out from our the dataStructure of our choosing. 
+    
+    > Assembly code jumps by 3
+    > Stack goes up by one
+    > SL DL RV  | X Y Z TY 
+
+      
+    > Assembly code: 7 0 3 
+    
+    // Symbol table
+    // assembly code increment for addresses is linear increment by 3 always. However, variable count 
+    // can affect the M values that get plugged for lod and sto when adding it into struct
+    
+*/
 
 typedef struct{
     int kind; //const = 1, var = 2, proc = 3.
     char name[11]; // name up to 11 chars.(identifer)
     int val; // number (ASCII value)
-    int level; // L level
+    int level; // L level -- assume 0 for the most part
     int adr; // M address
     int mark; // 0 = in use for code generation, 1 = unavailable.
 
 } namerecord_t;
 
-const MAX_NAME_TABLE_SIZE = 0;
+typedef struct{
+    int line; //const = 1, var = 2, proc = 3.
+    char name[4]; // name up to 11 chars.(identifer)
+    int L; // number (ASCII value)
+    int M; // L level
+    // assembly_Node next = null;
+} assembly_Node;
 
+#define MAX_NAME_TABLE_SIZE 500
+
+namerecord_t symbol_Table[MAX_NAME_TABLE_SIZE];
+
+assembly_Node assembly_Code[MAX_NAME_TABLE_SIZE];
+
+// 7*(6*(7/4(hasdf * ( 6))))
+//==========Functions===========//
+
+int GET_TOKEN()
+{
+    
+}
+
+
+void PROGRAM()
+{
+    int TOKEN;
+    BLOCK();
+
+    //Call token looking for '.' ENDING PROGRAM
+    TOKEN = GET_Token();
+    if (TOKEN != periodsym)
+    {
+        // ERROR(TOKEN);
+    }
+    else
+    {
+        // Store Assembly  SYS END is added
+        //Print Assembly code
+        
+        //SymbolTablePrint();
+    }
+}
+
+void BLOCK()
+{
+    int TOKEN;
+    TOKEN = GET_Token();
+    if(constsym == TOKEN) 
+    {
+        CONST_DECLARATION();
+    }
+    
+    if(varsym == TOKEN)
+    {
+        VAR_DECLARATION();
+    }
+    
+    STATEMENT();
+}
+
+void CONST_DECLARATION() 
+{
+    int TOKEN;
+    // checking until semicolon
+    TOKEN = GET_Token();
+    while(1){
+        //check for identifier if comma
+        TOKEN = GET_Token();
+        if(TOKEN == identsym)
+        {
+            //grab identifier function that grabs and saves variable  
+            //create named object for record
+            //keep reference
+            TOKEN = GET_Token();
+            if(TOKEN == eqsym)
+            {
+                TOKEN = GET_Token();
+                if(TOKEN == numbersym)
+                {
+                    //grab number
+                    //store number in from reference
+                    //main array name record addition 
+                    // call initialize add in the value and the identifer name
+                    //
+                    // ASSIGNEMENT TO VARIABLE THERE IS ASSEMBLY CODES
+                    // Guessing to use sto and lod 
+                
+                    TOKEN = GET_Token();
+                    if(TOKEN == commasym)
+                    {
+                        continue;
+                    }
+                    else if (TOKEN == semicolonsym)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        // SEMICOLON MISSING
+                        //Error
+                        break; 
+                    }
+                }
+                else
+                {
+                    // NUMBER MISSING
+                    //Error
+                    break; 
+                }
+            }
+            else
+            {
+                // NO EQUALS
+                //Error
+                break; 
+            }
+        }
+        else
+        {
+            //NO IDENTIFIER
+            //Error
+            break; 
+        }
+    } 
+}
+
+//const xd = 5, t = 3 
+// constdeclaration ::= [ “const” ident "=" number {"," ident "=" number} “;"].
+// var-declaration  ::= [ "var" ident {"," ident} “;"].
+void VAR_DECLARATION() {
+    
+}
+
+void STATEMENT()
+{
+    
+}
+
+void EXPRESSION()
+{
+    
+}
+
+void CONDTION()
+{
+
+}
+
+void TERM()
+{
+
+}
+
+void FACTOR()
+{
+    
+}
+
+namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark)
+{
+    namerecord_t* new_record =  malloc(sizeof(namerecord_t));
+    new_record->kind =_kind;
+    strcpy(new_record->name, _name);
+    new_record->val = _val;
+    new_record->level = _level;
+    new_record->adr = _adr;
+    new_record->mark = _mark;
+    return new_record;
+}
 
 
 //==========MAIN===========//
@@ -534,11 +724,9 @@ int main(int argc, char* argv[]) {
     char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
     codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
 
-    char* EditedcodePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
-    EditedcodePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
-
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
+        printf("entering while\n");
         fscanf(fp, "%c", &tyler);
         length = strlen(buffer);
 
@@ -547,7 +735,7 @@ int main(int argc, char* argv[]) {
         strcpy(line, buffer);
 
         line = lexicalParse(line); // lex parse
-
+        printf("passed parse\n");
         if(line != NULL)
         { 
             strcat(codePL,line);
@@ -560,6 +748,7 @@ int main(int argc, char* argv[]) {
 
         free(line);
     }   
+    printf("PASS 3\n");
 
 // =========================================
 // =========================================
@@ -579,80 +768,96 @@ int main(int argc, char* argv[]) {
         int tokenToInt;
         char stopChar = ' ';
 
-        if (EndProgramFlag) {
-            for (int i = 0; i < length; i++) {
+        if (EndProgramFlag) 
+        {
+            for (int i = 0; i < length && EndProgramFlag; i++) {
                 if (codePL[i] == ' ')
                 {
                     continue;
                 }
 
                 strncat(token, codePL + i, 1);
-                // printf("we've entered the for loop when i is %d and TOKEN is %s and WORD is %s\n", i, token, word);
 
                 if (codePL[i+1] != ' ') {
                     continue;
                 }
 
-                if (strcmp(token, "-5") == 0) {
+                if (strcmp(token, "20") == 0) {
+                    // printf("we've enterd the token, := if statement\n");
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "10") == 0) {
+                    // printf("we've enterd the token, <> if statement\n");
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "12") == 0) {
+                    // printf("we've enterd the token, <= if statement\n");
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "14") == 0) {
                     // printf("we've enterd the token, >= if statement\n");
+                    memset(token, '\0', 1000);
+                    continue;
+                }
+
+                if (strcmp(token, "-5") == 0) {
+                    EndProgramFlag = 0;
                     printf("%-9s%5s\n", "/*", "Unresolved In Line Comment Error");
                     memset(token, '\0', 1000);
                     continue;
                 }
 
                 if (strcmp(token, "3") == 0) {
-                    // printf("we've enterd the token, 3 if statement\n");
                     char* pos = strchr(codePL + i + 2, ' ');
                     int num_chars = pos - (codePL + i + 2);// 1
-                    // printf("num_chars is equal to %d\n", num_chars);
                     strncpy(word, codePL + i + 2, num_chars);
                     int valid  = isWordValid(word);
-                    switch(valid) 
+                    if(valid == -3)
                     {
-                        case -3:
-                            printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
-                            break;
-                        case 2:
-                            //printf("%-9s%5s\n", word, token);
-                            break;
+                        EndProgramFlag = 0;
+                        printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
                     }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
                     i += num_chars + 1;
                     continue;
                 }
+                
                 if (strcmp(token, "2") == 0) {
-                    // printf("we've enterd the token, 2 if statement\n");
                     char* pos = strchr(codePL + i + 2, ' ');
                     int num_chars = pos - (codePL + i + 2);// 1
-                    // printf("num_chars is equal to %d\n", num_chars);
                     strncpy(word, codePL + i + 2, num_chars);
                     if(strlen(word) == 1 && characterInSymbolTableBS(word[0],symbolTableOrdered) == -1)
                     {
+                        EndProgramFlag = 0;
                         printf("%-9s%5s\n", word, " (Invalid Symbol)");
                     }
                     else
                     {
                         int valid  = isWordValid(word);
-                        switch(valid) 
+                        if(valid == -1)
                         {
-                            case -1:
-                                printf("%-9s%5s\n", word, " Invalid Identifier, exceeds maxLength of 11");
-                                break;
-                            case -2:
-                                printf("%-9s%5s\n", word, " Invalid Identifier, starts with an Integer");
-                                break;
-                            case 1:
-                                //Do nothing
-                                break; 
+                            EndProgramFlag = 0;
+                            printf("%-9s%5s\n", word, " Invalid Identifier, exceeds maxLength of 11");
+                        }
+                        else if (valid == -2)
+                        {
+                            EndProgramFlag = 0;
+                            printf("%-9s%5s\n", word, " Invalid Identifier, starts with an Integer");
                         }
                     }
-                    
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
                     i += num_chars + 1;
                     continue;
                 }
+
                 index = -1;
                 tokenToInt = atoi(token);
                 for (int j = 0; j < 15; j++) {
@@ -662,45 +867,45 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 if (index != -1) {
-                    // printf("we've enterd the SPECIALTERMINAL IF if statement\n");
                     specialCharacter = specialTerminalSymbolsOrdered[index];
-                    //printf("%c%13s\n", specialCharacter, token);
                     memset(token, '\0', 1000);
                     continue;
                 }
-                // printf("PASSING\n");
-                index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
+                index = binarySearch(resWordsTokens, 0, 11, tokenToInt);
                 if(index != -1) {
-                    // printf("we've enterd the RESWORD if statement\n");
                     strcat(word, resWords[index]);
-                    //printf("%-9s%5s\n", word, token);
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
                     continue;
                 }
-                // printf("PASSING\n");
                 if(strcmp(token, "13") == 0)
                 {
                     memset(token, '\0', 1000);
                     continue;
                 }
-                //printf("Token %s NOT FOUND", token);
             }
         }
-        //printf("\n\n");
+
+        printf("CodePL:\n \t%s\n", codePL);// DONT FORGET TO DELETE ME LATER
+        
         memset(token, '\0', 1000);
         memset(word, '\0', 1000);
-
-
-        printf("Lexeme List:\n%s\n\n",codePL);
         free(token);
         free(word);
-        free(codePL);
     }   
-    //  HW2 MAIN END //
 
 
-    namerecord_t symbolTable[] = (namerecord_t*) malloc(sizeof(namerecord_t)* MAX_NAME_TABLE_SIZE);
+    //===================HW2 MAIN END==================//
 
+    if (EndProgramFlag)
+    {
+         
+
+    }
+   
+
+  
+    free(codePL);   
+    
     return 0;
 }
