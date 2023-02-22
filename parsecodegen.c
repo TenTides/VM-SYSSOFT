@@ -423,7 +423,7 @@ int binarySearch(int arr[], int left, int right, int x) {
     
     > Operations MUL 0 3   -OR-  OPP 0 3
 
-    > will we have to create a little vm with a stack within this code to keep track of where things are. Answer: handles itself
+    > will we have to create a little vm with a stack within this code to keep track of where things are in memory. Answer: handles itself
 
     > on page 11 of the HW3 why does it include modsym when that was not apart of HW2?
     
@@ -563,6 +563,61 @@ int binarySearch(int arr[], int left, int right, int x) {
     y := 7 * (u * 3)
     y := 7 * 3u
     y := 21u
+
+    ===========================
+    {Ambiguity}
+
+    order of operations (left most derivation)
+
+    a + b * c 
+    is should produce the same output as
+    b * c + a
+
+    but with how our program is, the first one will do (a+b)*c when it should be
+    a+(b*c). 
+
+    with in expression() and term() we must make it so that multiplication has precedence over addition. Look at pg 20 in slides and 23. it is already built in within the psuedocode. 
+    ===========================
+    {Recursive Descent parsing with left recursion}
+
+    > basically if we do not have  basecases within our recursive function we could end up having a stack overflow. 
+    ===========================
+    {Left factoring}
+    > This causes a compiler to be slower 
+
+    {example}
+
+    we will not want this:
+
+    IF<C>THEN<ST>
+    IF<C>THEN<ST>ELSE<ST>
+
+    instead we will do:
+
+    IF<C>THEN<ST><X>
+    
+    where <x> ::= ELSE<ST> | STOP   
+
+    > What this does it remove the rule of backtracking making our compiler slower. 
+    > we basically need to create a method that acts as the basecase. Exam question
+    ===========================
+
+    {very easy test case}
+
+    var a, b,c; // populate the symbol table
+    a := b + c.
+
+    {output should be}
+
+    LOD 0 4
+    LOD 0 5
+    ADD 0 2
+    STO 0 3
+    SYS 0 3
+
+    ===========================
+    We have to update our code so that it follows left factoring.
+
 */
 
 typedef struct{
