@@ -621,6 +621,7 @@ void CONST_DECLARATION()
                     // call initialize add in the value and the identifer name
                     //
                     // Sudo code sets the address to 0 always, when setting a constant why? 
+                    // "add to symbol table (kind 1, saved name, number, 0, 0)"
                 
                     TOKEN = GET_Token();
                     if(TOKEN == commasym)
@@ -760,7 +761,7 @@ void STATEMENT()
             break;
     //-----------------------------------------------------------------------------------------
         case beginsym:
-
+            
             break;
     //-----------------------------------------------------------------------------------------
         case ifsym:
