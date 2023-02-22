@@ -21,7 +21,7 @@ char* subString(int start, int end,char* line);
 int isWordValid(char* word);
 void PROGRAM();
 void BLOCK();
-int GET_TOKEN();
+int GET_Token();
 void EXPRESSION();
 void STATEMENT();
 void CONDTION();
@@ -413,18 +413,57 @@ int binarySearch(int arr[], int left, int right, int x) {
 
 //Project Questions//
 /*
-    > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark? Answer: we will not be worki
+    > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark? Answer: we will not be working linearly
 
     > How will be connecting our vm and our lexeme? 
 
     > how exactly should we be changing scanner for the future assignments? answer: remove whatever is not in the grammar and view them as identifiers.  
 
-    > How many lines of assmebly code will we have? 
+    > How many lines of assmebly code will we have? For the assembly code struct?
     
     > Operations MUL 0 3   -OR-  OPP 0 3
 
-    > will we have to create a little vm with a stack within this code to keep track of where things are.
+    > will we have to create a little vm with a stack within this code to keep track of where things are. Answer: handles itself
 
+    > on page 11 of the HW3 why does it include modsym when that was not apart of HW2?
+    
+
+    > CAN WE BE CERTAIN ADDRESSES for assembly codes like jmp and jpc are 3 incremented. Eg. after each code address increment by 3 like in the vm assignment
+
+    > When "emmiting", are we printing the assembly code to the screen or are we just storing it for later printing. For example, in the case that there is an error should have printed the valid assembly code to the screen that preceded that error. 
+    
+    >if token == whilesym
+        get next token
+        loopIdx = current code index <----- what index is this refering to? Code PL?
+        CONDITION
+        if token != dosym
+        error
+        get next token
+        jpcIdx = current code index <--
+        emit JPC
+        STATEMENT
+        emit JMP (M = loopIdx)
+        code[jpcIdx].M = current code index <--
+        return
+
+    >if token == ifsym
+        get next token
+        CONDITION
+        jpcIdx = current code index
+        emit JPC
+        if token != thensym
+        error
+        get next token
+        STATEMENT
+        code[jpcIdx].M = current code index
+        return
+    
+    > what is CURRENT CODE INDEX and what is code[], it is represented as a struct here.
+    
+    
+    > why do we need to have jumps if we are not using procedures and why are they apart of if
+    > what is meant by "emit read" and "emit write" ? IF THE ERROR STATEMENT IS ALL THAT IS PRINTED ON ERROR,
+    > what do we do for all the sudo he put up?
 */
 
 //======================Project Rules======================//
@@ -485,6 +524,7 @@ int binarySearch(int arr[], int left, int right, int x) {
         statement;
         statment;
         statment
+
     end
 
     (equals)
@@ -492,8 +532,12 @@ int binarySearch(int arr[], int left, int right, int x) {
     Begin
         statement;
         statment;
-        
+
     end
+
+    lexeme: 21 xx 18 xx 18 xx 22
+
+    lexeme:  21 xx 18 xx 18 22
 
     > when we print out the symbol table the mark on everything should be 1
 
@@ -514,12 +558,16 @@ int binarySearch(int arr[], int left, int right, int x) {
     // Symbol table
     // assembly code increment for addresses is linear increment by 3 always. However, variable count 
     // can affect the M values that get plugged for lod and sto when adding it into struct
+
     
+    y := 7 * (u * 3)
+    y := 7 * 3u
+    y := 21u
 */
 
 typedef struct{
     int kind; //const = 1, var = 2, proc = 3.
-    char name[11]; // name up to 11 chars.(identifer)
+    char name[12]; // name up to 11 chars.(identifer)
     int val; // number (ASCII value)
     int level; // L level -- assume 0 for the most part
     int adr; // M address
@@ -544,9 +592,13 @@ assembly_Node assembly_Code[MAX_NAME_TABLE_SIZE];
 // 7*(6*(7/4(hasdf * ( 6))))
 //==========Functions===========//
 
-int GET_TOKEN()
+int GET_Token()
 {
-    
+    //  >use a universal index that all the below functions can edit,this will go to the end of codePL
+    //  >it will return the NEXT token in code PL
+    //  > it should be able to either ignore the variable identifier names to go to the next token, or deal with it directly.
+    //    Ignoring it may be better, as a seperate function could be responable for grabbing the identifer from codePL 
+    //    and thereafter incrementing the universal index appropriately.  (helper function could be GRAB_NAME(index))
 }
 
 
@@ -560,7 +612,7 @@ void PROGRAM()
     if (TOKEN != periodsym)
     {
         // ERROR(TOKEN);
-        exit();
+        exit(0);
     }
     else
     {
@@ -605,7 +657,7 @@ void CONST_DECLARATION()
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , constant with the identifier name already exists
-                exit();
+                exit(0);
             }
             //create named object for record
             //keep reference
@@ -636,28 +688,28 @@ void CONST_DECLARATION()
                     {
                         // SEMICOLON MISSING, INVALID TOKEN 
                         //Error
-                        exit(); 
+                        exit(0); 
                     }
                 }
                 else
                 {
                     // NUMBER MISSING, INVALID TOKEN 
                     //Error
-                    exit(); 
+                    exit(0); 
                 }
             }
             else
             {
                 // NO EQUALS, INVALID TOKEN 
                 //Error
-                exit(); 
+                exit(0); 
             }
         }
         else
         {
             //NO IDENTIFIER, INVALID TOKEN 
             //Error
-            exit(); 
+            exit(0); 
         }
     } 
 }
@@ -679,13 +731,12 @@ void VAR_DECLARATION()
         TOKEN = GET_Token();
         if(TOKEN == identsym)
         {
-
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent;
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , variable with the identifier name already exists
-                exit();
+                exit(0);
             }
             // Create named object for record
             // Store object in main name array.
@@ -706,14 +757,14 @@ void VAR_DECLARATION()
             {
                 // SEMICOLON MISSING, INVALID TOKEN 
                 //Error
-                exit();
+                exit(0);
             }
         }
         else
         {
             //NO IDENTIFIER, INVALID TOKEN 
             //Error
-            exit();
+            exit(0);
         }
     } 
 }
@@ -740,52 +791,104 @@ void STATEMENT()
             if(symbolIndex == -1)
             {
                 // ERROR , identifier name does not exist
-                exit();
+                exit(0);
                 //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
             }
             if(symbol_Table[symbolIndex].kind != 2)
             {
                 // ERROR , identifier found is not of VAR type
-                exit();
+                exit(0);
             } 
             TOKEN = GET_Token();
             if(TOKEN != becomessym)
             {
                 // ERROR , become operator missing, expected for the statement
-                exit();
+                exit(0);
             } 
             TOKEN = GET_Token();
-            EXPRESSION()
+            EXPRESSION();
             // Store the assembly code into the array 
             // emit STO (M = table[symIdx].addr)
             break;
     //-----------------------------------------------------------------------------------------
         case beginsym:
-            
+            while(1)
+            {
+                TOKEN = GET_Token();
+                STATEMENT();
+                if(TOKEN != semicolonsym)
+                {
+                    break;
+                }
+            }
+            if(TOKEN != endsym)
+            {
+                //ERROR, end token expected, missing token.
+                exit(0);
+            }
+            TOKEN = GET_Token();
             break;
     //-----------------------------------------------------------------------------------------
         case ifsym:
-
+            TOKEN = GET_Token();
+            CONDITION();
+            // int jpcIdx;
+            // emit jpc, add to assembly code struct array
+            if(TOKEN != thensym)
+            {
+                //ERROR, then token expected, missing token.
+                exit(0);
+            }
+            STATEMENT();
+            //code[jpcIdx].M = current code index
             break;
     //-----------------------------------------------------------------------------------------
         case whilesym:
-
+            TOKEN = GET_Token();
+            //loopIdx = current code index
+            CONDITION();
+            if(TOKEN != dosym)
+            {
+                //ERROR, do token expected, missing token.
+                exit(0);
+            }
+            TOKEN = GET_Token();
+            // int jpcIdx;
+            // emit jpc, add to assembly code struct array
+            STATEMENT();
+            // emit JMP (M = loopIdx) , add to assembly code struct array
+            // code[jpcIdx].M = current code index 
             break;
     //-----------------------------------------------------------------------------------------
         case readsym:
-
+              // Grab identifier, function that grabs and saves variable  
+            char* nameIdent;
+            int symbolIndex = SYMBOLTABLECHECK(nameIdent);
+            if(symbolIndex == -1)
+            {
+                // ERROR , identifier name does not exist
+                exit(0);
+                //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
+            }
+            if(symbol_Table[symbolIndex].kind != 2)
+            {
+                // ERROR , identifier found is not of VAR type
+                exit(0);
+            } 
+            TOKEN = GET_Token();
+            // emit READ ????
+            // emit STO (M = table[symbolIndex].addr), add to assembly code struct array
             break;
     //-----------------------------------------------------------------------------------------
         case writesym:
-
-            break;
-    //-----------------------------------------------------------------------------------------
-        case -1: 
-            // EMPTY SATEMENT, assuming there is no more tokens in the line, that implies the statement is valid
+            TOKEN = GET_Token();
+            EXPRESSION();
+            // emit WRITE
             break;
     //-----------------------------------------------------------------------------------------
         default:
             //ERROR, token isn't one of the above ^^^
+            exit(0);
             break;
     //-----------------------------------------------------------------------------------------
     }
@@ -793,22 +896,179 @@ void STATEMENT()
 
 void EXPRESSION()
 {
+    int TOKEN;
+    if (TOKEN == minussym)
+    {
+        TOKEN = GET_Token();
+        TERM();
+        //emit NEGATIVE 
+        TOKEN = GET_Token();
+        while (TOKEN == plussym || TOKEN == minussym)
+        {
+            if (TOKEN == plussym) 
+            {
+                TOKEN = GET_Token();
+                TERM();
+                //emit ADD
+            }
+            else 
+            {
+                TOKEN = GET_Token();
+                TERM();
+                //emit SUB
+            }
+
+        }
+        
+    }
+    else if (TOKEN == plussym)
+    {
+        TOKEN = GET_Token();
+        TERM();    
+        //emit POSITIVE  
+        TOKEN = GET_Token();
+        while (TOKEN == plussym || TOKEN == minussym)
+        {
+            if (TOKEN == plussym) 
+            {
+                TOKEN = GET_Token();
+                TERM();
+                //emit add
+            }
+            else 
+            {
+                TOKEN = GET_Token();
+                TERM();
+                //emit SUB
+            }
+    
+
+        }
+
+        
+    }
     
 }
 
 void CONDTION()
 {
-
+    int TOKEN;
+    TOKEN = GET_Token();
+    if(TOKEN == oddsym)
+    {
+        TOKEN = GET_Token();
+        EXPRESSION();
+        //emit ODD, add code to assembly code struct
+    }
+    else
+    {
+        // no get token here?
+        EXPRESSION();
+        switch(TOKEN) 
+        {
+        //-----------------------------------------------------------------------------------------
+            case eqsym :
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit EQL
+                break;
+            case neqsym:
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit NEQ
+                break;
+            case lessym:
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit LSS
+                break;
+            case leqsym:
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit LEQ
+                break;
+            case gtrsym:
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit GTR
+                break;
+            case geqsym:
+                TOKEN = GET_Token();
+                EXPRESSION();
+                // emit GEQ
+                break;
+            default:
+                //ERROR, token isn't one of the above ^^^
+                exit(0);
+                break;
+        //-----------------------------------------------------------------------------------------
+        }
+    }
 }
 
 void TERM()
 {
+    int TOKEN;    
+    FACTOR();
+
+    TOKEN = GET_Token();
+    while (TOKEN == multsym || TOKEN == slashsym)
+    {
+        if (TOKEN == multsym)
+        {
+            TOKEN = GET_Token();
+            FACTOR();
+            //emit MUL
+        }
+        else if (TOKEN == slashsym)
+        {
+            TOKEN = GET_Token();
+            FACTOR();
+            //emit DIV
+        }
+    }
 
 }
 
 void FACTOR()
 {
-    
+    int TOKEN;
+        
+    if (TOKEN == identsym)
+    {
+        int symIdx = SYMBOLTABLECHECK(TOKEN);
+        if (symIdx == -1)
+        {
+            // ERROR  
+        }
+        else if (symbol_Table[symIdx].kind == 1)
+        {
+            // emit LIT (M = symbol_Table[symIdx].Value)
+        }
+        else 
+        {
+            // emit LOD (M = symbol_Table[symIdx].addr)
+        }
+    } 
+    else if (TOKEN == numbersym)
+    {
+        // emit LIT
+        TOKEN = GET_Token();
+    }
+    else if (TOKEN == lparentsym)
+    {
+        TOKEN = GET_Token();
+        EXPRESSION();
+        if (TOKEN != rparentsym)
+        {
+            // ERROR no right paranthesis
+        }
+        TOKEN = GET_Token();
+    }
+    else
+    {
+        // ERROR
+    }
 }
 
 namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark)
@@ -1022,14 +1282,6 @@ int main(int argc, char* argv[]) {
 
 
     //===================HW2 MAIN END==================//
-
-    if (EndProgramFlag)
-    {
-         
-
-    }
-   
-
   
     free(codePL);   
     
