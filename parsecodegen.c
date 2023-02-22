@@ -560,6 +560,7 @@ void PROGRAM()
     if (TOKEN != periodsym)
     {
         // ERROR(TOKEN);
+        exit();
     }
     else
     {
@@ -586,18 +587,26 @@ void BLOCK()
     
     STATEMENT();
 }
-
+// if SYMBOLTABLECHECK (token) != -1
+// We need  a SYMBOLTABLECHECK() to see if something is in the symbol table, -1 otherwise don't the else 
+//
 void CONST_DECLARATION() 
 {
     int TOKEN;
     // checking until semicolon
     TOKEN = GET_Token();
     while(1){
-        //check for identifier if comma
+        //check for identifier 
         TOKEN = GET_Token();
         if(TOKEN == identsym)
         {
             //grab identifier function that grabs and saves variable  
+            char* nameIdent;
+            if(SYMBOLTABLECHECK(nameIdent) != -1)
+            {
+                // ERROR , constant with the identifier name already exists
+                exit();
+            }
             //create named object for record
             //keep reference
             TOKEN = GET_Token();
@@ -611,8 +620,7 @@ void CONST_DECLARATION()
                     //main array name record addition 
                     // call initialize add in the value and the identifer name
                     //
-                    // ASSIGNEMENT TO VARIABLE THERE IS ASSEMBLY CODES
-                    // Guessing to use sto and lod 
+                    // Sudo code sets the address to 0 always, when setting a constant why? 
                 
                     TOKEN = GET_Token();
                     if(TOKEN == commasym)
@@ -625,30 +633,30 @@ void CONST_DECLARATION()
                     }
                     else
                     {
-                        // SEMICOLON MISSING
+                        // SEMICOLON MISSING, INVALID TOKEN 
                         //Error
-                        break; 
+                        exit(); 
                     }
                 }
                 else
                 {
-                    // NUMBER MISSING
+                    // NUMBER MISSING, INVALID TOKEN 
                     //Error
-                    break; 
+                    exit(); 
                 }
             }
             else
             {
-                // NO EQUALS
+                // NO EQUALS, INVALID TOKEN 
                 //Error
-                break; 
+                exit(); 
             }
         }
         else
         {
-            //NO IDENTIFIER
+            //NO IDENTIFIER, INVALID TOKEN 
             //Error
-            break; 
+            exit(); 
         }
     } 
 }
@@ -656,13 +664,130 @@ void CONST_DECLARATION()
 //const xd = 5, t = 3 
 // constdeclaration ::= [ “const” ident "=" number {"," ident "=" number} “;"].
 // var-declaration  ::= [ "var" ident {"," ident} “;"].
-void VAR_DECLARATION() {
-    
+
+// The sudo code has var declaration returning the number of variables
+// why isn't the variable count increased when a constant is defined in his
+// sudo code?
+void VAR_DECLARATION() 
+{
+    int TOKEN;
+    // checking until semicolon
+    TOKEN = GET_Token();
+    while(1){
+        //check for identifier
+        TOKEN = GET_Token();
+        if(TOKEN == identsym)
+        {
+
+            // Grab identifier, function that grabs and saves variable  
+            char* nameIdent;
+            if(SYMBOLTABLECHECK(nameIdent) != -1)
+            {
+                // ERROR , variable with the identifier name already exists
+                exit();
+            }
+            // Create named object for record
+            // Store object in main name array.
+            // increment VAR counter
+
+            // The addresses of the variables added to name table MUST be
+            // correct with regards to what is already there (var# +2) 
+            TOKEN = GET_Token();
+            if(TOKEN == commasym)
+            {
+                continue;
+            }
+            else if (TOKEN == semicolonsym)
+            {
+                break;
+            }
+            else
+            {
+                // SEMICOLON MISSING, INVALID TOKEN 
+                //Error
+                exit();
+            }
+        }
+        else
+        {
+            //NO IDENTIFIER, INVALID TOKEN 
+            //Error
+            exit();
+        }
+    } 
 }
+// statement   ::= [ ident ":=" expression
+//       | "begin" statement { ";" statement } "end" 
+//       | "if" condition "then" statement 
+//       | "while" condition "do" statement
+//       | "read" ident 
+//       | "write"  expression 
+//       | empty ] .  
 
 void STATEMENT()
 {
-    
+    int TOKEN;
+    TOKEN = GET_Token();
+    //MASSIVE SWITCH STATEMENT BEWARE
+    switch(TOKEN) 
+    {
+    //-----------------------------------------------------------------------------------------
+        case identsym:
+            // Grab identifier, function that grabs and saves variable  
+            char* nameIdent;
+            int symbolIndex = SYMBOLTABLECHECK(nameIdent);
+            if(symbolIndex == -1)
+            {
+                // ERROR , identifier name does not exist
+                exit();
+                //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
+            }
+            if(symbol_Table[symbolIndex].kind != 2)
+            {
+                // ERROR , identifier found is not of VAR type
+                exit();
+            } 
+            TOKEN = GET_Token();
+            if(TOKEN != becomessym)
+            {
+                // ERROR , become operator missing, expected for the statement
+                exit();
+            } 
+            TOKEN = GET_Token();
+            EXPRESSION()
+            // Store the assembly code into the array 
+            // emit STO (M = table[symIdx].addr)
+            break;
+    //-----------------------------------------------------------------------------------------
+        case beginsym:
+
+            break;
+    //-----------------------------------------------------------------------------------------
+        case ifsym:
+
+            break;
+    //-----------------------------------------------------------------------------------------
+        case whilesym:
+
+            break;
+    //-----------------------------------------------------------------------------------------
+        case readsym:
+
+            break;
+    //-----------------------------------------------------------------------------------------
+        case writesym:
+
+            break;
+    //-----------------------------------------------------------------------------------------
+        case -1: 
+            // EMPTY SATEMENT, assuming there is no more tokens in the line, that implies the statement is valid
+            break;
+    //-----------------------------------------------------------------------------------------
+        default:
+            //ERROR, token isn't one of the above ^^^
+            break;
+    //-----------------------------------------------------------------------------------------
+    }
 }
 
 void EXPRESSION()
