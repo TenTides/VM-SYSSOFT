@@ -620,7 +620,7 @@ int binarySearch(int arr[], int left, int right, int x) {
 
 
     ==================After class questions answers============
-    > For this program we will print to the terminal like we saw in the HW3 file. PL/0 the code and then the assembly code. But that is not all. We as we print each line of assembly code, we must store that code in an array and save it to the file where for example LOD 0 3 -> 7 0 3. This is so that we can run our assembly code within the vm. 
+    > For this program we will print to the terminal like we saw in the HW3 file. PL/0 the code and then the assembly code. But that is not all. Along with printing each line of assembly code, we must store that code in an array/datastructure and save it to the file where for example LOD 0 3 -> 7 0 3. This is so that we can run our assembly code within the vm. 
 
     > For this project we do not need to create a stack nor do we need to have the the text(assembly code)
     written somewhere for us to parse. Instead, we must just keep track of where we are with in those concepts so that when we run our assembly code within the vm, the stack will be created properly. Therefore the address of variables etc. must increment by 1, and the address of the assembly code(text) must increment by 3. That is all we have to worry about in this project.
