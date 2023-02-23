@@ -32,8 +32,7 @@ void FACTOR();
 
 //==========================================================================================================================
 
-namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-assembly_Node* initializeAssemblyRecord(int OP, int L, int M);
+
 
 //==========================================================================================================================
 
@@ -62,6 +61,8 @@ typedef struct{
     int M; // L level
 } assembly_Node;
 
+namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
+assembly_Node* initializeAssemblyRecord(int OP, int L, int M);
 
 namerecord_t* symbol_Table[MAX_NAME_TABLE_SIZE];
 assembly_Node* assembly_Code[MAX_NAME_TABLE_SIZE];// this is where we will be storing the the assembly code
@@ -446,9 +447,6 @@ int binarySearch(int arr[], int left, int right, int x) {
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
 
-
-
-
 //Project Questions//
 /*
     > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark? Answer: we will not be working linearly
@@ -667,8 +665,6 @@ int binarySearch(int arr[], int left, int right, int x) {
 
 */
 //==========Functions===========//
-
-
 
 //  >use a universal index that all the below functions can edit,this will go to the end of codePL
 //  >it will return the NEXT token in code PL
