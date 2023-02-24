@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
+#include <ctype.h>
 #define  CMAX     11       // maximum number of chars for idents 
 #define  STRMAX   125       // Assuming max codeline length is 50
 #define MAX_NAME_TABLE_SIZE 500
@@ -24,16 +25,17 @@ void PROGRAM();
 void BLOCK();
 char* GET_Token();
 int Get_TokenInteger();
+void CONST_DECLARATION();
+void VAR_DECLARATION();
+int SYMBOLTABLECHECK(char* name);
+
 void EXPRESSION();
 void STATEMENT();
-void CONDTION();
+void CONDITION();
 void TERM();
 void FACTOR();
 
 //==========================================================================================================================
-
-
-
 //==========================================================================================================================
 
 char* global_Lexeme;
@@ -43,7 +45,7 @@ int universalCodeText = 0;
 int universalCodeAddress = 0;
 
 int variableCount = 0;
-int universalSymbolIndex = 0;
+int universalSymbolIndex = 1;
 
 typedef struct{
     int kind; //const = 1, var = 2, proc = 3.
@@ -67,7 +69,10 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M);
 namerecord_t* symbol_Table[MAX_NAME_TABLE_SIZE];
 assembly_Node* assembly_Code[MAX_NAME_TABLE_SIZE];// this is where we will be storing the the assembly code
 
+int TOKEN = -1;
 //==========================================================================================================================
+//==========================================================================================================================
+
 typedef enum {  
     identsym = 2, 
     numbersym = 3, 
@@ -663,6 +668,7 @@ int binarySearch(int arr[], int left, int right, int x) {
 
     > The psuedo code he gave us already takes care of the properly perfoming Recursive Descent parsing with left recursion to avoid infinite recurisve loops. 
 
+
 */
 //==========Functions===========//
 
@@ -675,29 +681,39 @@ int binarySearch(int arr[], int left, int right, int x) {
 
 char* GET_Token()
 {
+    // printf("\n\nEntering the GET_Token\n");
     // initializing variables
     char* RETVAL;
-    int length = strlen(global_Lexeme);
-
+    // printf("This is Global Lexeme: %s\n", global_Lexeme);
+    int length = strlen(global_Lexeme);                  
+    int foundIt = 0;
     //initializing token and word
     char* token = (char*) malloc(sizeof(char) * 1000);
     token[0] = '\0';
+
     char specialCharacter;
     int index = 0;
     int tokenToInt;
     char stopChar = ' ';
 
-    
+    if(universialIndex == length - 1)
+    {
+        RETVAL = NULL;
+        return RETVAL;
+    }
+
+    // printf("This is universalIndex: %d\n", universialIndex);
     for(int i = universialIndex; i < length ;i++, universialIndex++)
     {   
+        // printf("We have entered the for loop\n");
         // if we see a space then we continue. 
         if (global_Lexeme[i] == ' ')
         {
-            continue;;
+            continue;
         }
 
         strncat(token, global_Lexeme + i, 1);
-
+        // printf("When i is %d token is %s\n", i, token);
         // continue if we have multiple numbers/chars 
         if (global_Lexeme[i+1] != ' ') {
             continue;
@@ -706,7 +722,8 @@ char* GET_Token()
 
         if (strcmp(token, "20") == 0) {
             //copy whatever the token is to RETVAL
-            strcpy(RETVAL, token);
+            strcpy(RETVAL, token); // is this psossible when retval destination is null? I will check it
+            
             memset(token, '\0', 1000);
             break;
         }
@@ -754,18 +771,51 @@ char* GET_Token()
             break;
         }
 
+        // printf("We are about to check the specialSymbolTokens for loop token is %s\n", token);
         index = -1;
+
         tokenToInt = atoi(token);
-        for (int j = 0; j < 15; j++) {
-            if (specialTerminalSymbolsTokens[j] == tokenToInt) {
-                // store token in retval
-                strcpy(RETVAL, token);
-                memset(token, '\0', 1000);
+        // printf("when token is %s tokenToInt is %d\n", token, tokenToInt);
+
+        if (strcmp(token, "0") == 0 || tokenToInt < 0 || tokenToInt > 0)
+        {
+            for (int j = 0; j < 15; j++) {
+                if (specialTerminalSymbolsTokens[j] == tokenToInt)
+                {
+                    // store token in retval
+                    
+                    strcpy(RETVAL, token);
+                    memset(token, '\0', 1000);
+                    foundIt = 1;
+                    break;
+                }
+            }
+
+            if(foundIt)
+            {
                 break;
             }
         }
 
+
+        // for (int j = 0; j < 15; j++) {
+        //     if (specialTerminalSymbolsTokens[j] == tokenToInt)
+        //     {
+        //         // store token in retval
+                
+        //         strcpy(RETVAL, token);
+        //         memset(token, '\0', 1000);
+        //         break;
+        //     }
+        // }
+
+
+
+        // printf("We just left the specialSymbolTokens for loop token is %s\n", token);
+        // printf("We are about to check the resWordsTokens for loop token is %s\n", token);
         // printf("PASSING\n");
+
+        
         index = binarySearch(resWordsTokens, 0, 15, tokenToInt);
         if(index != -1) {
             // store token in retval
@@ -773,7 +823,9 @@ char* GET_Token()
             memset(token, '\0', 1000);
             break;
         }
+        // printf("We just left thye resWordsTokens for loop token is %s\n", token);
 
+        // printf("doing normal strcpy when token is %s\n", token);
         strcpy(RETVAL, token);
         
         memset(token, '\0', 1000);
@@ -781,7 +833,10 @@ char* GET_Token()
     }
 
     free(token);
-    
+    // printf("about to return\n");
+    universialIndex++;
+
+    // printf("This is RETVAL before returning %s\n", RETVAL);
     return RETVAL;
 }
 
@@ -791,7 +846,7 @@ int Get_TokenInteger()
     int stringLength = strlen(temp);
     for(int i = 0 ; i<stringLength;i++)
     {
-        if(isDigit(temp[i]) == 0)
+        if(isdigit(temp[i]) == 0)
         {
             return -10;
         }
@@ -803,7 +858,8 @@ int Get_TokenInteger()
 
 void PROGRAM()
 {
-    int TOKEN;
+    namerecord_t* newCode = initializeNameRecord(0," ", 0, 0, 0, 0);
+    symbol_Table[0] = newCode;
     BLOCK();
 
     //Call token looking for '.' ENDING PROGRAM
@@ -824,7 +880,6 @@ void PROGRAM()
 
 void BLOCK()
 {
-    int TOKEN;
     TOKEN = Get_TokenInteger();
     if(constsym == TOKEN) 
     {
@@ -843,12 +898,9 @@ void BLOCK()
 //
 void CONST_DECLARATION() 
 {
-    int TOKEN;
-    // checking until semicolon
-    TOKEN = Get_TokenInteger();
     while(1){
         //check for identifier 
-        TOKEN = GET_Token();
+        TOKEN = Get_TokenInteger();
         if(TOKEN == identsym)
         {
             //grab identifier function that grabs and saves variable  
@@ -927,7 +979,6 @@ void CONST_DECLARATION()
 // sudo code?
 void VAR_DECLARATION() 
 {
-    int TOKEN;
     // checking until semicolon
     TOKEN = Get_TokenInteger();
     while(1){
@@ -986,16 +1037,20 @@ void VAR_DECLARATION()
 
 void STATEMENT()
 {
-    int TOKEN;
     TOKEN = Get_TokenInteger();
     //MASSIVE SWITCH STATEMENT BEWARE
+    int symbolIndex;
+    char* nameIdent;
+    int jpcIdx;
+    int M; 
+    assembly_Node* newCode;
     switch(TOKEN) 
     {
     //-----------------------------------------------------------------------------------------
         case identsym:
             // Grab identifier, function that grabs and saves variable  
-            char* nameIdent = GET_Token();
-            int symbolIndex = SYMBOLTABLECHECK(nameIdent);
+            nameIdent = GET_Token();
+            symbolIndex = SYMBOLTABLECHECK(nameIdent);
             if(symbolIndex == -1)
             {
                 // ERROR , identifier name does not exist
@@ -1016,9 +1071,9 @@ void STATEMENT()
             TOKEN = Get_TokenInteger();
             EXPRESSION();
             // Store the assembly code into the array 
-            int M = symbol_Table[symbolIndex]->adr;
-            assembly_Node* newCode = initializeAssemblyRecord(4, 0, M);
-            printf("%d    STO    0    %d\n",universalCodeText,M);
+            M = symbol_Table[symbolIndex]->adr;
+            newCode = initializeAssemblyRecord(4, 0, M);
+            printf("%d    STO    0    %d\n",universalCodeText, M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
@@ -1048,9 +1103,9 @@ void STATEMENT()
             CONDITION();
             // emit jpc, add to assembly code struct array
 
-            int jpcIdx = universalCodeAddress;
-            int M = jpcIdx;
-            assembly_Node* newCode = initializeAssemblyRecord(8, 0, M);
+            jpcIdx = universalCodeAddress;
+            M = jpcIdx;
+            newCode = initializeAssemblyRecord(8, 0, M);
             printf("%d    JPC    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
@@ -1075,9 +1130,9 @@ void STATEMENT()
                 exit(0);
             }
             TOKEN = Get_TokenInteger();
-            int jpcIdx =  universalCodeAddress;
+            jpcIdx =  universalCodeAddress;
             // emit jpc, add to assembly code struct array
-            int M = jpcIdx;
+            M = jpcIdx;
             assembly_Node* newCode1 = initializeAssemblyRecord(8, 0, jpcIdx);
             printf("%d    JPC    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode1;
@@ -1098,8 +1153,8 @@ void STATEMENT()
     //-----------------------------------------------------------------------------------------
         case readsym:
               // Grab identifier, function that grabs and saves variable  
-            char* nameIdent;
-            int symbolIndex = SYMBOLTABLECHECK(nameIdent);
+            nameIdent;
+            symbolIndex = SYMBOLTABLECHECK(nameIdent);
             if(symbolIndex == -1)
             {
                 // ERROR , identifier name does not exist
@@ -1113,15 +1168,15 @@ void STATEMENT()
             } 
             TOKEN = Get_TokenInteger();
             // emit READ ???? guessing sys read code
-            assembly_Node* newCode1 = initializeAssemblyRecord(9, 0, 2);
+            newCode = initializeAssemblyRecord(9, 0, 2);
             printf("%d    SYS    0    2\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode1;
             universalCodeText++;
             universalCodeAddress += 3;
             
             // emit  STO (M = table[symbolIndex].addr), add to assembly code struct array
-            int M = symbol_Table[symbolIndex]->adr;
-            assembly_Node* newCode2 = initializeAssemblyRecord(4, 0, M);
+            M = symbol_Table[symbolIndex]->adr;
+            newCode = initializeAssemblyRecord(4, 0, M);
             printf("%d    STO    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode2;
             universalCodeText++;
@@ -1150,7 +1205,6 @@ void STATEMENT()
 
 void EXPRESSION()
 {
-    int TOKEN;
     if (TOKEN == minussym)
     {
         TOKEN = Get_TokenInteger();
@@ -1224,9 +1278,8 @@ void EXPRESSION()
     
 }
 
-void CONDTION()
+void CONDITION()
 {
-    int TOKEN;
     TOKEN = Get_TokenInteger();
     if(TOKEN == oddsym)
     {
@@ -1240,6 +1293,7 @@ void CONDTION()
     {
         // no get token here?
         EXPRESSION();
+        assembly_Node* newCode;
         switch(TOKEN) 
         {
         //-----------------------------------------------------------------------------------------
@@ -1247,7 +1301,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit EQL
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 5);
+                newCode = initializeAssemblyRecord(2, 0, 5);
                 printf("%d    EQL    0    5\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1257,7 +1311,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit NEQ
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 6);
+                newCode = initializeAssemblyRecord(2, 0, 6);
                 printf("%d    NEQ    0    6\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1267,7 +1321,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit LSS
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 7);
+                newCode = initializeAssemblyRecord(2, 0, 7);
                 printf("%d    LSS    0    7\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1277,7 +1331,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit LEQ
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 8);
+                newCode = initializeAssemblyRecord(2, 0, 8);
                 printf("%d    LEQ    0    8\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1287,7 +1341,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit GTR
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 9);
+                newCode = initializeAssemblyRecord(2, 0, 9);
                 printf("%d    GTR    0    9\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1297,7 +1351,7 @@ void CONDTION()
                 TOKEN = Get_TokenInteger();
                 EXPRESSION();
                 // emit GEQ
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 10);
+                newCode = initializeAssemblyRecord(2, 0, 10);
                 printf("%d    GEQ    0    10\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1312,9 +1366,21 @@ void CONDTION()
     }
 }
 
-void TERM()
+int SYMBOLTABLECHECK(char* name)
 {
-    int TOKEN;    
+    strcpy(symbol_Table[0]->name,name);
+    for(int i = universalSymbolIndex+1; i> 0; i--)
+    {
+        if(strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void TERM()
+{    
     FACTOR();
 
     TOKEN = Get_TokenInteger();
@@ -1347,12 +1413,11 @@ void TERM()
 }
 
 void FACTOR()
-{
-    int TOKEN;
-        
+{       
     if (TOKEN == identsym)
     {
-        int symIdx = SYMBOLTABLECHECK(TOKEN);
+        char* nameIdent = GET_Token();
+        int symIdx = SYMBOLTABLECHECK(nameIdent);
         if (symIdx == -1)
         {
             // ERROR  
@@ -1413,6 +1478,7 @@ namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level,
     namerecord_t* new_record =  malloc(sizeof(namerecord_t));
     new_record->kind =_kind;
     strcpy(new_record->name, _name);
+    free(_name);
     new_record->val = _val;
     new_record->level = _level;
     new_record->adr = _adr;
@@ -1458,7 +1524,6 @@ int main(int argc, char* argv[]) {
 
     while(fscanf(fp, "%[^\n]s", buffer) != EOF)
     {
-        printf("entering while\n");
         fscanf(fp, "%c", &tyler);
         length = strlen(buffer);
 
@@ -1467,7 +1532,6 @@ int main(int argc, char* argv[]) {
         strcpy(line, buffer);
 
         line = lexicalParse(line); // lex parse
-        printf("passed parse\n");
         if(line != NULL)
         { 
             strcat(codePL,line);
@@ -1480,7 +1544,6 @@ int main(int argc, char* argv[]) {
 
         free(line);
     }   
-    printf("PASS 3\n");
 
 // =========================================
 // =========================================
@@ -1618,7 +1681,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        printf("CodePL:\n \t%s\n", codePL);// DONT FORGET TO DELETE ME LATER
+        //printf("CodePL:\n \t%s\n", codePL);// DONT FORGET TO DELETE ME LATER
 
         // creating Global Lexeme. 
         length = strlen(codePL);
@@ -1631,12 +1694,18 @@ int main(int argc, char* argv[]) {
         memset(word, '\0', 1000);
         free(token);
         free(word);
-    }   
-
-
-    //===================HW2 MAIN END==================//
-  
-    free(codePL);   
+    } 
+    printf("\nToken Lex: %s\n",global_Lexeme);
+    printf("Tokens From Get\n");
+    char* temp = GET_Token();
+    while (temp != NULL)
+    {
+        printf("Token: %s\n", temp);
+        temp = GET_Token();
+    }
     
+    //===================HW2 MAIN END==================//
+    free(global_Lexeme);
+    free(codePL);   
     return 0;
 }
