@@ -1695,6 +1695,7 @@ int main(int argc, char* argv[]) {
         free(token);
         free(word);
     } 
+    
     printf("\nToken Lex: %s\n",global_Lexeme);
     printf("Tokens From Get\n");
     char* temp = GET_Token();
