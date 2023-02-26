@@ -41,8 +41,8 @@ void FACTOR();
 char* global_Lexeme;
 int universialIndex = 0;
 
-int universalCodeText = 0;
-int universalCodeAddress = 0;
+int universalCodeText = 1;
+int universalCodeAddress = 3;
 
 int variableCount = 0;
 int universalSymbolIndex = 1;
@@ -683,7 +683,7 @@ char* GET_Token()
 {
     // printf("\n\nEntering the GET_Token\n");
     // initializing variables
-    char* RETVAL;
+    char* RETVAL = (char*) malloc(sizeof(char) * 1000);;
     // printf("This is Global Lexeme: %s\n", global_Lexeme);
     int length = strlen(global_Lexeme);                  
     int foundIt = 0;
@@ -842,8 +842,12 @@ char* GET_Token()
 
 int Get_TokenInteger()
 {
+    printf("GET token enter\n ");
     char* temp = GET_Token();
+    printf("Get token: %s\n", temp);
     int stringLength = strlen(temp);
+    printf("Get token len: %d\n", stringLength);
+
     for(int i = 0 ; i<stringLength;i++)
     {
         if(isdigit(temp[i]) == 0)
@@ -851,7 +855,7 @@ int Get_TokenInteger()
             return -10;
         }
     }
-    int  ret = atoi(temp);
+    int  ret = atoi(temp); // frees for you apparently, when I had free temp after this, it gave me a double free exception
     free(temp);
     return ret;
 }
@@ -860,6 +864,8 @@ void PROGRAM()
 {
     namerecord_t* newCode = initializeNameRecord(0," ", 0, 0, 0, 0);
     symbol_Table[0] = newCode;
+    printf("Program %d\n",TOKEN);
+
     BLOCK();
 
     //Call token looking for '.' ENDING PROGRAM
@@ -880,18 +886,39 @@ void PROGRAM()
 
 void BLOCK()
 {
+    printf("Block Get_TokenInt %d\n",TOKEN);
     TOKEN = Get_TokenInteger();
+    printf("Block %d\n",TOKEN);
+
     if(constsym == TOKEN) 
     {
+        printf("Block Const %d\n",TOKEN);
+
         CONST_DECLARATION();
     }
-    
     if(varsym == TOKEN)
     {
+        printf("Block Var %d\n",TOKEN);
         VAR_DECLARATION();
     }
+    else
+    {
+        // NO EQUALS, INVALID TOKEN 
+        //Error
+        exit(0); 
+    }
     
-    STATEMENT();
+    assembly_Node* newCode;
+    newCode = initializeAssemblyRecord(6, 0, (3+variableCount));
+    printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
+    assembly_Code[universalCodeText] = newCode;
+    printf("%d ",assembly_Code[universalCodeText]->OP);
+    printf("%d ",assembly_Code[universalCodeText]->L);
+    printf("%d\n",assembly_Code[universalCodeText]->M);
+    universalCodeText++;
+    universalCodeAddress += 3;
+
+    //STATEMENT();
 }
 // if SYMBOLTABLECHECK (token) != -1
 // We need  a SYMBOLTABLECHECK() to see if something is in the symbol table, -1 otherwise don't the else 
@@ -979,21 +1006,28 @@ void CONST_DECLARATION()
 // sudo code?
 void VAR_DECLARATION() 
 {
+    printf("Block Var enter %d\n",TOKEN);
+
     // checking until semicolon
-    TOKEN = Get_TokenInteger();
+    //TOKEN = Get_TokenInteger();
     while(1){
         //check for identifier
+        printf("var Before call %d\n",TOKEN);
         TOKEN = Get_TokenInteger();
+        printf(" Var 1 token %d\n",TOKEN);
         if(TOKEN == identsym)
         {
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent = GET_Token();
+            printf("Block Var name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , variable with the identifier name already exists
                 exit(0);
             }
             // Create named object for record
+            printf("Block Var name Pass \n");
+
             namerecord_t* newVar = initializeNameRecord(2,nameIdent,0, 0, variableCount + 2,  0);
             // Store object in main name array.
             symbol_Table[universalSymbolIndex] = newVar;
@@ -1133,18 +1167,18 @@ void STATEMENT()
             jpcIdx =  universalCodeAddress;
             // emit jpc, add to assembly code struct array
             M = jpcIdx;
-            assembly_Node* newCode1 = initializeAssemblyRecord(8, 0, jpcIdx);
+            newCode = initializeAssemblyRecord(8, 0, jpcIdx);
             printf("%d    JPC    0    %d\n",universalCodeText,M);
-            assembly_Code[universalCodeText] = newCode1;
+            assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
 
             STATEMENT();
             // emit JMP (M = loopIdx) , add to assembly code struct array
             M = loopIdx;
-            assembly_Node* newCode2 = initializeAssemblyRecord(7, 0, loopIdx);
+            newCode = initializeAssemblyRecord(7, 0, loopIdx);
             printf("%d    JPM    0    %d\n",universalCodeText,M);
-            assembly_Code[universalCodeText] = newCode2;
+            assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
             
@@ -1170,7 +1204,7 @@ void STATEMENT()
             // emit READ ???? guessing sys read code
             newCode = initializeAssemblyRecord(9, 0, 2);
             printf("%d    SYS    0    2\n",universalCodeText);
-            assembly_Code[universalCodeText] = newCode1;
+            assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
             
@@ -1178,7 +1212,7 @@ void STATEMENT()
             M = symbol_Table[symbolIndex]->adr;
             newCode = initializeAssemblyRecord(4, 0, M);
             printf("%d    STO    0    %d\n",universalCodeText,M);
-            assembly_Code[universalCodeText] = newCode2;
+            assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
             // emit 
@@ -1188,7 +1222,7 @@ void STATEMENT()
             TOKEN = Get_TokenInteger();
             EXPRESSION();
             // emit WRITE
-            assembly_Node* newCode = initializeAssemblyRecord(9, 0, 1);
+            newCode = initializeAssemblyRecord(9, 0, 1);
             printf("%d    SYS    0    1\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
@@ -1205,11 +1239,18 @@ void STATEMENT()
 
 void EXPRESSION()
 {
+    assembly_Node* newCode;
     if (TOKEN == minussym)
     {
         TOKEN = Get_TokenInteger();
         TERM();
-        //emit NEGATIVE ??
+        //-------------------------------------------------------
+        newCode = initializeAssemblyRecord(11, 0, 0);
+        printf("%d    NEGATIVE    0    0\n",universalCodeText);
+        assembly_Code[universalCodeText] = newCode;
+        universalCodeText++;
+        universalCodeAddress += 3;
+        //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
         {
@@ -1218,7 +1259,7 @@ void EXPRESSION()
                 TOKEN = Get_TokenInteger();
                 TERM();
                 //emit ADD
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 1);
+                newCode = initializeAssemblyRecord(2, 0, 1);
                 printf("%d    ADD    0    1\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1229,7 +1270,7 @@ void EXPRESSION()
                 TOKEN = Get_TokenInteger();
                 TERM();
                 //emit SUB
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 2);
+                newCode = initializeAssemblyRecord(2, 0, 2);
                 printf("%d    SUB    0    2\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
@@ -1244,6 +1285,13 @@ void EXPRESSION()
         TOKEN = Get_TokenInteger();
         TERM();    
         //emit POSITIVE  ??
+        //-------------------------------------------------------
+        newCode = initializeAssemblyRecord(12, 0, 0);
+        printf("%d    POSITVE    0    0\n",universalCodeText);
+        assembly_Code[universalCodeText] = newCode;
+        universalCodeText++;
+        universalCodeAddress += 3;
+        //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
         {
@@ -1252,22 +1300,26 @@ void EXPRESSION()
                 TOKEN = Get_TokenInteger();
                 TERM();
                 //emit add
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 1);
+                //-------------------------------------------------------
+                newCode = initializeAssemblyRecord(2, 0, 1);
                 printf("%d    ADD    0    1\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
                 universalCodeAddress += 3;
+                //-------------------------------------------------------
             }
             else 
             {
                 TOKEN = Get_TokenInteger();
                 TERM();
                 //emit SUB
-                assembly_Node* newCode = initializeAssemblyRecord(2, 0, 2);
+                //-------------------------------------------------------
+                newCode = initializeAssemblyRecord(2, 0, 2);
                 printf("%d    SUB    0    2\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
                 universalCodeAddress += 3;
+                //-------------------------------------------------------
             }
     
 
@@ -1281,11 +1333,19 @@ void EXPRESSION()
 void CONDITION()
 {
     TOKEN = Get_TokenInteger();
+    assembly_Node* newCode;
     if(TOKEN == oddsym)
     {
         TOKEN = Get_TokenInteger();
         EXPRESSION();
         // emit ODD, 
+        //-------------------------------------------------------
+        newCode = initializeAssemblyRecord(10, 0, 0);
+        printf("%d    ODD    0    0\n",universalCodeText);
+        assembly_Code[universalCodeText] = newCode;
+        universalCodeText++;
+        universalCodeAddress += 3;
+        //-------------------------------------------------------
         // No odd code in the assembly index, what goes here?
 
     }
@@ -1293,7 +1353,6 @@ void CONDITION()
     {
         // no get token here?
         EXPRESSION();
-        assembly_Node* newCode;
         switch(TOKEN) 
         {
         //-----------------------------------------------------------------------------------------
@@ -1478,7 +1537,6 @@ namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level,
     namerecord_t* new_record =  malloc(sizeof(namerecord_t));
     new_record->kind =_kind;
     strcpy(new_record->name, _name);
-    free(_name);
     new_record->val = _val;
     new_record->level = _level;
     new_record->adr = _adr;
@@ -1494,7 +1552,6 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
     new_record->M = M;
     return new_record;
 }
-
 
 //==========MAIN===========//
 int main(int argc, char* argv[]) {
@@ -1695,14 +1752,15 @@ int main(int argc, char* argv[]) {
         free(token);
         free(word);
     } 
-    printf("\nToken Lex: %s\n",global_Lexeme);
-    printf("Tokens From Get\n");
-    char* temp = GET_Token();
-    while (temp != NULL)
-    {
-        printf("Token: %s\n", temp);
-        temp = GET_Token();
-    }
+    // printf("\nToken Lex: %s\n",global_Lexeme);
+    // printf("Tokens From Get\n");
+    // char* temp = GET_Token();
+    // while (temp != NULL)
+    // {
+    //     printf("Token: %s\n", temp);
+    //     temp = GET_Token();
+    // }
+    PROGRAM();
     
     //===================HW2 MAIN END==================//
     free(global_Lexeme);
