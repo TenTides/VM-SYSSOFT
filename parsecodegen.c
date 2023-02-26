@@ -997,7 +997,7 @@ void CONST_DECLARATION()
     } 
 }
 
-//const xd = 5, t = 3 
+//const xd = 5, t = 3 k
 // constdeclaration ::= [ “const” ident "=" number {"," ident "=" number} “;"].
 // var-declaration  ::= [ "var" ident {"," ident} “;"].
 
