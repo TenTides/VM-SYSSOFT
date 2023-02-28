@@ -886,16 +886,20 @@ void PROGRAM()
     printf("Program %d\n",TOKEN);
 
     BLOCK();
-
+    printf("reentering Block with %d\n", TOKEN);
     //Call token looking for '.' ENDING PROGRAM
+    
+    printf("Block pre token grab %d\n", TOKEN);
     TOKEN = Get_TokenInteger();
+    printf("Block post token grab %d\n", TOKEN);
     if (TOKEN != periodsym)
     {
-        // ERROR(TOKEN);
+        // ERROR NOT A PERIOD AT THE END
         exit(0);
     }
     else
     {
+        printf("YAYYYY WE MADE IT TO THE PERIOD EXTIO!!!!\n");
         // Store Assembly  SYS END is added
         //Print Assembly code
         
@@ -927,6 +931,22 @@ void BLOCK()
         exit(0); 
     }
     
+    // When working with the stack we must reserve three indecies for Static Link, Dynamic Link, and Return Address. 
+    // Stack pointer should be at 3 now. 
+    // We must then then increment stack pointer to however many variables we have just "declared". in the case of test01.txt 
+    // we have two variables x and y. Therefore we must increment the stack pointer by 2. Stack pointer should now be 5. 
+    // stack should look like this from left to right:
+    // SL DL RA 0 0 _
+    //              ^
+    //              SP
+    // We do this so that when we initialize a variable using LIT 0 34 the stack pointer will add it to indicie 5. 
+    // SL DL RA 0 0 34
+    //              ^
+    //              SP
+    // Then when LOD 0 3 is called, the variable will be placed at indicies 3.
+    // SL DL RA 34 0 
+    //          ^
+    //          SP
     assembly_Node* newCode;
     newCode = initializeAssemblyRecord(6, 0, (3+variableCount));
     printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
@@ -1046,12 +1066,12 @@ void VAR_DECLARATION()
             // Create named object for record
             //printf("Block Var name Pass \n");
 
-            namerecord_t* newVar = initializeNameRecord(2,nameIdent,0, 0, variableCount + 2,  0);
+            namerecord_t* newVar = initializeNameRecord(2 ,nameIdent,0, 0, variableCount + 2,  0);
             // Store object in main name array.
             symbol_Table[universalSymbolIndex] = newVar;
             universalSymbolIndex++;
             variableCount++;
-            free(nameIdent);
+            free(nameIdent);// must free becuase we used Get_Token(). 
             // increment VAR counter
 
             // The addresses of the variables added to name table MUST be
@@ -1091,12 +1111,14 @@ void VAR_DECLARATION()
 void STATEMENT()
 {
     printf("Statement enter Area %d\n",TOKEN);
-    if(TOKEN != 2)
+
+    if(TOKEN != 2 && TOKEN != endsym) // added endsym to ensure we do not get another token before going back to statement(beginsym).
     {
         TOKEN = Get_TokenInteger();
+        printf("Statement post Area Grab %d\n",TOKEN);
     }
     
-    printf("Statement post Area Grab %d\n",TOKEN);
+   
 
     //MASSIVE SWITCH STATEMENT BEWARE
     int symbolIndex;
@@ -1112,7 +1134,7 @@ void STATEMENT()
             //printf("Statement enter Ident %d\n",TOKEN);
             nameIdent = GET_Token();
             //printf("Statement name Ident %s\n",nameIdent);
-            symbolIndex = SYMBOLTABLECHECK(nameIdent);
+            symbolIndex = SYMBOLTABLECHECK(nameIdent); // check that the identifer exists
             //printSymTbl();
             //printf("post symbolTable Check %d\n",symbolIndex);
             if(symbolIndex == -1)
@@ -1169,8 +1191,9 @@ void STATEMENT()
                 printf("False Exit\n");
                 exit(0);
             }
-            printf("exito\n");
-            exit(0);
+            // !!! since we exito before going back to Block, our program does not yet check for whether there is a period at the end. 
+            printf("exito without going back to block to check for periodsym :) \n");
+            // exit(0);
             //TOKEN = Get_TokenInteger();
             break;
     //-----------------------------------------------------------------------------------------
@@ -1271,6 +1294,11 @@ void STATEMENT()
             universalCodeAddress += 3;
             break;
     //-----------------------------------------------------------------------------------------
+        case endsym:
+            // if we see the endsym, the statement(beginsym) will check wether or not it exists.
+            // we were hitting the default before :(. 
+            break;
+    //-----------------------------------------------------------------------------------------
         default:
             //ERROR, token isn't one of the above ^^^
             exit(0);
@@ -1342,12 +1370,13 @@ void EXPRESSION()
             if (TOKEN == plussym) 
             {
                 TOKEN = Get_TokenInteger();
-                printf("Expecting 3 %d\n",TOKEN);
+                printf("Expecting 3 %d and entering Term: \n",TOKEN);
                 TERM();
+                printf("leaving Term and reentering Expression with: %d\n", TOKEN);
                 //emit add
                 //-------------------------------------------------------
                 newCode = initializeAssemblyRecord(2, 0, 1);
-                printf("%d    ADD    0    1\n",universalCodeText);
+                printf("%d    ADD    0    1\n",universalCodeText);// why is it 1?
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
                 universalCodeAddress += 3;
@@ -1494,9 +1523,10 @@ int SYMBOLTABLECHECK(char* name)
 }
 
 void TERM()
-{    
+{   
     printf("Entering Factor with: %d\n",TOKEN);
     FACTOR();
+    printf("Leaving Factor reentering Term with:%d\n", TOKEN);
     //printf("SemiColon Term Prior? %d\n",TOKEN);
     //TOKEN = Get_TokenInteger();
     printf("SemiColon Term Or 4 which is +? %d\n",TOKEN);
@@ -1537,14 +1567,16 @@ void FACTOR()
         printf("identsym Post Name token grab: %s\n",nameIdent);
 
         int symIdx = SYMBOLTABLECHECK(nameIdent);
+        printSymTbl();
         if (symIdx == -1)
         {
-            // ERROR  
+            // ERROR identifier does not exist withiin the symbolTable
         }
-        else if (symbol_Table[symIdx]->kind == 1)
+        else if (symbol_Table[symIdx]->kind == 1) // 1 = const
         {
             // emit LIT (M = symbol_Table[symIdx].Value)
             int M = symbol_Table[symIdx]->val;
+            
             assembly_Node* newCode = initializeAssemblyRecord(1, 0, symbol_Table[symIdx]->val);
             printf("%d    LIT    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
@@ -1553,7 +1585,7 @@ void FACTOR()
 
             
         }
-        else 
+        else // 2 = var
         {
             // emit LIT (M = symbol_Table[symIdx].Value)
             int M = symbol_Table[symIdx]->adr;
@@ -1608,11 +1640,12 @@ namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level,
 }
 void printSymTbl()
 {
+    printf("\nIndex | Kind | Name | Value | Level | Address | Mark \n");
     for (int i = 0; i < universalSymbolIndex; i++)
     {
-        printf("%d '%s'\n",i,symbol_Table[i]->name);
+        printf("  %d      %d     '%s'      %d       %d      %d         %d\n",i, symbol_Table[i]->kind, symbol_Table[i]->name, symbol_Table[i]->val,symbol_Table[i]->level, symbol_Table[i]->adr, symbol_Table[i]->mark);
     }
-    
+    printf("\n");
 }
 
 assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
