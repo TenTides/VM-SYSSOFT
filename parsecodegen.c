@@ -889,7 +889,7 @@ void PROGRAM()
 
 void BLOCK()
 {
-    printf("Block Get_TokenInt %d\n",TOKEN);
+    //printf("Block Get_TokenInt %d\n",TOKEN);
     TOKEN = Get_TokenInteger();
     printf("Block %d\n",TOKEN);
 
@@ -901,7 +901,7 @@ void BLOCK()
     }
     if(varsym == TOKEN)
     {
-        printf("Block Var %d\n",TOKEN);
+        printf("Var %d\n",TOKEN);
         VAR_DECLARATION();
     }
     else
@@ -1008,7 +1008,7 @@ void CONST_DECLARATION()
 // sudo code?
 void VAR_DECLARATION() 
 {
-    printf("Block Var enter %d\n",TOKEN);
+    printf("Var enter %d\n",TOKEN);
 
     // checking until semicolon
     //TOKEN = Get_TokenInteger();
@@ -1021,7 +1021,7 @@ void VAR_DECLARATION()
         {
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent = GET_Token();
-            printf("Block Var name %s\n",nameIdent);
+            printf("Var name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , variable with the identifier name already exists
@@ -1098,7 +1098,7 @@ void STATEMENT()
             printf("Statement name Ident %s\n",nameIdent);
             symbolIndex = SYMBOLTABLECHECK(nameIdent);
             //printSymTbl();
-            printf("post symbolTable Check %d\n",symbolIndex);
+            //printf("post symbolTable Check %d\n",symbolIndex);
             if(symbolIndex == -1)
             {
                 // ERROR , identifier name does not exist
@@ -1148,6 +1148,7 @@ void STATEMENT()
             if(TOKEN != endsym)
             {
                 //ERROR, end token expected, missing token.
+                printf("False Exit\n");
                 exit(0);
             }
             printf("exito\n");
@@ -1263,19 +1264,17 @@ void STATEMENT()
 void EXPRESSION()
 {
     assembly_Node* newCode;
-    // Not handling simple fucking assignment dumbass teacher
-    // 
     
     TERM();    
     if (TOKEN == minussym)
     {
         
         //-------------------------------------------------------
-        newCode = initializeAssemblyRecord(11, 0, 0);
-        printf("%d    NEGATIVE    0    0\n",universalCodeText);
-        assembly_Code[universalCodeText] = newCode;
-        universalCodeText++;
-        universalCodeAddress += 3;
+        // newCode = initializeAssemblyRecord(11, 0, 0);
+        // printf("%d    NEGATIVE    0    0\n",universalCodeText);
+        // assembly_Code[universalCodeText] = newCode;
+        // universalCodeText++;
+        // universalCodeAddress += 3;
         //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
@@ -1310,11 +1309,11 @@ void EXPRESSION()
     {  
         //emit POSITIVE  ??
         //-------------------------------------------------------
-        newCode = initializeAssemblyRecord(12, 0, 0);
-        printf("%d    POSITVE    0    0\n",universalCodeText);
-        assembly_Code[universalCodeText] = newCode;
-        universalCodeText++;
-        universalCodeAddress += 3;
+        // newCode = initializeAssemblyRecord(12, 0, 0);
+        // printf("%d    POSITVE    0    0\n",universalCodeText);
+        // assembly_Code[universalCodeText] = newCode;
+        // universalCodeText++;
+        // universalCodeAddress += 3;
         //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
@@ -1475,8 +1474,9 @@ int SYMBOLTABLECHECK(char* name)
 void TERM()
 {    
     FACTOR();
-
-    TOKEN = Get_TokenInteger();
+    //printf("SemiColon Term Prior? %d\n",TOKEN);
+    //TOKEN = Get_TokenInteger();
+    printf("SemiColon Term? %d\n",TOKEN);
     while (TOKEN == multsym || TOKEN == slashsym)
     {
         if (TOKEN == multsym)
