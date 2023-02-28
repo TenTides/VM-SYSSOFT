@@ -63,7 +63,7 @@ typedef struct{
     int OP; // name up to 11 chars.(identifer)
     int L; // number (ASCII value)
     int M; // L level
-} assembly_Node;
+} assembly_Node; 
 
 // Function Signitures for functions that will insert structs into the arrays below.
 namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
