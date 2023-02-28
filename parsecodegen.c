@@ -42,15 +42,15 @@ void printSymTbl();
 char* global_Lexeme;
 int universialIndex = 0;
 
-int universalCodeText = 1;
-int universalCodeAddress = 3;
+int universalCodeText = 1;// This keeps track of how many opcodes we have (This should be "Line" in the terminal)
+int universalCodeAddress = 3;// This keeps track of the addresses in the assembly text, we start at 3 for the 0 0 0 then we go and read the next opcode
 
-int variableCount = 0;
-int universalSymbolIndex = 1;
+int variableCount = 0;// This keeps track of how many Variables have been stored into the Symbol table 
+int universalSymbolIndex = 1;// This keeps track of what index we must store into next. This also is where we start our search. Searching starts at universal Symbol Index and decrements until 0. 
 
 typedef struct{
-    int kind; //const = 1, var = 2, proc = 3.
-    char name[12]; // name up to 11 chars.(identifer)
+    int kind; //const = 1, var = 2, proc = 3. -- proc is not in use for now. 
+    char name[12]; // name up to 11 chars not including '\0'.(identifer)
     int val; // number (ASCII value)
     int level; // L level -- assume 0 for the most part
     int adr; // M address
@@ -58,15 +58,18 @@ typedef struct{
 
 } namerecord_t;
 
+// This struct will be used to store the opcodes as be "emit" them to the screen for processing later. 
 typedef struct{
     int OP; // name up to 11 chars.(identifer)
     int L; // number (ASCII value)
     int M; // L level
 } assembly_Node;
 
+// Function Signitures for functions that will insert structs into the arrays below.
 namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
 assembly_Node* initializeAssemblyRecord(int OP, int L, int M);
 
+// Arrays that will hold the structs. 
 namerecord_t* symbol_Table[MAX_NAME_TABLE_SIZE];
 assembly_Node* assembly_Code[MAX_NAME_TABLE_SIZE];// this is where we will be storing the the assembly code
 
@@ -902,9 +905,9 @@ void PROGRAM()
 
 void BLOCK()
 {
-    printf("Block Get_TokenInt %d\n",TOKEN);
+    printf("Block Pre Token Grab %d\n",TOKEN);
     TOKEN = Get_TokenInteger();
-    printf("Block %d\n",TOKEN);
+    printf("Block Post Token Grab %d\n",TOKEN);
 
     if(constsym == TOKEN) 
     {
@@ -914,7 +917,7 @@ void BLOCK()
     }
     if(varsym == TOKEN)
     {
-        printf("Var %d\n",TOKEN);
+        printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION();
     }
     else
@@ -1021,7 +1024,7 @@ void CONST_DECLARATION()
 // sudo code?
 void VAR_DECLARATION() 
 {
-    printf("Var enter %d\n",TOKEN);
+    printf("Var enter Area %d\n",TOKEN);
 
     // checking until semicolon
     //TOKEN = Get_TokenInteger();
@@ -1034,7 +1037,7 @@ void VAR_DECLARATION()
         {
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent = GET_Token();
-            printf("Var Name %s\n",nameIdent);
+            printf("Var Identifier Name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , variable with the identifier name already exists
@@ -1087,13 +1090,13 @@ void VAR_DECLARATION()
 
 void STATEMENT()
 {
-    printf("Statement enter %d\n",TOKEN);
+    printf("Statement enter Area %d\n",TOKEN);
     if(TOKEN != 2)
     {
         TOKEN = Get_TokenInteger();
     }
     
-    printf("Statement post %d\n",TOKEN);
+    printf("Statement post Area Grab %d\n",TOKEN);
 
     //MASSIVE SWITCH STATEMENT BEWARE
     int symbolIndex;
@@ -1124,7 +1127,9 @@ void STATEMENT()
                 exit(0);
             } 
             TOKEN = Get_TokenInteger();
-            printf("Statement enter 2 Ident %d\n",TOKEN);
+            printf("Statement Identifier Area  %d\n",TOKEN);
+            printf("Statement Identifier Area Name  %s\n",nameIdent);
+
             if(TOKEN != becomessym)
             {
                 // ERROR , become operator missing, expected for the statement
@@ -1132,9 +1137,9 @@ void STATEMENT()
             } 
             TOKEN = Get_TokenInteger();
 
-            printf("Statement enter 3 NUM SYS %d\n",TOKEN);
+            printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
             EXPRESSION();
-            printf("Post expression %d\n",TOKEN);
+            printf("Statement Identifier Area Post Expression %d\n",TOKEN);
 
             M = symbol_Table[symbolIndex]->adr;
             newCode = initializeAssemblyRecord(4, 0, M);
@@ -1148,10 +1153,10 @@ void STATEMENT()
         case beginsym:
             while(1)
             {
-                printf("Statement enter Begin %d\n",TOKEN);
+                printf("Statement enter in Begin %d\n",TOKEN);
                 TOKEN = Get_TokenInteger();
                 STATEMENT();
-                printf("Statement Post Begin  %d\n",TOKEN);
+                printf("Statement Post  in Begin  %d\n",TOKEN);
 
                 if(TOKEN != semicolonsym)
                 {
@@ -1161,7 +1166,7 @@ void STATEMENT()
             if(TOKEN != endsym)
             {
                 //ERROR, end token expected, missing token.
-                printf("BINGO BONGO NO END\n");
+                printf("False Exit\n");
                 exit(0);
             }
             printf("exito\n");
@@ -1175,49 +1180,49 @@ void STATEMENT()
             // emit jpc, add to assembly code struct array
 
             jpcIdx = universalCodeAddress;
-            M = jpcIdx;
-            newCode = initializeAssemblyRecord(8, 0, M);
-            printf("%d    JPC    0    %d\n",universalCodeText,M);
+            newCode = initializeAssemblyRecord(8, 0, 0);
+            printf("%d    JPC    0    0\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
-
+        
             if(TOKEN != thensym)
             {
                 //ERROR, then token expected, missing token.
                 exit(0);
             }
             STATEMENT();
+            assembly_Code[jpcIdx]->M = universalCodeText;
             //code[jpcIdx].M = current code index
             break;
     //-----------------------------------------------------------------------------------------
         case whilesym://FIXXXXXX MEEE!!!!!! look at pg 24 of newest slides
+            jpcIdx =  universalCodeAddress;
             TOKEN = Get_TokenInteger();
-            int loopIdx =  universalCodeAddress;
             CONDITION();
+            int loopIdx =  universalCodeAddress;
             if(TOKEN != dosym)
             {
                 //ERROR, do token expected, missing token.
                 exit(0);
             }
             TOKEN = Get_TokenInteger();
-            jpcIdx =  universalCodeAddress;
-            // emit jpc, add to assembly code struct array
-            M = jpcIdx;
-            newCode = initializeAssemblyRecord(8, 0, jpcIdx);
-            printf("%d    JPC    0    %d\n",universalCodeText,M);
-            assembly_Code[universalCodeText] = newCode;
-            universalCodeText++;
-            universalCodeAddress += 3;
 
-            STATEMENT();
-            // emit JMP (M = loopIdx) , add to assembly code struct array
-            M = loopIdx;
-            newCode = initializeAssemblyRecord(7, 0, loopIdx);
-            printf("%d    JPM    0    %d\n",universalCodeText,M);
+            newCode = initializeAssemblyRecord(8, 0, 0);
+            printf("%d    JPC    0    0\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
             universalCodeAddress += 3;
+            STATEMENT();
+
+            newCode = initializeAssemblyRecord(7, 0, 0);
+            printf("%d    JMP    0    %d\n",universalCodeText,jpcIdx);
+            assembly_Code[universalCodeText] = newCode;
+            universalCodeText++;
+            universalCodeAddress += 3;
+            //JPC REASSIGNMENT
+            assembly_Code[loopIdx]->M = universalCodeText;
+
             
             // code[jpcIdx].M = current code index 
             break;
@@ -1277,7 +1282,10 @@ void STATEMENT()
 void EXPRESSION()
 {
     assembly_Node* newCode;
-    TERM();    
+    printf("Entering Term with %d\n",TOKEN);
+    TERM();   
+    printf("Leaving Term and entering Expression with %d\n",TOKEN);
+ 
     if (TOKEN == minussym)
     {
         
@@ -1319,6 +1327,7 @@ void EXPRESSION()
     }
     else if (TOKEN == plussym)
     {  
+        printf("Plus area Expression %d\n",TOKEN);
         //emit POSITIVE  ??
         //-------------------------------------------------------
         // newCode = initializeAssemblyRecord(12, 0, 0);
@@ -1327,12 +1336,13 @@ void EXPRESSION()
         // universalCodeText++;
         // universalCodeAddress += 3;
         //-------------------------------------------------------
-        TOKEN = Get_TokenInteger();
+        //TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
         {
             if (TOKEN == plussym) 
             {
                 TOKEN = Get_TokenInteger();
+                printf("Expecting 3 %d\n",TOKEN);
                 TERM();
                 //emit add
                 //-------------------------------------------------------
@@ -1485,10 +1495,11 @@ int SYMBOLTABLECHECK(char* name)
 
 void TERM()
 {    
+    printf("Entering Factor with: %d\n",TOKEN);
     FACTOR();
-
-    TOKEN = Get_TokenInteger();
-    printf("TOKEN SEMI, %d\n",TOKEN);
+    //printf("SemiColon Term Prior? %d\n",TOKEN);
+    //TOKEN = Get_TokenInteger();
+    printf("SemiColon Term Or 4 which is +? %d\n",TOKEN);
     while (TOKEN == multsym || TOKEN == slashsym)
     {
         if (TOKEN == multsym)
@@ -1521,7 +1532,10 @@ void FACTOR()
 {       
     if (TOKEN == identsym)
     {
+        printf("identsym Pre token grab %d\n",TOKEN);
         char* nameIdent = GET_Token();
+        printf("identsym Post Name token grab: %s\n",nameIdent);
+
         int symIdx = SYMBOLTABLECHECK(nameIdent);
         if (symIdx == -1)
         {
@@ -1549,11 +1563,14 @@ void FACTOR()
             universalCodeText++;
             universalCodeAddress += 3;
         }
+        TOKEN = Get_TokenInteger();
     } 
     else if (TOKEN == numbersym)
     {
-        // emit LIT
+        printf("Num Sys Pre token grab %d\n",TOKEN);
         int M = Get_TokenInteger();
+        printf("Num Sys Post token grab %d\n",M);
+
         assembly_Node* newCode = initializeAssemblyRecord(3, 0, M);
         printf("%d    LIT    0    %d\n",universalCodeText,M);
         assembly_Code[universalCodeText] = newCode;
