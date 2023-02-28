@@ -669,10 +669,23 @@ int binarySearch(int arr[], int left, int right, int x) {
 
     > The psuedo code he gave us already takes care of the properly perfoming Recursive Descent parsing with left recursion to avoid infinite recurisve loops. 
 
+    ===================================
+    > Syntax Graphs 
 
+    A way to represent the the function of grammar.
+
+
+    ===================================
+    
+
+    >We can take out emmit positve and negative
+    and he will send out an announcement.
 */
-//==========Functions===========//
 
+
+
+
+//==========Functions===========//
 //  >use a universal index that all the below functions can edit,this will go to the end of codePL
 //  >it will return the NEXT token in code PL
 //  > it should be able to either ignore the variable identifier names to go to the next token, or deal with it directly.
@@ -901,7 +914,7 @@ void BLOCK()
     }
     if(varsym == TOKEN)
     {
-        printf("Block Var %d\n",TOKEN);
+        printf("Var %d\n",TOKEN);
         VAR_DECLARATION();
     }
     else
@@ -1008,7 +1021,7 @@ void CONST_DECLARATION()
 // sudo code?
 void VAR_DECLARATION() 
 {
-    printf("Block Var enter %d\n",TOKEN);
+    printf("Var enter %d\n",TOKEN);
 
     // checking until semicolon
     //TOKEN = Get_TokenInteger();
@@ -1021,7 +1034,7 @@ void VAR_DECLARATION()
         {
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent = GET_Token();
-            printf("Block Var name %s\n",nameIdent);
+            printf("Var Name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
                 // ERROR , variable with the identifier name already exists
@@ -1093,12 +1106,12 @@ void STATEMENT()
     //-----------------------------------------------------------------------------------------
         case identsym:
             // Grab identifier, function that grabs and saves variable  
-            printf("Statement enter Ident %d\n",TOKEN);
+            //printf("Statement enter Ident %d\n",TOKEN);
             nameIdent = GET_Token();
-            printf("Statement name Ident %s\n",nameIdent);
+            //printf("Statement name Ident %s\n",nameIdent);
             symbolIndex = SYMBOLTABLECHECK(nameIdent);
             //printSymTbl();
-            printf("post symbolTable Check %d\n",symbolIndex);
+            //printf("post symbolTable Check %d\n",symbolIndex);
             if(symbolIndex == -1)
             {
                 // ERROR , identifier name does not exist
@@ -1118,9 +1131,9 @@ void STATEMENT()
                 exit(0); 
             } 
             TOKEN = Get_TokenInteger();
+
             printf("Statement enter 3 NUM SYS %d\n",TOKEN);
             EXPRESSION();
-            // Store the assembly code into the array 
             printf("Post expression %d\n",TOKEN);
 
             M = symbol_Table[symbolIndex]->adr;
@@ -1148,6 +1161,7 @@ void STATEMENT()
             if(TOKEN != endsym)
             {
                 //ERROR, end token expected, missing token.
+                printf("BINGO BONGO NO END\n");
                 exit(0);
             }
             printf("exito\n");
@@ -1155,7 +1169,7 @@ void STATEMENT()
             //TOKEN = Get_TokenInteger();
             break;
     //-----------------------------------------------------------------------------------------
-        case ifsym:
+        case ifsym://FIXXXXXX MEEE!!!!!! look at pg 22 of newest slides 000
             TOKEN = Get_TokenInteger();
             CONDITION();
             // emit jpc, add to assembly code struct array
@@ -1177,7 +1191,7 @@ void STATEMENT()
             //code[jpcIdx].M = current code index
             break;
     //-----------------------------------------------------------------------------------------
-        case whilesym:
+        case whilesym://FIXXXXXX MEEE!!!!!! look at pg 24 of newest slides
             TOKEN = Get_TokenInteger();
             int loopIdx =  universalCodeAddress;
             CONDITION();
@@ -1263,19 +1277,16 @@ void STATEMENT()
 void EXPRESSION()
 {
     assembly_Node* newCode;
-    // Not handling simple fucking assignment dumbass teacher
-    // 
-    
     TERM();    
     if (TOKEN == minussym)
     {
         
         //-------------------------------------------------------
-        newCode = initializeAssemblyRecord(11, 0, 0);
-        printf("%d    NEGATIVE    0    0\n",universalCodeText);
-        assembly_Code[universalCodeText] = newCode;
-        universalCodeText++;
-        universalCodeAddress += 3;
+        // newCode = initializeAssemblyRecord(11, 0, 0);
+        // printf("%d    NEGATIVE    0    0\n",universalCodeText);
+        // assembly_Code[universalCodeText] = newCode;
+        // universalCodeText++;
+        // universalCodeAddress += 3;
         //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
@@ -1310,11 +1321,11 @@ void EXPRESSION()
     {  
         //emit POSITIVE  ??
         //-------------------------------------------------------
-        newCode = initializeAssemblyRecord(12, 0, 0);
-        printf("%d    POSITVE    0    0\n",universalCodeText);
-        assembly_Code[universalCodeText] = newCode;
-        universalCodeText++;
-        universalCodeAddress += 3;
+        // newCode = initializeAssemblyRecord(12, 0, 0);
+        // printf("%d    POSITVE    0    0\n",universalCodeText);
+        // assembly_Code[universalCodeText] = newCode;
+        // universalCodeText++;
+        // universalCodeAddress += 3;
         //-------------------------------------------------------
         TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
@@ -1477,6 +1488,7 @@ void TERM()
     FACTOR();
 
     TOKEN = Get_TokenInteger();
+    printf("TOKEN SEMI, %d\n",TOKEN);
     while (TOKEN == multsym || TOKEN == slashsym)
     {
         if (TOKEN == multsym)
