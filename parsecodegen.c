@@ -1316,7 +1316,7 @@ void EXPRESSION()
  
     if (TOKEN == minussym)
     {
-        
+        printf("minus if statement\n");
         //-------------------------------------------------------
         // newCode = initializeAssemblyRecord(11, 0, 0);
         // printf("%d    NEGATIVE    0    0\n",universalCodeText);
@@ -1324,7 +1324,6 @@ void EXPRESSION()
         // universalCodeText++;
         // universalCodeAddress += 3;
         //-------------------------------------------------------
-        TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
         {
             if (TOKEN == plussym) 
@@ -1340,6 +1339,7 @@ void EXPRESSION()
             }
             else 
             {
+                printf("entering else statement\n");
                 TOKEN = Get_TokenInteger();
                 TERM();
                 //emit SUB
@@ -1364,7 +1364,6 @@ void EXPRESSION()
         // universalCodeText++;
         // universalCodeAddress += 3;
         //-------------------------------------------------------
-        //TOKEN = Get_TokenInteger();
         while (TOKEN == plussym || TOKEN == minussym)
         {
             if (TOKEN == plussym) 
