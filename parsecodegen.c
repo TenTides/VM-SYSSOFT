@@ -35,6 +35,8 @@ void CONDITION();
 void TERM();
 void FACTOR();
 void printSymTbl();
+void printAssCodes();
+char* assemblyConvertOP(int OP,int M);
 
 //==========================================================================================================================
 //==========================================================================================================================
@@ -882,7 +884,15 @@ void PROGRAM()
 {
     namerecord_t* newCode = initializeNameRecord(0," ", 0, 0, 0, 0);
     symbol_Table[0] = newCode;
-    printSymTbl();
+
+    assembly_Node* newAssCode;
+    newAssCode = initializeAssemblyRecord(7, 0, 3);
+    printf("%d    JMP    0    3\n\n",universalCodeText);
+    assembly_Code[universalCodeText] = newAssCode;
+    universalCodeText++;
+    universalCodeAddress += 3;
+
+    //printSymTbl();
     printf("Program %d\n",TOKEN);
 
     BLOCK();
@@ -894,16 +904,23 @@ void PROGRAM()
     printf("Block post token grab %d\n", TOKEN);
     if (TOKEN != periodsym)
     {
-        // ERROR NOT A PERIOD AT THE END
+        printf("Error: program must end with period\n");
         exit(0);
     }
     else
     {
         printf("YAYYYY WE MADE IT TO THE PERIOD EXTIO!!!!\n");
         // Store Assembly  SYS END is added
+        assembly_Node* newAssCode;
+        newAssCode = initializeAssemblyRecord(9, 0, 3);
+        printf("%d    SYS    0    3\n",universalCodeText);
+        assembly_Code[universalCodeText] = newAssCode;
+        universalCodeText++;
+        universalCodeAddress += 3;
+
         //Print Assembly code
-        
-        //SymbolTablePrint();
+        printAssCodes();        
+        printSymTbl();
     }
 }
 
@@ -924,12 +941,11 @@ void BLOCK()
         printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION();
     }
-    else
-    {
-        // NO EQUALS, INVALID TOKEN 
-        //Error
-        exit(0); 
-    }
+    // else
+    // {
+    //     //Error
+    //     exit(0); 
+    // }
     
     // When working with the stack we must reserve three indecies for Static Link, Dynamic Link, and Return Address. 
     // Stack pointer should be at 3 now. 
@@ -972,7 +988,7 @@ void CONST_DECLARATION()
             char* nameIdent = GET_Token();
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
-                // ERROR , constant with the identifier name already exists
+                printf("Error: symbol name has already been declared\n");
                 exit(0);
             }
             //create named object for record
@@ -1007,7 +1023,7 @@ void CONST_DECLARATION()
                     }
                     else
                     {
-                        // SEMICOLON MISSING, INVALID TOKEN 
+                        printf("Error: constant and variable declarations must be followed by a semicolon\n");
                         //Error
                         exit(0); 
                     }
@@ -1015,20 +1031,21 @@ void CONST_DECLARATION()
                 else
                 {
                     // NUMBER MISSING, INVALID TOKEN 
+                    printf("Error: constants must be assigned an integer value\n");
                     //Error
                     exit(0); 
                 }
             }
             else
             {
-                // NO EQUALS, INVALID TOKEN 
+                printf("Error: constants must be assigned with =\n");
                 //Error
                 exit(0); 
             }
         }
         else
         {
-            //NO IDENTIFIER, INVALID TOKEN 
+            printf("Error: const, var, and read keywords must be followed by identifier\n");
             //Error
             exit(0); 
         }
@@ -1060,7 +1077,7 @@ void VAR_DECLARATION()
             printf("Var Identifier Name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
-                // ERROR , variable with the identifier name already exists
+                printf("Error: symbol name has already been declared\n");
                 exit(0);
             }
             // Create named object for record
@@ -1087,7 +1104,7 @@ void VAR_DECLARATION()
             }
             else
             {
-                // SEMICOLON MISSING, INVALID TOKEN 
+                printf("Error: constant and variable declarations must be followed by a semicolon\n");
                 //Error
                 exit(0);
             }
@@ -1095,6 +1112,7 @@ void VAR_DECLARATION()
         else
         {
             //NO IDENTIFIER, INVALID TOKEN 
+            printf("Error: const, var, and read keywords must be followed by identifier\n");
             //Error
             exit(0);
         }
@@ -1139,7 +1157,7 @@ void STATEMENT()
             //printf("post symbolTable Check %d\n",symbolIndex);
             if(symbolIndex == -1)
             {
-                // ERROR , identifier name does not exist
+                printf("Error: undeclared identifier\n");
                 exit(0);
                 //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
             }
@@ -1155,6 +1173,7 @@ void STATEMENT()
             if(TOKEN != becomessym)
             {
                 // ERROR , become operator missing, expected for the statement
+                printf("Error: assignment statements must use :=\n");
                 exit(0); 
             } 
             TOKEN = Get_TokenInteger();
@@ -1187,8 +1206,8 @@ void STATEMENT()
             }
             if(TOKEN != endsym)
             {
-                //ERROR, end token expected, missing token.
-                printf("False Exit\n");
+                printf("Error: begin must be followed by end\n");
+                //printf("False Exit\n");
                 exit(0);
             }
             // !!! since we exito before going back to Block, our program does not yet check for whether there is a period at the end. 
@@ -1211,7 +1230,7 @@ void STATEMENT()
         
             if(TOKEN != thensym)
             {
-                //ERROR, then token expected, missing token.
+                printf("Error: if must be followed by then\n");
                 exit(0);
             }
             STATEMENT();
@@ -1226,7 +1245,7 @@ void STATEMENT()
             int loopIdx =  universalCodeAddress;
             if(TOKEN != dosym)
             {
-                //ERROR, do token expected, missing token.
+                printf("Error: while must be followed by do\n");
                 exit(0);
             }
             TOKEN = Get_TokenInteger();
@@ -1256,13 +1275,13 @@ void STATEMENT()
             symbolIndex = SYMBOLTABLECHECK(nameIdent);
             if(symbolIndex == -1)
             {
-                // ERROR , identifier name does not exist
+                printf("Error: undeclared identifier\n");
                 exit(0);
                 //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
             }
             if(symbol_Table[symbolIndex]->kind != 2)
             {
-                // ERROR , identifier found is not of VAR type
+                printf("Error: only variable values may be altered\n");
                 exit(0);
             } 
             TOKEN = Get_TokenInteger();
@@ -1300,7 +1319,7 @@ void STATEMENT()
             break;
     //-----------------------------------------------------------------------------------------
         default:
-            //ERROR, token isn't one of the above ^^^
+            printf("Error: condition must contain comparison operator\n");
             exit(0);
             break;
     //-----------------------------------------------------------------------------------------
@@ -1414,13 +1433,12 @@ void CONDITION()
         EXPRESSION();
         // emit ODD, 
         //-------------------------------------------------------
-        newCode = initializeAssemblyRecord(10, 0, 0);
-        printf("%d    ODD    0    0\n",universalCodeText);
+        newCode = initializeAssemblyRecord(2, 0, 11);
+        printf("%d    ODD    0    11\n",universalCodeText);
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
         universalCodeAddress += 3;
         //-------------------------------------------------------
-        // No odd code in the assembly index, what goes here?
 
     }
     else
@@ -1491,7 +1509,7 @@ void CONDITION()
                 universalCodeAddress += 3;
                 break;
             default:
-                //ERROR, token isn't one of the above ^^^
+                printf("Error: condition must contain comparison operator\n");
                 exit(0);
                 break;
         //-----------------------------------------------------------------------------------------
@@ -1567,7 +1585,7 @@ void FACTOR()
         printf("identsym Post Name token grab: %s\n",nameIdent);
 
         int symIdx = SYMBOLTABLECHECK(nameIdent);
-        printSymTbl();
+        //printSymTbl();
         if (symIdx == -1)
         {
             // ERROR identifier does not exist withiin the symbolTable
@@ -1617,13 +1635,15 @@ void FACTOR()
         EXPRESSION();
         if (TOKEN != rparentsym)
         {
-            // ERROR no right paranthesis
+            printf("Error: right parenthesis must follow left parenthesis\n");
+            exit(0);
         }
         TOKEN = Get_TokenInteger();
     }
     else
     {
-        // ERROR
+        printf("Error: arithmetic equations must contain operands, parentheses, numbers, or symbols\n");
+        exit(0);
     }
 }
 
@@ -1647,7 +1667,110 @@ void printSymTbl()
     }
     printf("\n");
 }
-
+void printAssCodes()
+{
+    printf("\nLine    OP    L    M\n");
+    for (int i = 0; i < universalCodeText; i++)
+    {
+        char* temp = assemblyConvertOP(assembly_Code[i]->OP,assembly_Code[i]->M);
+        printf("   %d    %s    %d    %d\n",i, temp, assembly_Code[i]->L, assembly_Code[i]->M);
+        free(temp);
+    }
+    printf("\n");
+}
+char* assemblyConvertOP(int OP,int M)
+{
+    char* result = malloc(sizeof(char)*4);
+    switch(OP) {
+        case 1:
+            strcpy(result, "LIT");
+          break;
+        case 2: 
+          switch(M) {
+            case 0:
+              strcpy(result, "RTN");
+              break;
+            //ADD addition
+            case 1:
+              strcpy(result, "ADD");
+              break;
+            //SUB subtraction
+            case 2:
+              strcpy(result, "SUB");
+              break;
+            //MUL multiplication
+            case 3:
+              strcpy(result, "MUL");
+              break;
+            //DIV division
+            case 4:
+              strcpy(result, "DIV");
+              break;
+            //EQL equality 
+            case 5:
+              strcpy(result, "EQL");           
+              break;
+            //NEQ not equal
+            case 6:
+              strcpy(result, "NEQ");
+              break;
+            //LSS less than
+            case 7:
+              strcpy(result, "LSS");
+              break;
+            //LEQ less than or equal to
+            case 8:
+              strcpy(result, "LEQ");
+              break;
+            //GTR greater than 
+            case 9:
+              strcpy(result, "GTR");
+              break;
+            //GEQ greater than or equal to
+            case 10:
+              strcpy(result, "GEQ");
+              break;
+            case 11:
+              strcpy(result, "ODD");
+              break;
+          }
+          break;
+        case 3:
+          strcpy(result, "LOD");
+          break;
+        case 4:
+          strcpy(result, "STO");
+          break;
+        case 5:
+          strcpy(result, "CAL");
+          break;
+        case 6:
+          strcpy(result, "INC");
+          break;
+        case 7:
+          strcpy(result, "JMP");
+          break;
+        case 8:
+          strcpy(result, "JPC");
+          break;
+        case 9:
+          if(M == 1)
+          {
+            strcpy(result, "SOU");
+            break;
+          }
+          else if(M == 2)
+          {
+            strcpy(result, "SIN");
+            break;
+          }
+          if(M == 3)
+          {
+            strcpy(result, "EOP");
+          }
+      }
+    return result;
+} 
 assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
 {
     assembly_Node* new_record =  malloc(sizeof(assembly_Node));
@@ -1738,6 +1861,12 @@ int main(int argc, char* argv[]) {
                     continue;
                 }
 
+                if (strcmp(token, "0") == 0) {
+                    EndProgramFlag = 0;
+                    printf("%-9s%5s\n", ":", " Error: symbol invalid when not followed by =");
+                    memset(token, '\0', 1000);
+                    continue;
+                }
                 if (strcmp(token, "20") == 0) {
                     // printf("we've enterd the token, := if statement\n");
                     memset(token, '\0', 1000);
@@ -1764,7 +1893,7 @@ int main(int argc, char* argv[]) {
 
                 if (strcmp(token, "-5") == 0) {
                     EndProgramFlag = 0;
-                    printf("%-9s%5s\n", "/*", "Unresolved In Line Comment Error");
+                    printf("%-9s%5s\n", "/*", "Error: Unresolved In Line Comment Error");
                     memset(token, '\0', 1000);
                     continue;
                 }
@@ -1777,7 +1906,7 @@ int main(int argc, char* argv[]) {
                     if(valid == -3)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, " Invalid Number, exceeds maxDigits of 5");
+                        printf("%-9s%5s\n", word, "Error: Invalid Number, exceeds max digits of 5");
                     }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
@@ -1792,7 +1921,7 @@ int main(int argc, char* argv[]) {
                     if(strlen(word) == 1 && characterInSymbolTableBS(word[0],symbolTableOrdered) == -1)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, " (Invalid Symbol)");
+                        printf("%-9s%5s\n", word, "Error:  Invalid Symbol");
                     }
                     else
                     {
@@ -1800,12 +1929,12 @@ int main(int argc, char* argv[]) {
                         if(valid == -1)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, " Invalid Identifier, exceeds maxLength of 11");
+                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, exceeds max length of 11");
                         }
                         else if (valid == -2)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, " Invalid Identifier, starts with an Integer");
+                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, starts with an Integer");
                         }
                     }
                     memset(token, '\0', 1000);
@@ -1841,10 +1970,6 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-
-        //printf("CodePL:\n \t%s\n", codePL);// DONT FORGET TO DELETE ME LATER
-
-        // creating Global Lexeme. 
         length = strlen(codePL);
         global_Lexeme = (char*) malloc(sizeof(char)* (length));
         strcpy(global_Lexeme,codePL);
