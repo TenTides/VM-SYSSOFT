@@ -1,2 +1,5 @@
 var a, b,c; /* populate the symbol table */
 a := b + c.
+12345xxxxx 
+> > > > > >
+< < < < < <

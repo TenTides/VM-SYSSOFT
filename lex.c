@@ -14,6 +14,8 @@ int characterInSymbolTableBS(char c, char* symTbl);
 int isStatementReserved(char* word);            
 char* subString(int start, int end,char* line);  
 int isWordValid(char* word);
+char* assemblyConvertOP(int OP,int M);
+
 
 typedef enum {  
     nulsym = 1, //was skipsys, but skip isn't in PL/0, this must be null
@@ -56,8 +58,9 @@ char* resWords[] = {"null", "odd", "begin", "end", "if", "then", "while", "do", 
 int resWordsTokens[] = {nulsym, oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym,  writesym , readsym , elsesym};   
 //Symbol table is in order of ascii value, can be used with binary search
 char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
-                        '=', '>','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
-                        'v', 'w', 'x', 'y', 'z'};   
+                        '=', '>','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+                        'X', 'Y', 'Z','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+                        'v', 'w', 'x', 'y', 'z'};      
 
 
 
@@ -151,6 +154,7 @@ char* lexicalParse(char* codeLine)
                     // find what special char token it corresponds to
                     specialIndex = characterInSymbolTableBS(codeLine[start], specialTerminalSymbolsOrdered);
                     token =  specialTerminalSymbolsTokens[specialIndex];
+                    //printf("TOKEN LOOKING FOR 13 %d\n",token);
                     // if(specialIndex == -1)
                     // {
                     //     token  = -1;
@@ -411,6 +415,100 @@ int binarySearch(int arr[], int left, int right, int x) {
     return -1;
 }
 
+char* assemblyConvertOP(int OP,int M)
+{
+    char* result = malloc(sizeof(char)*4);
+    result[0] = '\0';
+    switch(OP) {
+        case 1:
+            strcpy(result, "LIT");
+          break;
+        case 2: 
+          switch(M) {
+            case 0:
+              strcpy(result, "RTN");
+              break;
+            //ADD addition
+            case 1:
+              strcpy(result, "ADD");
+              break;
+            //SUB subtraction
+            case 2:
+              strcpy(result, "SUB");
+              break;
+            //MUL multiplication
+            case 3:
+              strcpy(result, "MUL");
+              break;
+            //DIV division
+            case 4:
+              strcpy(result, "DIV");
+              break;
+            //EQL equality 
+            case 5:
+              strcpy(result, "EQL");           
+              break;
+            //NEQ not equal
+            case 6:
+              strcpy(result, "NEQ");
+              break;
+            //LSS less than
+            case 7:
+              strcpy(result, "LSS");
+              break;
+            //LEQ less than or equal to
+            case 8:
+              strcpy(result, "LEQ");
+              break;
+            //GTR greater than 
+            case 9:
+              strcpy(result, "GTR");
+              break;
+            //GEQ greater than or equal to
+            case 10:
+              strcpy(result, "GEQ");
+              break;
+            case 11:
+              strcpy(result, "ODD");
+              break;
+          }
+          break;
+        case 3:
+          strcpy(result, "LOD");
+          break;
+        case 4:
+          strcpy(result, "STO");
+          break;
+        case 5:
+          strcpy(result, "CAL");
+          break;
+        case 6:
+          strcpy(result, "INC");
+          break;
+        case 7:
+          strcpy(result, "JMP");
+          break;
+        case 8:
+          strcpy(result, "JPC");
+          break;
+        case 9:
+          if(M == 1)
+          {
+            strcpy(result, "SOU");
+            break;
+          }
+          else if(M == 2)
+          {
+            strcpy(result, "SIN");
+            break;
+          }
+          if(M == 3)
+          {
+            strcpy(result, "EOP");
+          }
+      }
+    return result;
+} 
 
 void printSourceCode(char* filename) {
 
@@ -717,7 +815,13 @@ int main(int argc, char *argv[])
                 memset(token, '\0', 1000);
                 continue;
             }
-
+            if(strcmp(token, "13") == 0)
+            {
+                strcat(EditedcodePL, token);
+                strcat(EditedcodePL, " ");
+                memset(token, '\0', 1000);
+                continue;
+            }
             if (strcmp(token, "14") == 0) {
                 // printf("we've enterd the token, >= if statement\n");
                 strcat(EditedcodePL, token);
@@ -829,18 +933,19 @@ int main(int argc, char *argv[])
                 continue;
             }
             // printf("PASSING\n");
-            if(strcmp(token, "13") == 0)
-            {
-                memset(token, '\0', 1000);
-                continue;
-            }
-
             memset(token, '\0', 1000);
             memset(word, '\0', 1000);
             continue;
         }
 
         printf("Lexeme List:\n%s\n\n",EditedcodePL);
+        //printf("Num Check\n");
+
+        // int d = characterInSymbolTableBS('>',specialTerminalSymbolsOrdered);
+        // printf("Num %d\n", specialTerminalSymbolsTokens[d]);
+        //printf("Num Check %s\n",codePL);
+        //printf("odd : %s\n",assemblyConvertOP(2,11));
+
         free(token);
         free(word);
         free(codePL);

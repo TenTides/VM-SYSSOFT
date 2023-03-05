@@ -888,9 +888,9 @@ void PROGRAM()
     assembly_Node* newAssCode;
     newAssCode = initializeAssemblyRecord(7, 0, 3);
     printf("%d    JMP    0    3\n\n",universalCodeText);
-    assembly_Code[universalCodeText] = newAssCode;
-    universalCodeText++;
-    universalCodeAddress += 3;
+    assembly_Code[0] = newAssCode;
+    //universalCodeText++;
+    //universalCodeAddress += 3;
 
     //printSymTbl();
     printf("Program %d\n",TOKEN);
@@ -1197,7 +1197,7 @@ void STATEMENT()
                 printf("Statement enter in Begin %d\n",TOKEN);
                 TOKEN = Get_TokenInteger();
                 STATEMENT();
-                printf("Statement Post  in Begin  %d\n",TOKEN);
+                printf("Statement Post in Begin  %d\n",TOKEN);
 
                 if(TOKEN != semicolonsym)
                 {
@@ -1657,29 +1657,35 @@ namerecord_t* initializeNameRecord(int _kind, char* _name, int _val, int _level,
     new_record->mark = _mark;
     return new_record;
 }
+
 void printSymTbl()
 {
     printf("\nIndex | Kind | Name | Value | Level | Address | Mark \n");
     for (int i = 0; i < universalSymbolIndex; i++)
     {
-        printf("  %d      %d     '%s'      %d       %d      %d         %d\n",i, symbol_Table[i]->kind, symbol_Table[i]->name, symbol_Table[i]->val,symbol_Table[i]->level, symbol_Table[i]->adr, symbol_Table[i]->mark);
+        printf("  %d      %d     '%s'      %d       %d      %d         %d\n",i, symbol_Table[i]->kind, symbol_Table[i]->name, symbol_Table[i]->val,symbol_Table[i]->level, symbol_Table[i]->adr, 1);
     }
     printf("\n");
 }
+
+
 void printAssCodes()
 {
-    printf("\nLine    OP    L    M\n");
+    printf("\nLine    OP     L    M\n");
     for (int i = 0; i < universalCodeText; i++)
     {
         char* temp = assemblyConvertOP(assembly_Code[i]->OP,assembly_Code[i]->M);
-        printf("   %d    %s    %d    %d\n",i, temp, assembly_Code[i]->L, assembly_Code[i]->M);
+        printf("%d       %s    %d    %d\n",i, temp, assembly_Code[i]->L, assembly_Code[i]->M);
         free(temp);
     }
     printf("\n");
 }
+
+
 char* assemblyConvertOP(int OP,int M)
 {
     char* result = malloc(sizeof(char)*4);
+    result[0] = '\0';
     switch(OP) {
         case 1:
             strcpy(result, "LIT");
