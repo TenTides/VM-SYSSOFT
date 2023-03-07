@@ -1,0 +1,5 @@
+var x, y, z;
+begin
+    z := 34        /* <--- what kind of error is this supposed to give? */
+    y := z / 54
+end.
