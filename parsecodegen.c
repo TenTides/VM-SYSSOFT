@@ -988,6 +988,7 @@ void CONST_DECLARATION()
             char* nameIdent = GET_Token();
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
+                // VERIFIED
                 printf("Error: symbol name has already been declared\n");
                 exit(0);
             }
@@ -1023,14 +1024,15 @@ void CONST_DECLARATION()
                     }
                     else
                     {
+                        // VERIFIED
                         printf("Error: constant and variable declarations must be followed by a semicolon\n");
-                        //Error
                         exit(0); 
                     }
                 }
                 else
                 {
                     // NUMBER MISSING, INVALID TOKEN 
+                    // VERIFIED
                     printf("Error: constants must be assigned an integer value\n");
                     //Error
                     exit(0); 
@@ -1038,6 +1040,7 @@ void CONST_DECLARATION()
             }
             else
             {
+                // VERIFIED
                 printf("Error: constants must be assigned with =\n");
                 //Error
                 exit(0); 
@@ -1077,6 +1080,7 @@ void VAR_DECLARATION()
             printf("Var Identifier Name %s\n",nameIdent);
             if(SYMBOLTABLECHECK(nameIdent) != -1)
             {
+                // VERIFIED
                 printf("Error: symbol name has already been declared\n");
                 exit(0);
             }
@@ -1104,6 +1108,7 @@ void VAR_DECLARATION()
             }
             else
             {
+                // VERIFIED
                 printf("Error: constant and variable declarations must be followed by a semicolon\n");
                 //Error
                 exit(0);
@@ -1112,6 +1117,7 @@ void VAR_DECLARATION()
         else
         {
             //NO IDENTIFIER, INVALID TOKEN 
+            // VERIFIED
             printf("Error: const, var, and read keywords must be followed by identifier\n");
             //Error
             exit(0);
@@ -1157,6 +1163,7 @@ void STATEMENT()
             //printf("post symbolTable Check %d\n",symbolIndex);
             if(symbolIndex == -1)
             {
+                //VERIFIED
                 printf("Error: undeclared identifier\n");
                 exit(0);
                 //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
@@ -1173,6 +1180,7 @@ void STATEMENT()
             if(TOKEN != becomessym)
             {
                 // ERROR , become operator missing, expected for the statement
+                // VERIFIED
                 printf("Error: assignment statements must use :=\n");
                 exit(0); 
             } 
@@ -1194,7 +1202,11 @@ void STATEMENT()
         case beginsym:
             while(1)
             {
-                printf("Statement enter in Begin %d\n",TOKEN);
+                if (TOKEN == beginsym)
+                    printf("Statement enter in Begin %d\n",TOKEN);
+                else 
+                    printf("Statement re-entering loop in Begin %d\n",TOKEN);
+
                 TOKEN = Get_TokenInteger();
                 STATEMENT();
                 printf("Statement Post in Begin  %d\n",TOKEN);
@@ -1588,6 +1600,9 @@ void FACTOR()
         if (symIdx == -1)
         {
             // ERROR identifier does not exist withiin the symbolTable
+            // VERIFIED
+            printf("Error: Identifier has not been declared\n");
+            exit(0);
         }
         else if (symbol_Table[symIdx]->kind == 1) // 1 = const
         {
@@ -1620,7 +1635,7 @@ void FACTOR()
         int M = Get_TokenInteger();
         printf("Num Sys Post token grab %d\n",M);
 
-        assembly_Node* newCode = initializeAssemblyRecord(3, 0, M);
+        assembly_Node* newCode = initializeAssemblyRecord(1, 0, M); // changed this from 3 to 1
         printf("%d    LIT    0    %d\n",universalCodeText,M);
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
