@@ -1800,6 +1800,24 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
     return new_record;
 }
 
+void outputAssemblyToFile()
+{
+    printf("\nPRINTING TO FILE ...\n");
+    FILE*  file = fopen("output.txt", "w");
+    if (file == NULL) {
+        printf("Failed to pen File!\n");
+        return;
+    }
+
+
+    for (int i = 0; i < universalCodeText; i++)
+    {
+        fprintf(file, "%d %d %d\n",assembly_Code[i]->OP, assembly_Code[i]->L, assembly_Code[i]->M);
+    }
+
+    fclose(file);
+}
+
 //==========MAIN===========//
 int main(int argc, char* argv[]) {
 //  HW2 MAIN START //
@@ -2011,7 +2029,8 @@ int main(int argc, char* argv[]) {
     //     temp = GET_Token();
     // }
     PROGRAM();
-    
+    outputAssemblyToFile();
+
     //===================HW2 MAIN END==================//
     free(global_Lexeme);
     free(codePL);   

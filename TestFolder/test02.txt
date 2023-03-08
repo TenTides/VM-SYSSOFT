@@ -1,5 +1,5 @@
 var x, y, z;
 begin
     z := 34;
-    y := z / 54
+    y := z + 54
 end.
