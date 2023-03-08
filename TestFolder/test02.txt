@@ -1,5 +1,5 @@
 var x, y, z;
 begin
-    z := 34        /* <--- what kind of error is this supposed to give? */
+    z := 34;
     y := z / 54
 end.
