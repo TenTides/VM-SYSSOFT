@@ -37,6 +37,8 @@ void FACTOR();
 void printSymTbl();
 void printAssCodes();
 char* assemblyConvertOP(int OP,int M);
+void freeAll();
+
 
 //==========================================================================================================================
 //==========================================================================================================================
@@ -454,6 +456,25 @@ int binarySearch(int arr[], int left, int right, int x) {
     // If we reach here, then element was not present
     return -1;
 }
+void freeAll()
+{
+    for(int i = 0; i<MAX_NAME_TABLE_SIZE;i++)
+    {
+        if(symbol_Table[i] != NULL)
+        {
+            free(symbol_Table[i]);
+        }
+        if(assembly_Code[i] != NULL)
+        {
+            free(assembly_Code[i]);
+        }
+        if(assembly_Code[i] == NULL && symbol_Table[i] == NULL)
+        {
+            break;
+        }
+    }
+}
+
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
@@ -1923,7 +1944,6 @@ int main(int argc, char* argv[]) {
                     memset(token, '\0', 1000);
                     continue;
                 }
-
                 if (strcmp(token, "14") == 0) {
                     // printf("we've enterd the token, >= if statement\n");
                     memset(token, '\0', 1000);
@@ -2002,11 +2022,6 @@ int main(int argc, char* argv[]) {
                     memset(word, '\0', 1000);
                     continue;
                 }
-                if(strcmp(token, "13") == 0)
-                {
-                    memset(token, '\0', 1000);
-                    continue;
-                }
             }
         }
         length = strlen(codePL);
@@ -2031,6 +2046,7 @@ int main(int argc, char* argv[]) {
     // }
     PROGRAM();
     outputAssemblyToFile();
+    freeAll();
 
     //===================HW2 MAIN END==================//
     free(global_Lexeme);
