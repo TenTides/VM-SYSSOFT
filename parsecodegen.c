@@ -1802,7 +1802,7 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
 
 void outputAssemblyToFile()
 {
-    printf("\nPRINTING TO FILE ...\n");
+    printf("\nPRINTING TO \"output.txt\" ...\n");
     FILE*  file = fopen("output.txt", "w");
     if (file == NULL) {
         printf("Failed to pen File!\n");
@@ -1816,6 +1816,7 @@ void outputAssemblyToFile()
     }
 
     fclose(file);
+    printf("SUCCESS!\n");
 }
 
 //==========MAIN===========//
