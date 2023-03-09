@@ -885,20 +885,24 @@ int Get_TokenInteger()
 {
     //printf("GET_TokenInteger enter\n ");
     char* temp = GET_Token();
-    //printf("Get token: %s\n", temp);
-    int stringLength = strlen(temp);
-    //printf("Get token len: %d\n", stringLength);
-
-    for(int i = 0 ; i<stringLength;i++)
+    if(temp != NULL)
     {
-        if(isdigit(temp[i]) == 0)
+        //printf("Get token: %s\n", temp);
+        int stringLength = strlen(temp);
+        //printf("Get token len: %d\n", stringLength);
+
+        for(int i = 0 ; i<stringLength;i++)
         {
-            return -10;
+            if(isdigit(temp[i]) == 0)
+            {
+                return -10;
+            }
         }
+        int  ret = atoi(temp); // frees for you apparently, when I had free temp after this, it gave me a double free exception
+        free(temp);
+        return ret;
     }
-    int  ret = atoi(temp); // frees for you apparently, when I had free temp after this, it gave me a double free exception
-    free(temp);
-    return ret;
+    return -11;
 }
 
 void PROGRAM()
@@ -922,8 +926,9 @@ void PROGRAM()
     
     printf("Block pre token grab %d\n", TOKEN);
     TOKEN = Get_TokenInteger();
+
     printf("Block post token grab %d\n", TOKEN);
-    if (TOKEN != periodsym)
+    if (TOKEN != periodsym || TOKEN == -11)
     {
         printf("Error: program must end with period\n");
         exit(0);
@@ -956,6 +961,7 @@ void BLOCK()
         printf("Block Const %d\n",TOKEN);
 
         CONST_DECLARATION();
+        TOKEN = Get_TokenInteger();
     }
     if(varsym == TOKEN)
     {
@@ -1191,7 +1197,7 @@ void STATEMENT()
             }
             if(symbol_Table[symbolIndex]->kind != 2)
             {
-                // ERROR , identifier found is not of VAR type
+                printf("Error: only variable values may be altered\n");
                 exit(0);
             } 
             TOKEN = Get_TokenInteger();
@@ -1304,35 +1310,41 @@ void STATEMENT()
     //-----------------------------------------------------------------------------------------
         case readsym:
               // Grab identifier, function that grabs and saves variable  
-            nameIdent;
-            symbolIndex = SYMBOLTABLECHECK(nameIdent);
-            if(symbolIndex == -1)
-            {
-                printf("Error: undeclared identifier\n");
-                exit(0);
-                //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
-            }
-            if(symbol_Table[symbolIndex]->kind != 2)
-            {
-                printf("Error: only variable values may be altered\n");
-                exit(0);
-            } 
             TOKEN = Get_TokenInteger();
-            // emit READ ???? guessing sys read code
-            newCode = initializeAssemblyRecord(9, 0, 2);
-            printf("%d    SYS    0    2\n",universalCodeText);
-            assembly_Code[universalCodeText] = newCode;
-            universalCodeText++;
-            universalCodeAddress += 3;
-            
-            // emit  STO (M = table[symbolIndex].addr), add to assembly code struct array
-            M = symbol_Table[symbolIndex]->adr;
-            newCode = initializeAssemblyRecord(4, 0, M);
-            printf("%d    STO    0    %d\n",universalCodeText,M);
-            assembly_Code[universalCodeText] = newCode;
-            universalCodeText++;
-            universalCodeAddress += 3;
-            // emit 
+            if(TOKEN == 2)
+            {
+                nameIdent = GET_Token();
+                symbolIndex = SYMBOLTABLECHECK(nameIdent);
+                if(symbolIndex == -1)
+                {
+                    printf("Error: undeclared identifier\n");
+                    exit(0);
+                    //The exit() function in C. The exit() function is used to terminate a process or function calling immediately in the program. 
+                }
+                if(symbol_Table[symbolIndex]->kind != 2)
+                {
+                    printf("Error: only variable values may be altered\n");
+                    exit(0);
+                } 
+                TOKEN = Get_TokenInteger();
+                newCode = initializeAssemblyRecord(9, 0, 2);
+                printf("%d    SYS    0    2\n",universalCodeText);
+                assembly_Code[universalCodeText] = newCode;
+                universalCodeText++;
+                universalCodeAddress += 3;
+                
+                M = symbol_Table[symbolIndex]->adr;
+                newCode = initializeAssemblyRecord(4, 0, M);
+                printf("%d    STO    0    %d\n",universalCodeText,M);
+                assembly_Code[universalCodeText] = newCode;
+                universalCodeText++;
+                universalCodeAddress += 3; 
+            }
+            else
+            {
+                printf("Error: const, var, and read keywords must be followed by identifier\n");
+                exit(0);
+            }
             break;
     //-----------------------------------------------------------------------------------------
         case writesym:
@@ -1352,7 +1364,7 @@ void STATEMENT()
             break;
     //-----------------------------------------------------------------------------------------
         default:
-            printf("Error: condition must contain comparison operator\n");
+            printf("Error: Invalid operation for statement\n");
             exit(0);
             break;
     //-----------------------------------------------------------------------------------------
@@ -1823,8 +1835,8 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
 
 void outputAssemblyToFile()
 {
-    printf("\nPRINTING TO \"output.txt\" ...\n");
-    FILE*  file = fopen("output.txt", "w");
+    printf("\nPRINTING TO \"outputAssemblyCode.txt\" ...\n");
+    FILE*  file = fopen("outputAssemblyCode.txt", "w");
     if (file == NULL) {
         printf("Failed to pen File!\n");
         return;
@@ -2036,7 +2048,7 @@ int main(int argc, char* argv[]) {
         free(word);
     } 
     
-    // printf("\nToken Lex: %s\n",global_Lexeme);
+    printf("\nToken Lex: %s\n",global_Lexeme);
     // printf("Tokens From Get\n");
     // char* temp = GET_Token();
     // while (temp != NULL)
