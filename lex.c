@@ -65,9 +65,9 @@ char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/',
 
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
-char specialTerminalSymbolsOrdered[] = {'\t','\r',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>'}; // ' ' isn't a term sym, it was put here
+char specialTerminalSymbolsOrdered[] = {'\t','\r',' ', '(',')','*', '+',',', '-' ,'.', '/', ':', ';','<','=','>','~'}; // ' ' isn't a term sym, it was put here
 
-int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
+int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym,0}; // -1 is for spaces and 0 is for colons and -2 for tabs, 
 
 // //=======new=======//
 // //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
@@ -380,16 +380,23 @@ int numberOfFileLines(char* filename)
     return numLines;
 }
 
-int characterInSymbolTableBS(char c, char* symTbl)
-{
+int characterInSymbolTableBS(char c, char* symTbl) {
+    
     int low = 0;
-    int high = strlen(symTbl)-1; 
-    while (low <= high) 
+    int high = strlen(symTbl) - 1;
+    if(symTbl[high] == c)
     {
+        return high;
+    }
+    while (low <= high) {
         int mid = (high + low) / 2;
-        if (symTbl[mid] == c) return mid;
-        else if (symTbl[mid] > c) high = mid - 1;
-        else low = mid + 1;
+        if (symTbl[mid] == c) {
+            return mid;
+        } else if (symTbl[mid] < c) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
     }
     return -1;
 }
@@ -941,8 +948,11 @@ int main(int argc, char *argv[])
         printf("Lexeme List:\n%s\n\n",EditedcodePL);
         //printf("Num Check\n");
 
-        // int d = characterInSymbolTableBS('>',specialTerminalSymbolsOrdered);
-        // printf("Num %d\n", specialTerminalSymbolsTokens[d]);
+        int d = characterInSymbolTableBS('>',specialTerminalSymbolsOrdered);
+        printf("Num  d %d\n", d);
+
+        printf("Num %d\n", specialTerminalSymbolsTokens[d]);
+        printf("\nToken LexParse: %s\n",lexicalParse(">>>"));
         //printf("Num Check %s\n",codePL);
         //printf("odd : %s\n",assemblyConvertOP(2,11));
 
