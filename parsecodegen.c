@@ -45,6 +45,8 @@ void freeAll();
 
 char* global_Lexeme;
 int universialIndex = 0;
+int tokencount = 0;
+
 
 int universalCodeText = 1;// This keeps track of how many opcodes we have (This should be "Line" in the terminal)
 int universalCodeAddress = 3;// This keeps track of the addresses in the assembly text, we start at 3 for the 0 0 0 then we go and read the next opcode
@@ -887,6 +889,7 @@ int Get_TokenInteger()
     char* temp = GET_Token();
     if(temp != NULL)
     {
+        tokencount++;
         //printf("Get token: %s\n", temp);
         int stringLength = strlen(temp);
         //printf("Get token len: %d\n", stringLength);
@@ -967,6 +970,7 @@ void BLOCK()
     {
         printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION();
+        TOKEN = Get_TokenInteger();
     }
     // else
     // {
@@ -1162,12 +1166,14 @@ void VAR_DECLARATION()
 void STATEMENT()
 {
     printf("Statement enter Area %d\n",TOKEN);
+    //printf("Statement index %d\n",tokencount);
 
-    if(TOKEN != 2 && TOKEN != endsym) // added endsym to ensure we do not get another token before going back to statement(beginsym).
-    {
-        TOKEN = Get_TokenInteger();
-        printf("Statement post Area Grab %d\n",TOKEN);
-    }
+
+    // if(TOKEN != 2 && TOKEN != endsym && tokencount != 1) // added endsym to ensure we do not get another token before going back to statement(beginsym).
+    // {
+    //     TOKEN = Get_TokenInteger();
+    //     printf("Statement post Area Grab %d\n",TOKEN);
+    // }
     
    
 
@@ -1235,7 +1241,10 @@ void STATEMENT()
                     printf("Statement re-entering loop in Begin %d\n",TOKEN);
 
                 TOKEN = Get_TokenInteger();
-                STATEMENT();
+                if(TOKEN != -11)
+                {
+                    STATEMENT();
+                }
                 printf("Statement Post in Begin  %d\n",TOKEN);
 
                 if(TOKEN != semicolonsym)
@@ -1258,6 +1267,7 @@ void STATEMENT()
         case ifsym://FIXXXXXX MEEE!!!!!! look at pg 22 of newest slides 000
             TOKEN = Get_TokenInteger();
             CONDITION();
+            printf("OUT OF CONDITION\n");
             // emit jpc, add to assembly code struct array
 
             jpcIdx = universalCodeAddress;
