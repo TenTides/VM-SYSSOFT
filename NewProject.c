@@ -38,4 +38,15 @@
     > a.out stands for "assembler output"
     >the whole point of having assembly code is that we don't have to create a new compiler for each operating system.
 
+    ========================
+    -----Project 4-----
+    > In the new project we will be implementing procedures into our grammar
+    > when we write in the code for procedures, we once we reach the start of main we need to create a jmp at index 0 so that when the text is starting to be read, we will jmp to where main is in the text.
+
+    > In the process address space and process control block
+
+    Definitions
+    > Process: Program in execution
+    > Thread: Unit of execution of a process
+
 */
