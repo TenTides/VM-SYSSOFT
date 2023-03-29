@@ -1,0 +1,6 @@
+var x;
+begin
+	begin
+		x := 2 * (3 + 4 * 3);
+	end
+end.

@@ -26,6 +26,7 @@ void BLOCK();
 char* GET_Token();
 int Get_TokenInteger();
 void CONST_DECLARATION();
+void PROC_DECLARATION();
 void VAR_DECLARATION();
 int SYMBOLTABLECHECK(char* name);
 
@@ -49,10 +50,11 @@ int tokencount = 0;
 
 
 int universalCodeText = 1;// This keeps track of how many opcodes we have (This should be "Line" in the terminal)
-int universalCodeAddress = 3;// This keeps track of the addresses in the assembly text, we start at 3 for the 0 0 0 then we go and read the next opcode
 
 int variableCount = 0;// This keeps track of how many Variables have been stored into the Symbol table 
 int universalSymbolIndex = 2;// This keeps track of what index we must store into next. This also is where we start our search. Searching starts at universal Symbol Index and decrements until 0. 
+
+int universalLevel = 0;
 
 typedef struct{
     int kind; //const = 1, var = 2, proc = 3. -- proc is not in use for now. 
@@ -109,8 +111,10 @@ typedef enum {
     thensym = 24,  
     whilesym = 25, 
     dosym = 26, 
+    callsym = 27, 
     constsym = 28, 
     varsym = 29, 
+    procsym = 30, 
     writesym = 31, 
     readsym = 32, 
 }token_type; 
@@ -119,8 +123,8 @@ typedef enum {
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
 
-char* resWords[] = {"odd", "begin", "end", "if", "then", "while", "do", "const",  "var",  "write", "read"}; 
-int resWordsTokens[] = {oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, constsym,  varsym, writesym , readsym};   
+char* resWords[] = {"odd", "begin", "end", "if", "then", "while", "do", "call", "const",  "var", "procedure",  "write", "read"}; 
+int resWordsTokens[] = {oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym, writesym , readsym};   
 //Symbol table is in order of ascii value, can be used with binary search
 char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
@@ -133,18 +137,6 @@ char specialTerminalSymbolsOrdered[] = {'\t','\r',' ', '(',')','*', '+',',', '-'
 int specialTerminalSymbolsTokens[] = {-3,-2,-1, lparentsym, rparentsym, multsym, plussym, commasym, minussym ,periodsym, slashsym, 0, semicolonsym ,lessym, eqsym, gtrsym,0}; // -1 is for spaces and 0 is for colons and -2 for tabs,                                                                                                                            
 int halt_flag = 1; 
 int EndProgramFlag = 1;   
-
-//==================================================================================================================================================================//
-//==================================================================================================================================================================//
-//==================================================================================================================================================================//
-// char  letters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-//                         'X', 'Y', 'Z','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
-//                         'v', 'w', 'x', 'y', 'z'};   
-
-// char numbers[] = {'0', '1', '2','3', '4', '5', '6', '7', '8', '9'};
-
-
-
 
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
@@ -500,246 +492,6 @@ void freeAll()
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
 
-//Project Questions//
-/*
-    > When we are inserting a procedure into the symbol table, why do we leave its address to a question mark? Answer: we will not be working linearly
-
-    > How will be connecting our vm and our lexeme? 
-
-    > how exactly should we be changing scanner for the future assignments? answer: remove whatever is not in the grammar and view them as identifiers.  
-
-    > How many lines of assmebly code will we have? For the assembly code struct?
-    
-    > Operations MUL 0 3   -OR-  OPP 0 3
-
-    > will we have to create a little vm with a stack within this code to keep track of where things are in memory. Answer: handles itself
-
-    > on page 11 of the HW3 why does it include modsym when that was not apart of HW2?
-    
-
-    > CAN WE BE CERTAIN ADDRESSES for assembly codes like jmp and jpc are 3 incremented. Eg. after each code address increment by 3 like in the vm assignment
-
-    > When "emmiting", are we printing the assembly code to the screen or are we just storing it for later printing. For example, in the case that there is an error should have printed the valid assembly code to the screen that preceded that error. 
-    
-    >if token == whilesym
-        get next token
-        loopIdx = current code index <----- what index is this refering to? Code PL?
-        CONDITION
-        if token != dosym
-        error
-        get next token
-        jpcIdx = current code index <--
-        emit JPC
-        STATEMENT
-        emit JMP (M = loopIdx)
-        code[jpcIdx].M = current code index <--
-        return
-
-    >if token == ifsym
-        get next token
-        CONDITION
-        jpcIdx = current code index
-        emit JPC
-        if token != thensym
-        error
-        get next token
-        STATEMENT
-        code[jpcIdx].M = current code index
-        return
-    
-    > what is CURRENT CODE INDEX and what is code[], it is represented as a struct here.
-    
-    
-    > why do we need to have jumps if we are not using procedures and why are they apart of if
-    > what is meant by "emit read" and "emit write" ? IF THE ERROR STATEMENT IS ALL THAT IS PRINTED ON ERROR,
-    > what do we do for all the sudo he put up?
-*/
-
-//======================Project Rules======================//
-/*
-    // Symbol Table
-
-    > When seeking a variable name during a lookup. The seek pointer should be pointing at the same location as the table pointer(tp), and then iterate the back towards index 0. (seek = tp)
-
-    > When we call a new procedure the we must set mark == 1 for all of the variables in the previous procedure.s
-
-    > Everytime a variable is called we must complete a lookup throught the Symbol table
-
-    > If we try to use a variable that was not declared we can use the sentinel technique. This technique is where we leave the index 0 of the array empty to store the name of the varible we are seeking so that if that variable is found and seek == 0, then the variable was not declared and an error in the message must be emmited.
-
-    //Grammar/Syntax (Context Free Grammar)
-
-    > to check for sytanx we will create function that check sytax rules of each section of the code. Each time we call a function we must check if the rules are followed or print an error to the screen if the sytnax is wrong. This will allow us to check the sytanx of many differnt looking peices of code. 
-
-    > A context free language is defined by a 4-tuple(T,N,R,S)
-        1 terminal symbols (valid words that are a within  syntatic class)(T)
-        2 non-terminal Symbols (aka the syntatic classes)(N)
-        3 Syntatic equations(R)
-        4 Start Symbol(S)
-
-    > rule get a token and call the <program> function all the way down to a terminal symbol or sytanx error. By doing this we create a sort of tree structure more specifically inorder search. 
-
-
-    > basically while parsing the lexeme token by token we will use rules (also known as left most derivation).
-
-    {Example code}
-
-    <expr> {
-
-        if (  "("  == token) {
-            call <expr>
-
-            if ( ")" == token){
-                return; 
-            } else {
-                
-            }
-             
-        }
-        ...
-        ...
-        ...
-    }
-
-
-    > Remove any keywords that are not part of  grammer inside of scanner
-
-    > Scanner and Parser should be within the same program. 
-
-
-    {Example Code}
-
-    Begin
-        statement;
-        statment;
-        statment
-
-    end
-
-    (equals)
-
-    Begin
-        statement;
-        statment;
-
-    end
-
-    lexeme: 21 xx 18 xx 18 xx 22
-
-    lexeme:  21 xx 18 xx 18 22
-
-    > when we print out the symbol table the mark on everything should be 1
-
-
-
-    // ASSEMBLY CODE PART
-    
-    > We will have two datastructures one will be the stack that will be linear since there are no 
-        procedures and therefore no jumps and we will also have the text which is the assembly code which we will print out from our the dataStructure of our choosing. 
-    
-    > Assembly code jumps by 3
-    > Stack goes up by one
-    > SL DL RV  | X Y Z TY 
-
-      
-    > Assembly code: 7 0 3 
-    
-    // Symbol table
-    // assembly code increment for addresses is linear increment by 3 always. However, variable count 
-    // can affect the M values that get plugged for lod and sto when adding it into struct
-
-    
-    y := 7 * (u * 3)
-    y := 7 * 3u
-    y := 21u
-
-    ===========================
-    {Ambiguity}
-
-    order of operations (left most derivation)
-
-    a + b * c 
-    is should produce the same output as
-    b * c + a
-
-    but with how our program is, the first one will do (a+b)*c when it should be
-    a+(b*c). 
-
-    with in expression() and term() we must make it so that multiplication has precedence over addition. Look at pg 20 in slides and 23. it is already built in within the psuedocode. 
-    ===========================
-    {Recursive Descent parsing with left recursion}
-
-    > basically if we do not have  basecases within our recursive function we could end up having a stack overflow. 
-    ===========================
-    {Left factoring}
-    > This causes a compiler to be slower 
-
-    {example}
-
-    we will not want this:
-
-    IF<C>THEN<ST>
-    IF<C>THEN<ST>ELSE<ST>
-
-    instead we will do:
-
-    IF<C>THEN<ST><X>
-    
-    where <x> ::= ELSE<ST> | STOP   
-
-    > What this does it remove the rule of backtracking making our compiler slower. 
-    > we basically need to create a method that acts as the basecase. Exam question
-    ===========================
-
-    {very easy test case}
-
-    var a, b,c; // populate the symbol table
-    a := b + c.
-
-    {output should be}
-
-    LOD 0 4
-    LOD 0 5
-    ADD 0 2
-    STO 0 3
-    SYS 0 3
-
-    ===========================
-    We have to update our code so that it follows left factoring.
-
-
-    ==================After class questions answers============
-    > For this program we will print to the terminal like we saw in the HW3 file. PL/0 the code and then the assembly code. But that is not all. Along with printing each line of assembly code, we must store that code in an array/datastructure and save it to the file where for example LOD 0 3 -> 7 0 3. This is so that we can run our assembly code within the vm. 
-
-    > For this project we do not need to create a stack nor do we need to have the the text(assembly code)
-    written somewhere for us to parse. Instead, we must just keep track of where we are with in those concepts so that when we run our assembly code within the vm, the stack will be created properly. Therefore the address of variables etc. must increment by 1, and the address of the assembly code(text) must increment by 3. That is all we have to worry about in this project.
-
-    > The psuedo code he gave us already takes care of the properly perfoming Recursive Descent parsing with left recursion to avoid infinite recurisve loops. 
-
-    ===================================
-    > Syntax Graphs 
-
-    A way to represent the the function of grammar.
-
-
-    ===================================
-    
-
-    >We can take out emmit positve and negative
-    and he will send out an announcement.
-*/
-
-
-
-
-//==========Functions===========//
-//  >use a universal index that all the below functions can edit,this will go to the end of codePL
-//  >it will return the NEXT token in code PL
-//  > it should be able to either ignore the variable identifier names to go to the next token, or deal with it directly.
-//    Ignoring it may be better, as a seperate function could be responable for grabbing the identifer from codePL 
-//    and thereafter incrementing the universal index appropriately.  (helper function could be GRAB_NAME(index))
-//universialIndex
-
 char* GET_Token()
 {
     // printf("\n\nEntering the GET_Token\n");
@@ -762,7 +514,6 @@ char* GET_Token()
         RETVAL = NULL;
         return RETVAL;
     }
-
     // printf("This is universalIndex: %d\n", universialIndex);
     for(int i = universialIndex; i < length ;i++, universialIndex++)
     {   
@@ -906,7 +657,6 @@ char* GET_Token()
     return RETVAL;
 }
 
-
 int Get_TokenInteger()
 {
     //printf("GET_TokenInteger enter\n ");
@@ -925,7 +675,7 @@ int Get_TokenInteger()
                 return -10;
             }
         }
-        int  ret = atoi(temp); // frees for you apparently, when I had free temp after this, it gave me a double free exception
+        int  ret = atoi(temp); 
         free(temp);
         return ret;
     }
@@ -934,22 +684,14 @@ int Get_TokenInteger()
 
 void PROGRAM()
 {
-    namerecord_t* newCode = initializeNameRecord(0," ", 0, 0, 0, 0);
+    namerecord_t* newCode = initializeNameRecord(0," ", 0, 0, 0, 0); //used for sentinel value
     symbol_Table[0] = newCode;
-    newCode = initializeNameRecord(3,"main", 0, 0, 3, 1);
+    newCode = initializeNameRecord(3,"main", 0, 0, 3, 1); // hardset proc at the begining
     symbol_Table[1] = newCode;
 
     assembly_Node* newAssCode;
     newAssCode = initializeAssemblyRecord(7, 0, 3);
-    //printf("%d    JMP    0    3\n\n",universalCodeText);
     assembly_Code[0] = newAssCode;
-    //universalCodeText++;
-    //universalCodeAddress += 3;
-
-    //printSymTbl();
-    //printf("Program %d\n",TOKEN);
-
-
 
     while (TOKEN != endsym)
     {
@@ -973,7 +715,7 @@ void PROGRAM()
     //printf("out Token Grab While %d\n",TOKEN);
 
     TOKEN = Get_TokenInteger();
-    while(TOKEN == endsym) TOKEN = Get_TokenInteger();  
+    while(TOKEN == endsym) TOKEN = Get_TokenInteger();   // <-this needs to be checked out a bit more
 
     //printf("Block post token grab %d\n", TOKEN);
     
@@ -984,17 +726,13 @@ void PROGRAM()
     }
     else
     {
-        //printf("YAYYYY WE MADE IT TO THE PERIOD EXTIO!!!!\n");
-        // Store Assembly  SYS END is added
         assembly_Node* newAssCode;
         newAssCode = initializeAssemblyRecord(9, 0, 3);
-        //printf("%d    SYS    0    3\n",universalCodeText);
         assembly_Code[universalCodeText] = newAssCode;
         universalCodeText++;
-        universalCodeAddress += 3;
 
         //Print Assembly code
-        printAssCodes();        
+        printAssCodes();        //will need to be changed for HW4
         printSymTbl();
     }
     
@@ -1019,28 +757,15 @@ void BLOCK()
         VAR_DECLARATION();
         TOKEN = Get_TokenInteger();
     }
-    // else
-    // {
-    //     //Error
-    //     exit(0); 
-    // }
-    
-    // When working with the stack we must reserve three indecies for Static Link, Dynamic Link, and Return Address. 
-    // Stack pointer should be at 3 now. 
-    // We must then then increment stack pointer to however many variables we have just "declared". in the case of test01.txt 
-    // we have two variables x and y. Therefore we must increment the stack pointer by 2. Stack pointer should now be 5. 
-    // stack should look like this from left to right:
-    // SL DL RA 0 0 _
-    //              ^
-    //              SP
-    // We do this so that when we initialize a variable using LIT 0 34 the stack pointer will add it to indicie 5. 
-    // SL DL RA 0 0 34
-    //              ^
-    //              SP
-    // Then when LOD 0 3 is called, the variable will be placed at indicies 3.
-    // SL DL RA 34 0 
-    //          ^
-    //          SP
+   while(procsym == TOKEN)
+   {
+
+        PROC_DECLARATION();
+        universalLevel ++;
+        TOKEN = Get_TokenInteger();
+   }
+
+
     assembly_Node* newCode;
     newCode = initializeAssemblyRecord(6, 0, (3+variableCount));
     //printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
@@ -1049,12 +774,52 @@ void BLOCK()
     // printf("%d ",assembly_Code[universalCodeText]->L);
     // printf("%d\n",assembly_Code[universalCodeText]->M);
     universalCodeText++;
-    universalCodeAddress += 3;
     STATEMENT();
 }
 // if SYMBOLTABLECHECK (token) != -1
 // We need  a SYMBOLTABLECHECK() to see if something is in the symbol table, -1 otherwise don't the else 
 //
+void PROC_DECLARATION()
+{
+    TOKEN = Get_TokenInteger();
+    if(TOKEN == identsym)
+    {
+        //grab identifier function that grabs and saves variable  
+        char* nameIdent = GET_Token();
+        if(SYMBOLTABLECHECK(nameIdent) != -1)
+        {
+            // VERIFIED
+            printf("Error: symbol name has already been declared\n");
+            exit(0);
+        }
+        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,Get_TokenInteger(), 0, 0,  0); //address of  a stored procedure? considered unknown?
+        // Store object in main name array.
+        symbol_Table[universalSymbolIndex] = newConst;
+        universalSymbolIndex++;
+
+        TOKEN = Get_TokenInteger();
+        if(TOKEN == semicolonsym)
+        {
+            TOKEN = Get_TokenInteger();
+            BLOCK();
+            if(TOKEN != semicolonsym)
+            {
+                printf("Error: block statement in procedures must be followed by a semicolon\n");
+                exit(0); 
+            }
+        }
+        else
+        {
+            printf("Error: procedure, constant, and variable declarations must be followed by a semicolon\n");
+            exit(0); 
+        }
+    }
+
+} 
+
+
+
+
 void CONST_DECLARATION() 
 {
     while(1){
@@ -1268,7 +1033,6 @@ void STATEMENT()
             //printf("%d    STO    0    %d\n",universalCodeText, M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
             // emit STO (M = table[symIdx].addr)
             break;
     //-----------------------------------------------------------------------------------------
@@ -1314,7 +1078,6 @@ void STATEMENT()
             //printf("%d    JPC    0    0\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
         
             if(TOKEN != thensym)
             {
@@ -1331,7 +1094,6 @@ void STATEMENT()
             TOKEN = Get_TokenInteger();
             int loopIdx =  universalCodeText;
             CONDITION();
-            //int loopIdxAdd =  universalCodeAddress;
             if(TOKEN != dosym)
             {
                 printf("Error: while must be followed by do\n");
@@ -1343,14 +1105,12 @@ void STATEMENT()
             //printf("%d    JPC    0    %d\n",universalCodeText,universalCodeText*3);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
             STATEMENT();
 
             newCode = initializeAssemblyRecord(7, 0, loopIdx*3);
             //printf("%d    JMP    0    %d\n",universalCodeText,loopIdx*3);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
             //JPC REASSIGNMENT
             assembly_Code[jpcIdx]->M = universalCodeText*3;
 
@@ -1380,14 +1140,12 @@ void STATEMENT()
                 //printf("%d    SYS    0    2\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 
                 M = symbol_Table[symbolIndex]->adr;
                 newCode = initializeAssemblyRecord(4, 0, M);
                 //printf("%d    STO    0    %d\n",universalCodeText,M);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3; 
             }
             else
             {
@@ -1404,13 +1162,37 @@ void STATEMENT()
             //printf("%d    SYS    0    1\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
             break;
     //-----------------------------------------------------------------------------------------
         case endsym:
             // if we see the endsym, the statement(beginsym) will check wether or not it exists.
             // we were hitting the default before :(. 
             break;
+        case callsym:
+            TOKEN = Get_TokenInteger();
+            if(TOKEN == 2)
+            {
+                nameIdent = GET_Token();
+                symbolIndex = SYMBOLTABLECHECK(nameIdent);
+                if(symbolIndex == -1)
+                {
+                    printf("Error: undeclared identifier: %s\n",nameIdent);
+                    exit(0);
+                }
+                if(symbol_Table[symbolIndex]->kind != 3)
+                {
+                    printf("Error: only variable values may be altered\n");
+                    exit(0);
+                } 
+            }
+            else
+            {
+                printf("Error: call  must be followed by identifier\n");
+                exit(0);
+            }
+            TOKEN = Get_TokenInteger(); // <careful with this one
+            break;
+
     //-----------------------------------------------------------------------------------------
         default:
             printf("Error: Invalid operation for statement when TOKEN is %d\n", TOKEN);
@@ -1448,7 +1230,6 @@ void EXPRESSION()
                 //printf("%d    ADD    0    1\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
             }
             else 
             {
@@ -1460,7 +1241,6 @@ void EXPRESSION()
                 //printf("%d    SUB    0    2\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
             }
 
         }
@@ -1468,30 +1248,17 @@ void EXPRESSION()
     }
     else if (TOKEN == plussym)
     {  
-        //printf("Plus area Expression %d\n",TOKEN);
-        //emit POSITIVE  ??
-        //-------------------------------------------------------
-        // newCode = initializeAssemblyRecord(12, 0, 0);
-        // printf("%d    POSITVE    0    0\n",universalCodeText);
-        // assembly_Code[universalCodeText] = newCode;
-        // universalCodeText++;
-        // universalCodeAddress += 3;
-        //-------------------------------------------------------
         while (TOKEN == plussym || TOKEN == minussym)
         {
             if (TOKEN == plussym) 
             {
                 TOKEN = Get_TokenInteger();
-                //printf("Expecting 3 %d and entering Term: \n",TOKEN);
                 TERM();
-                //printf("leaving Term and reentering Expression with: %d\n", TOKEN);
                 //emit add
                 //-------------------------------------------------------
                 newCode = initializeAssemblyRecord(2, 0, 1);
-               // printf("%d    ADD    0    1\n",universalCodeText);// why is it 1?
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 //-------------------------------------------------------
             }
             else 
@@ -1504,7 +1271,6 @@ void EXPRESSION()
                 //printf("%d    SUB    0    2\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 //-------------------------------------------------------
             }
     
@@ -1533,7 +1299,6 @@ void CONDITION()
         //printf("%d    ODD    0    11\n",universalCodeText);
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
-        universalCodeAddress += 3;
         //-------------------------------------------------------
 
     }
@@ -1552,7 +1317,6 @@ void CONDITION()
                 //printf("%d    EQL    0    5\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             case neqsym:
                 TOKEN = Get_TokenInteger();
@@ -1562,7 +1326,6 @@ void CONDITION()
                 //printf("%d    NEQ    0    6\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             case lessym:
                 TOKEN = Get_TokenInteger();
@@ -1572,7 +1335,6 @@ void CONDITION()
                 //printf("%d    LSS    0    7\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             case leqsym:
                 TOKEN = Get_TokenInteger();
@@ -1582,7 +1344,6 @@ void CONDITION()
                 //printf("%d    LEQ    0    8\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             case gtrsym:
                 TOKEN = Get_TokenInteger();
@@ -1592,7 +1353,6 @@ void CONDITION()
                 //printf("%d    GTR    0    9\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             case geqsym:
                 TOKEN = Get_TokenInteger();
@@ -1602,7 +1362,6 @@ void CONDITION()
                 //printf("%d    GEQ    0    10\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
-                universalCodeAddress += 3;
                 break;
             default:
                 printf("Error: condition must contain comparison operator\n");
@@ -1640,8 +1399,6 @@ void TERM()
 {   
     //printf("Entering Factor with: %d\n",TOKEN);
     FACTOR();
-    //printf("Leaving Factor reentering Term with:%d\n", TOKEN);
-    //printf("SemiColon Term Prior? %d\n",TOKEN);
     //TOKEN = Get_TokenInteger();
     //printf("SemiColon Term Or 4 which is +? %d\n",TOKEN);
     while (TOKEN == multsym || TOKEN == slashsym)
@@ -1655,7 +1412,6 @@ void TERM()
             //printf("%d    MUL    0    3\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
         }
         else if (TOKEN == slashsym)
         {
@@ -1666,7 +1422,6 @@ void TERM()
             //printf("%d    DIV    0    4\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
         }
     }
 
@@ -1680,7 +1435,6 @@ void FACTOR()
     {
        // printf("identsym Pre token grab %d\n",TOKEN);
         char* nameIdent = GET_Token();
-      //  printf("identsym Post Name token grab: %s\n",nameIdent);
 
         int symIdx = SYMBOLTABLECHECK(nameIdent);
         //printSymTbl();
@@ -1700,7 +1454,6 @@ void FACTOR()
            // printf("%d    LIT    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
 
             
         }
@@ -1712,7 +1465,6 @@ void FACTOR()
            // printf("%d    LOD    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
-            universalCodeAddress += 3;
         }
       //  printf("TOKEN PRE LOD: %d\n",TOKEN);
         TOKEN = Get_TokenInteger();
@@ -1728,7 +1480,6 @@ void FACTOR()
       //  printf("%d    LIT    0    %d\n",universalCodeText,M);
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
-        universalCodeAddress += 3;
 
         TOKEN = Get_TokenInteger();
     }
@@ -1892,12 +1643,11 @@ assembly_Node* initializeAssemblyRecord(int OP, int L, int M)
 void outputAssemblyToFile()
 {
     //printf("\nPRINTING TO \"outputAssemblyCode.txt\" ...\n");
-    FILE*  file = fopen("outputAssemblyCode.txt", "w");
+    FILE*  file = fopen("elf.txt", "w");
     if (file == NULL) {
         printf("Failed to pen File!\n");
         return;
     }
-
 
     for (int i = 0; i < universalCodeText; i++)
     {
@@ -2109,21 +1859,10 @@ int main(int argc, char* argv[]) {
         free(word);
     } 
     
-    //printf("\nToken Lex: %s\n",codePL);
-    // printf("Tokens From Get\n");
-    // char* temp = GET_Token();
-    // while (temp != NULL)
-    // {
-    //     printf("Token: %s\n", temp);
-    //     temp = GET_Token();
-    // }
-    //printf("\nToken LexParse: %s\n",lexicalParse(">>>"));
-
     PROGRAM();
     outputAssemblyToFile();
     freeAll();
 
-    //===================HW2 MAIN END==================//
     free(global_Lexeme);
     free(codePL);   
     return 0;

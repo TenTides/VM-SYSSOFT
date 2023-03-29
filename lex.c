@@ -948,11 +948,11 @@ int main(int argc, char *argv[])
         printf("Lexeme List:\n%s\n\n",EditedcodePL);
         //printf("Num Check\n");
 
-        int d = characterInSymbolTableBS('>',specialTerminalSymbolsOrdered);
-        printf("Num  d %d\n", d);
+        // int d = characterInSymbolTableBS('>',specialTerminalSymbolsOrdered);
+        // printf("Num  d %d\n", d);
 
-        printf("Num %d\n", specialTerminalSymbolsTokens[d]);
-        printf("\nToken LexParse: %s\n",lexicalParse(">>>"));
+        // printf("Num %d\n", specialTerminalSymbolsTokens[d]);
+        // printf("\nToken LexParse: %s\n",lexicalParse(">>>"));
         //printf("Num Check %s\n",codePL);
         //printf("odd : %s\n",assemblyConvertOP(2,11));
 

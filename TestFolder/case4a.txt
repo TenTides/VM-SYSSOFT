@@ -1,0 +1,6 @@
+var x;
+begin
+	begin
+		x := 2 + 2;
+	end
+end.
