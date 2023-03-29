@@ -817,9 +817,6 @@ void PROC_DECLARATION()
 
 } 
 
-
-
-
 void CONST_DECLARATION() 
 {
     while(1){
@@ -1388,6 +1385,26 @@ int SYMBOLTABLECHECK(char* name)
         if(strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
         {
             return i;
+        }
+    }
+
+    //printf("post strcpy\n");
+    return -1;
+}
+int SYMBOLTABLECHECK(char* name, int level)
+{
+
+    strcpy(symbol_Table[0]->name,name);
+
+    for(int i = universalSymbolIndex - 1; i > 0; i--)
+    {
+        if(strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0 && symbol_Table[i]->level == level)
+        {
+            return i;
+        }
+        if(symbol_Table[i]->level == 0)
+        {
+            break;//start of procedure storage
         }
     }
 
