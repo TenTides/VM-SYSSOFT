@@ -22,12 +22,16 @@ int isStatementReserved(char* word);
 char* subString(int start, int end,char* line);  
 int isWordValid(char* word);
 void PROGRAM();
+void BLOCK(int level);
 void BLOCK();
+
 char* GET_Token();
 int Get_TokenInteger();
-void CONST_DECLARATION();
-void PROC_DECLARATION();
+void CONST_DECLARATION(int level, int* dx);
+void PROC_DECLARATION(int level, int* dx);
+void VAR_DECLARATION(int level, int* dx);
 void VAR_DECLARATION();
+
 int SYMBOLTABLECHECK(char* name);
 
 void EXPRESSION();
@@ -688,10 +692,10 @@ void PROGRAM()
     symbol_Table[0] = newCode;
     newCode = initializeNameRecord(3,"main", 0, 0, 3, 1); // hardset proc at the begining
     symbol_Table[1] = newCode;
-
-    assembly_Node* newAssCode;
-    newAssCode = initializeAssemblyRecord(7, 0, 3);
-    assembly_Code[0] = newAssCode;
+    // COMMMENTED OUT ASSUMED THAT BLOCK WILL DO IT NOW
+    // assembly_Node* newAssCode;
+    // newAssCode = initializeAssemblyRecord(7, 0, 3);
+    // assembly_Code[0] = newAssCode;
 
     while (TOKEN != endsym)
     {
@@ -737,7 +741,7 @@ void PROGRAM()
     }
     
 }
-
+//prior
 void BLOCK()
 {
     //printf("Block Pre Token Grab %d\n",TOKEN);
@@ -757,29 +761,67 @@ void BLOCK()
         VAR_DECLARATION();
         TOKEN = Get_TokenInteger();
     }
-   while(procsym == TOKEN)
-   {
+    while(procsym == TOKEN)
+    {
 
         PROC_DECLARATION();
         universalLevel ++;
         TOKEN = Get_TokenInteger();
-   }
-
-
+    }
     assembly_Node* newCode;
     newCode = initializeAssemblyRecord(6, 0, (3+variableCount));
     //printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
     assembly_Code[universalCodeText] = newCode;
-    // printf("%d ",assembly_Code[universalCodeText]->OP);
-    // printf("%d ",assembly_Code[universalCodeText]->L);
-    // printf("%d\n",assembly_Code[universalCodeText]->M);
     universalCodeText++;
     STATEMENT();
 }
+BLOCK(int level)
+{
+    int dx = 2;
+    assembly_Node* newCode = initializeAssemblyRecord(7, 0, 0);
+    int jmpIdx = universalCodeText;
+    //printf("%d    JMP    0    %d\n",universalCodeText,loopIdx*3);
+    assembly_Code[jmpIdx] = newCode;
+    universalCodeText++;
+    do
+    {
+        if(constsym == TOKEN) 
+        {
+            CONST_DECLARATION(level, &dx);
+            TOKEN = Get_TokenInteger();
+        }
+        if(varsym == TOKEN)
+        {
+            //printf("Var Block Enter Area %d\n",TOKEN);
+            VAR_DECLARATION(level, &dx);//handles looping aspect
+            TOKEN = Get_TokenInteger();
+        }
+        while(procsym == TOKEN)
+        {
+            //lv and dx
+            PROC_DECLARATION(level, &dx);
+
+            //universalLevel ++; // not needed?
+            TOKEN = Get_TokenInteger();
+        }
+    }while(TOKEN = constsym || TOKEN = procsym || TOKEN = varsym)
+    assembly_Code[jmpIdx]->M = universalCodeText*3; // fixing up jmp address
+    //dx will be flexible to any number of declarations hence why the declarations need to be altered
+    newCode = initializeAssemblyRecord(6, 0, (3+dx));
+    //printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
+    assembly_Code[universalCodeText] = newCode;
+    universalCodeText++;
+    STATEMENT();
+
+    newCode = initializeAssemblyRecord(2, 0, 0); // return operation?
+    assembly_Code[universalCodeText] = newCode;
+    universalCodeText++;
+}
+
 // if SYMBOLTABLECHECK (token) != -1
 // We need  a SYMBOLTABLECHECK() to see if something is in the symbol table, -1 otherwise don't the else 
 //
-void PROC_DECLARATION()
+void PROC_DECLARATION(int level, int* dx)
 {
     TOKEN = Get_TokenInteger();
     if(TOKEN == identsym)
@@ -800,8 +842,8 @@ void PROC_DECLARATION()
         TOKEN = Get_TokenInteger();
         if(TOKEN == semicolonsym)
         {
-            TOKEN = Get_TokenInteger();
-            BLOCK();
+            TOKEN = Get_TokenInteger(); // goes one block higher
+            BLOCK(); // needs level 
             if(TOKEN != semicolonsym)
             {
                 printf("Error: block statement in procedures must be followed by a semicolon\n");
@@ -816,8 +858,8 @@ void PROC_DECLARATION()
     }
 
 } 
-
-void CONST_DECLARATION() 
+//hasn't changed too much
+void CONST_DECLARATION(int level, int* dx) 
 {
     while(1){
         //check for identifier 
@@ -895,13 +937,72 @@ void CONST_DECLARATION()
     } 
 }
 
-//const xd = 5, t = 3 k
-// constdeclaration ::= [ “const” ident "=" number {"," ident "=" number} “;"].
-// var-declaration  ::= [ "var" ident {"," ident} “;"].
 
-// The sudo code has var declaration returning the number of variables
-// why isn't the variable count increased when a constant is defined in his
-// sudo code?
+//changed
+void VAR_DECLARATION(int level, int* dx) 
+{
+    //printf("Var enter Area %d\n",TOKEN);
+
+    // checking until semicolon
+    //TOKEN = Get_TokenInteger();
+    variableCount = 0;
+    while(1){
+        //check for identifier
+        //printf("var Before call %d\n",TOKEN);
+        TOKEN = Get_TokenInteger();
+        //printf(" Var 1 token %d\n",TOKEN);
+        if(TOKEN == identsym)
+        {
+            // Grab identifier, function that grabs and saves variable  
+            char* nameIdent = GET_Token();
+            //printf("Var Identifier Name %s\n",nameIdent);
+            if(SYMBOLTABLECHECK(nameIdent) != -1)
+            {
+                // VERIFIED
+                printf("Error: symbol name has already been declared\n");
+                exit(0);
+            }
+            // Create named object for record
+            //printf("Block Var name Pass \n");
+            variableCount++; // might cause a problem
+            namerecord_t* newVar = initializeNameRecord(2 ,nameIdent,0, level, variableCount + *dx,  0);
+            // Store object in main name array.
+            symbol_Table[universalSymbolIndex] = newVar;
+            universalSymbolIndex++;
+            free(nameIdent);// must free becuase we used Get_Token(). 
+            // increment VAR counter
+
+            // The addresses of the variables added to name table MUST be
+            // correct with regards to what is already there (var# +2) 
+            TOKEN = Get_TokenInteger();
+            if(TOKEN == commasym)
+            {
+                continue;
+            }
+            else if (TOKEN == semicolonsym)
+            {
+                break;
+            }
+            else
+            {
+                // VERIFIED
+                printf("Error: constant and variable declarations must be followed by a semicolon\n");
+                //Error
+                exit(0);
+            }
+        }
+        else
+        {
+            //NO IDENTIFIER, INVALID TOKEN 
+            // VERIFIED
+            printf("Error: const, var, and read keywords must be followed by identifier\n");
+            //Error
+            exit(0);
+        }
+    } 
+    (*dx) += variableCount;
+
+}
 void VAR_DECLARATION() 
 {
     //printf("Var enter Area %d\n",TOKEN);
@@ -926,7 +1027,7 @@ void VAR_DECLARATION()
             }
             // Create named object for record
             //printf("Block Var name Pass \n");
-            variableCount++;
+            variableCount++; // might cause a problem
             namerecord_t* newVar = initializeNameRecord(2 ,nameIdent,0, 0, variableCount + 2,  0);
             // Store object in main name array.
             symbol_Table[universalSymbolIndex] = newVar;
