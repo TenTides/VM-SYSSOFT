@@ -32,6 +32,8 @@ void VAR_DECLARATION(int* dx);
 //void VAR_DECLARATION();
 
 int SYMBOLTABLECHECK(char* name);
+void SYMBOLTABLEDELETELEVEL(int level);
+
 //int SYMBOLTABLECHECK(char* name, int level);
 
 
@@ -53,7 +55,7 @@ char* global_Lexeme;
 int universialIndex = 0;
 int tokencount = 0;
 
-int universalCodeText = 1;// This keeps track of how many opcodes we have (This should be "Line" in the terminal)
+int universalCodeText = 0;// This keeps track of how many opcodes we have (This should be "Line" in the terminal)
 
 int variableCount = 0;// This keeps track of how many Variables have been stored into the Symbol table 
 int universalSymbolIndex = 2;// This keeps track of what index we must store into next. This also is where we start our search. Searching starts at universal Symbol Index and decrements until 0. 
@@ -692,9 +694,9 @@ void PROGRAM()
     newCode = initializeNameRecord(3,"main", 0, 0, 3, 1); // hardset proc at the begining
     symbol_Table[1] = newCode;
     // COMMMENTED OUT ASSUMED THAT BLOCK WILL DO IT NOW
-    assembly_Node* newAssCode;
-    newAssCode = initializeAssemblyRecord(7, 0, 3);
-    assembly_Code[0] = newAssCode;
+    // assembly_Node* newAssCode;
+    // newAssCode = initializeAssemblyRecord(7, 0, 3);
+    // assembly_Code[0] = newAssCode;
 
     while (TOKEN != endsym)
     {
@@ -743,8 +745,11 @@ void PROGRAM()
 
 int BLOCK()
 {
-    universalLevel++;
-    int dx = 3; // 2 or 3? I think 3
+    TOKEN = Get_TokenInteger();
+    printf("Block Enter Area %d\n",TOKEN);
+
+    //universalLevel++;
+    int dx = 2; // 2 or 3? I think 3
     assembly_Node* newCode = initializeAssemblyRecord(7, 0, 0);
     int jmpIdx = universalCodeText;
     //printf("%d    JMP    0    %d\n",universalCodeText,loopIdx*3);
@@ -766,7 +771,10 @@ int BLOCK()
     while(procsym == TOKEN)
     {
         //lv and dx
+        universalLevel++;
         PROC_DECLARATION();
+        SYMBOLTABLEDELETELEVEL(universalLevel);
+        universalLevel--;
         TOKEN = Get_TokenInteger();
     }
     //}while(TOKEN = constsym || TOKEN = procsym || TOKEN = varsym)
@@ -785,9 +793,9 @@ int BLOCK()
     universalCodeText++;
     //clean house? for symbol table?
     //eliminate level? <--- to be implemented
-    universalLevel--;
+    //SYMBOLTABLEDELETELEVEL(universalLevel);
+    //universalLevel--;
     return assembly_Code[jmpIdx]->M; // will this work? 
-
 }
 
 void PROC_DECLARATION()
@@ -1036,7 +1044,7 @@ void VAR_DECLARATION(int* dx)
 
 void STATEMENT()
 {
-    //printf("Statement enter Area %d\n",TOKEN);
+    printf("Statement enter Area %d\n",TOKEN);
     //printf("Statement index %d\n",tokencount);
 
     //MASSIVE SWITCH STATEMENT BEWARE
@@ -1462,6 +1470,25 @@ int SYMBOLTABLECHECK(char* name)
 
     //printf("post strcpy\n");
     return -1;
+}
+void SYMBOLTABLEDELETELEVEL(int level)
+{
+    if(level == 0) return;
+    // printf("SYM TBL %s\n",name);
+    
+    // // printf("pre strcpy\n");
+    for(int i = universalSymbolIndex - 1; i > 0; i--)
+    {
+        if(symbol_Table[i]->level == level)
+        {
+            symbol_Table[i] = NULL;
+            universalSymbolIndex--;
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 // int SYMBOLTABLECHECK(char* name, int level)
 // {
