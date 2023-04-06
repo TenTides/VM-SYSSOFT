@@ -22,7 +22,7 @@ int isStatementReserved(char* word);
 char* subString(int start, int end,char* line);  
 int isWordValid(char* word);
 void PROGRAM();
-void BLOCK();
+int BLOCK();
 
 char* GET_Token();
 int Get_TokenInteger();
@@ -741,7 +741,7 @@ void PROGRAM()
     
 }
 
-void BLOCK()
+int BLOCK()
 {
     universalLevel++;
     int dx = 3; // 2 or 3? I think 3
@@ -784,9 +784,9 @@ void BLOCK()
     assembly_Code[universalCodeText] = newCode;
     universalCodeText++;
     //clean house? for symbol table?
-    //eliminate level?
+    //eliminate level? <--- to be implemented
     universalLevel--;
-    //return incrementAddress*3;
+    return assembly_Code[jmpIdx]->M; // will this work? 
 
 }
 
@@ -803,9 +803,9 @@ void PROC_DECLARATION()
             exit(0);
         }
         //initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel, 0,  0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
+        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel, -5,  0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
         // Store object in main name array.
-        //int tempPrcInd = universalSymbolIndex;
+        int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
         universalSymbolIndex++;
 
@@ -813,12 +813,13 @@ void PROC_DECLARATION()
         if(TOKEN == semicolonsym)
         {
             TOKEN = Get_TokenInteger(); // goes one block higher
-            BLOCK(); // needs level 
+            symbol_Table[tempPrcInd]->adr = BLOCK(); // needs level 
             if(TOKEN != semicolonsym)
             {
                 printf("Error: block statement in procedures must be followed by a semicolon\n");
                 exit(0); 
             }
+
         }
         else
         {
@@ -1232,7 +1233,7 @@ void STATEMENT()
             // if we see the endsym, the statement(beginsym) will check wether or not it exists.
             // we were hitting the default before :(. 
             break;
-        case callsym:
+        case callsym: //needs call to op code
             TOKEN = Get_TokenInteger();
             if(TOKEN == 2)
             {
@@ -1248,6 +1249,10 @@ void STATEMENT()
                     printf("Error: only variable values may be altered\n");
                     exit(0);
                 } 
+                newCode = initializeAssemblyRecord(5, universalLevel-symbol_Table[symbolIndex]->level,symbol_Table[symbolIndex]->adr);
+                //printf("%d    CALL    L    M\n",universalCodeText);
+                assembly_Code[universalCodeText] = newCode;
+                universalCodeText++;
             }
             else
             {
