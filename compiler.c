@@ -819,7 +819,7 @@ void PROC_DECLARATION()
             exit(0);
         }
         //initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel-1, -5,  0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
+        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel-1, -5,  0); 
         // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
@@ -831,7 +831,7 @@ void PROC_DECLARATION()
         {
             //TOKEN = Get_TokenInteger(); // goes one block higher
             //printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
-            symbol_Table[tempPrcInd]->adr = BLOCK(); // needs level 
+            symbol_Table[tempPrcInd]->adr = BLOCK(); 
             //printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
             //printf("Perc Token %d\n",TOKEN);
 
@@ -928,7 +928,8 @@ void CONST_DECLARATION()
         }
     } 
 }
-//changed
+
+
 void VAR_DECLARATION(int* dx) 
 {
     //printf("Var enter Area %d\n",TOKEN);
@@ -1224,6 +1225,7 @@ void STATEMENT()
                 //printf("%d    CALL ADD\n",symbol_Table[symbolIndex]->adr);
 
                 newCode = initializeAssemblyRecord(5, universalLevel-symbol_Table[symbolIndex]->level,symbol_Table[symbolIndex]->adr);
+                //if(newCode->adr)
                 //printf("%d    CALL    L    M\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
                 universalCodeText++;
