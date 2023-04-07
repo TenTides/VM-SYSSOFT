@@ -23,6 +23,7 @@ char* subString(int start, int end,char* line);
 int isWordValid(char* word);
 void PROGRAM();
 int BLOCK();
+void printSourceCode(char* filename);
 
 char* GET_Token();
 int Get_TokenInteger();
@@ -129,12 +130,13 @@ typedef enum {
 //==================================================================================================================================================================//
 
 char* resWords[] = {"odd", "begin", "end", "if", "then", "while", "do", "call", "const",  "var", "procedure",  "write", "read"}; 
-int resWordsTokens[] = {oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym, writesym , readsym};   
+
+int resWordsTokens[] = {oddsym, beginsym, endsym, ifsym, thensym, whilesym, dosym, callsym, constsym,  varsym, procsym,  writesym , readsym};   
 //Symbol table is in order of ascii value, can be used with binary search
 char  symbolTableOrdered[] = {'\t','\r',' ','(',')','*', '+',',', '-' ,'.', '/', '0', '1', '2','3', '4', '5', '6', '7', '8', '9', ':', ';', '<',
                         '=', '>','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
                         'X', 'Y', 'Z','a','b','c','d','e','f','g','h','i','j','k','l' ,'m' ,'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
-                        'v', 'w', 'x', 'y', 'z'};   
+                        'v', 'w', 'x', 'y', 'z'};      
 
 
 //Symbols which are essentially breakpoints and line enders // is not in here, a lookahead check is necessary for that one
@@ -355,7 +357,7 @@ char* lexicalParse(char* codeLine)
 int isStatementReserved(char* word)
 {
     int retval = -1;
-    for(int x = 0; x < 11; x++)
+    for(int x = 0; x < 13; x++)
     {
         if(strcmp(word,resWords[x]) == 0)
         {
@@ -726,7 +728,7 @@ void PROGRAM()
     
     if (TOKEN != periodsym || TOKEN == -11)
     {
-        printf("Error: program must end with period\n");
+        printf("-Error: program must end with period-\n");
         exit(0);
     }
     else
@@ -736,6 +738,7 @@ void PROGRAM()
         assembly_Code[universalCodeText] = newAssCode;
         universalCodeText++;
 
+        printf("No errors Detected. Compile executed Successfully.\n");
         //Print Assembly code
         printAssCodes();        //will need to be changed for HW4
         printSymTbl();
@@ -767,10 +770,13 @@ int BLOCK()
         //printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION(&dx);//handles looping aspect
         TOKEN = Get_TokenInteger();
+        printSymTbl();
     }
     while(procsym == TOKEN)
     {
         //lv and dx
+        //printSymTbl();
+
         universalLevel++;
         PROC_DECLARATION();
         SYMBOLTABLEDELETELEVEL(universalLevel);
@@ -811,17 +817,19 @@ void PROC_DECLARATION()
             exit(0);
         }
         //initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel, -5,  0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
+        namerecord_t* newPrc = initializeNameRecord(3,nameIdent,0, universalLevel-1, -5,  0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
         // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
         universalSymbolIndex++;
+        //printSymTbl();
 
         TOKEN = Get_TokenInteger();
         if(TOKEN == semicolonsym)
         {
-            TOKEN = Get_TokenInteger(); // goes one block higher
+            //TOKEN = Get_TokenInteger(); // goes one block higher
             symbol_Table[tempPrcInd]->adr = BLOCK(); // needs level 
+            TOKEN = Get_TokenInteger(); 
             if(TOKEN != semicolonsym)
             {
                 printf("Error: block statement in procedures must be followed by a semicolon\n");
@@ -1044,7 +1052,7 @@ void VAR_DECLARATION(int* dx)
 
 void STATEMENT()
 {
-    printf("Statement enter Area %d\n",TOKEN);
+    //printf("Statement enter Area %d\n",TOKEN);
     //printf("Statement index %d\n",tokencount);
 
     //MASSIVE SWITCH STATEMENT BEWARE
@@ -1778,6 +1786,51 @@ void outputAssemblyToFile()
     //printf("SUCCESS!\n");
 }
 
+void printSourceCode(char* filename) {
+
+    // Initializing variables
+    char buffer[STRMAX];
+    int length;
+    char tyler;
+
+    // =========================================
+    //Initalize input file for viewing
+    int lines = numberOfFileLines(filename);
+    FILE *fp;
+    fp = fopen(filename, "r");
+
+    if (fp == NULL) {
+        printf("Error opening file. \n");
+        return;
+    }
+
+    // =========================================
+    // =========================================
+    //Initalize main code array
+    char* codePL = (char*) malloc(sizeof(char)* (STRMAX*lines));
+    codePL[0] = '\0'; // Must be set to the first index to allow for smooth cats
+
+    printf("Source Program:\n\n");
+    //This while loop doesn't ommit comments 
+    //int errorFlag = 1;
+    while(fscanf(fp, "%[^\n]s", buffer) != EOF)
+    {
+        fscanf(fp, "%c", &tyler);
+        
+        length = strlen(buffer);
+        
+
+        char* line = (char*) malloc(sizeof(char) * (length+ 1));
+        line[0] = '\0';
+        strcpy(line, buffer);
+        printf("%s\n", line);
+        free(line);
+    }  
+
+    return; 
+}
+
+
 //==========MAIN===========//
 int main(int argc, char* argv[]) {
 //  HW2 MAIN START //
@@ -1978,7 +2031,13 @@ int main(int argc, char* argv[]) {
         free(token);
         free(word);
     } 
+    printSourceCode(argv[1]);
+    printf("\n");
     
+    //printf("\n%d",isStatementReserved("read"));
+
+    printf("\n%s\n\n",global_Lexeme);
+
     PROGRAM();
     outputAssemblyToFile();
     freeAll();
