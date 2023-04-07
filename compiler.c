@@ -749,10 +749,10 @@ void PROGRAM()
 int BLOCK()
 {
     TOKEN = Get_TokenInteger();
-    printf("Block Enter Area %d\n",TOKEN);
+    //printf("Block Enter Area %d\n",TOKEN);
 
     //universalLevel++;
-    int dx = 2; // 2 or 3? I think 3
+    int dx = 2; // 2 or 3? I think 2
     assembly_Node* newCode = initializeAssemblyRecord(7, 0, 0);
     int jmpIdx = universalCodeText;
     //printf("%d    JMP    0    %d\n",universalCodeText,loopIdx*3);
@@ -770,7 +770,7 @@ int BLOCK()
         //printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION(&dx);//handles looping aspect
         TOKEN = Get_TokenInteger();
-        printSymTbl();
+        //printSymTbl();
     }
     while(procsym == TOKEN)
     {
@@ -787,7 +787,7 @@ int BLOCK()
     assembly_Code[jmpIdx]->M = universalCodeText*3; // fixing up jmp address
     //dx will be flexible to any number of declarations hence why the declarations need to be altered
 
-    newCode = initializeAssemblyRecord(6, 0, (dx));
+    newCode = initializeAssemblyRecord(6, 0, (dx+1));
     //printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
     assembly_Code[universalCodeText] = newCode;
     //int incrementAddress = universalCodeText;
@@ -828,7 +828,11 @@ void PROC_DECLARATION()
         if(TOKEN == semicolonsym)
         {
             //TOKEN = Get_TokenInteger(); // goes one block higher
+            //printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
             symbol_Table[tempPrcInd]->adr = BLOCK(); // needs level 
+            //printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
+            //printf("Perc Token %d\n",TOKEN);
+
             TOKEN = Get_TokenInteger(); 
             if(TOKEN != semicolonsym)
             {
@@ -987,67 +991,6 @@ void VAR_DECLARATION(int* dx)
     (*dx) += variableCount;
 
 }
-// void VAR_DECLARATION() 
-// {
-//     //printf("Var enter Area %d\n",TOKEN);
-
-//     // checking until semicolon
-//     //TOKEN = Get_TokenInteger();
-//     while(1){
-//         //check for identifier
-//         //printf("var Before call %d\n",TOKEN);
-//         TOKEN = Get_TokenInteger();
-//         //printf(" Var 1 token %d\n",TOKEN);
-//         if(TOKEN == identsym)
-//         {
-//             // Grab identifier, function that grabs and saves variable  
-//             char* nameIdent = GET_Token();
-//             //printf("Var Identifier Name %s\n",nameIdent);
-//             if(SYMBOLTABLECHECK(nameIdent) != -1)
-//             {
-//                 // VERIFIED
-//                 printf("Error: symbol name has already been declared\n");
-//                 exit(0);
-//             }
-//             // Create named object for record
-//             //printf("Block Var name Pass \n");
-//             variableCount++; // might cause a problem
-//             namerecord_t* newVar = initializeNameRecord(2 ,nameIdent,0, 0, variableCount + 2,  0);
-//             // Store object in main name array.
-//             symbol_Table[universalSymbolIndex] = newVar;
-//             universalSymbolIndex++;
-//             free(nameIdent);// must free becuase we used Get_Token(). 
-//             // increment VAR counter
-
-//             // The addresses of the variables added to name table MUST be
-//             // correct with regards to what is already there (var# +2) 
-//             TOKEN = Get_TokenInteger();
-//             if(TOKEN == commasym)
-//             {
-//                 continue;
-//             }
-//             else if (TOKEN == semicolonsym)
-//             {
-//                 break;
-//             }
-//             else
-//             {
-//                 // VERIFIED
-//                 printf("Error: constant and variable declarations must be followed by a semicolon\n");
-//                 //Error
-//                 exit(0);
-//             }
-//         }
-//         else
-//         {
-//             //NO IDENTIFIER, INVALID TOKEN 
-//             // VERIFIED
-//             printf("Error: const, var, and read keywords must be followed by identifier\n");
-//             //Error
-//             exit(0);
-//         }
-//     } 
-// }
 
 
 void STATEMENT()
@@ -1265,6 +1208,8 @@ void STATEMENT()
                     printf("Error: only variable values may be altered\n");
                     exit(0);
                 } 
+                //printf("%d    CALL ADD\n",symbol_Table[symbolIndex]->adr);
+
                 newCode = initializeAssemblyRecord(5, universalLevel-symbol_Table[symbolIndex]->level,symbol_Table[symbolIndex]->adr);
                 //printf("%d    CALL    L    M\n",universalCodeText);
                 assembly_Code[universalCodeText] = newCode;
