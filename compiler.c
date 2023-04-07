@@ -2018,7 +2018,7 @@ int main(int argc, char* argv[]) {
     
     //printf("\n%d",isStatementReserved("read"));
 
-    printf("\n%s\n\n",global_Lexeme);
+    //printf("\n%s\n\n",global_Lexeme);
 
     PROGRAM();
     outputAssemblyToFile();
