@@ -34,6 +34,8 @@ void VAR_DECLARATION(int* dx);
 
 int SYMBOLTABLECHECK(char* name);
 void SYMBOLTABLEDELETELEVEL(int level);
+int SYMBOLTABLECHECKLEVEL(char* name);
+
 
 //int SYMBOLTABLECHECK(char* name, int level);
 
@@ -811,7 +813,7 @@ void PROC_DECLARATION()
     {
         //grab identifier function that grabs and saves variable  
         char* nameIdent = GET_Token();
-        if(SYMBOLTABLECHECK(nameIdent) != -1) // needs changing
+        if(SYMBOLTABLECHECKLEVEL(nameIdent) != -1) // needs changing
         {
             printf("Error: symbol name has already been declared\n");
             exit(0);
@@ -944,7 +946,7 @@ void VAR_DECLARATION(int* dx)
             // Grab identifier, function that grabs and saves variable  
             char* nameIdent = GET_Token();
             //printf("Var Identifier Name %s\n",nameIdent);
-            if(SYMBOLTABLECHECK(nameIdent) != -1)
+            if(SYMBOLTABLECHECKLEVEL(nameIdent) != -1)
             {
                 // VERIFIED
                 printf("Error: symbol name has already been declared\n");
@@ -1047,6 +1049,10 @@ void STATEMENT()
             //printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
             EXPRESSION();
             //printf("Statement Identifier Area Post Expression %d\n",TOKEN);
+            if(TOKEN == identsym)
+            {
+                STATEMENT();
+            }
 
             M = symbol_Table[symbolIndex]->adr;
             L = universalLevel - symbol_Table[symbolIndex]->level;
@@ -1065,22 +1071,29 @@ void STATEMENT()
                 //     printf("Statement enter in Begin %d\n",TOKEN);
                 // else 
                 //     printf("Statement re-entering loop in Begin %d\n",TOKEN);
-
+                //printf("Statement pre in Begin  %d\n",TOKEN);
                 TOKEN = Get_TokenInteger();
-                // printf("pre Statement %d\n", TOKEN);
+                //printf("pre Statement %d\n", TOKEN);
                 if(TOKEN != -11)
                 {
                     STATEMENT();
                 }
-                // printf("Statement Post in Begin  %d\n",TOKEN);
+                //printf("Statement Post in Begin  %d\n",TOKEN);
 
                 if(TOKEN != semicolonsym)
                 {
                     break;
                 }
             }
+            //printf("Statement Post near end  %d\n",TOKEN);
+
             if(TOKEN != endsym)
             {
+                // char* name = GET_Token();
+                // printf("Statement Post in end error  %s\n",name);
+                // TOKEN = Get_TokenInteger();
+                // printf("Statement Post in end error  %d\n",TOKEN);
+
                 printf("Error: begin must be followed by end\n");
                 //printf("False Exit\n");
                 exit(0);
@@ -1221,6 +1234,8 @@ void STATEMENT()
                 exit(0);
             }
             TOKEN = Get_TokenInteger(); // <careful with this one
+            //printf("Statement Post in CALL  %d\n",TOKEN);
+
             break;
 
     //-----------------------------------------------------------------------------------------
@@ -1416,6 +1431,28 @@ int SYMBOLTABLECHECK(char* name)
     for(int i = universalSymbolIndex - 1; i > 0; i--)
     {
         if(strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
+        {
+            return i;
+        }
+    }
+
+    //printf("post strcpy\n");
+    return -1;
+}
+int SYMBOLTABLECHECKLEVEL(char* name)
+{
+    // printf("SYM TBL %s\n",name);
+    
+    // // printf("pre strcpy\n");
+    strcpy(symbol_Table[0]->name,name);
+    // // printf("post strcpy\n");
+    
+    // printf("SYM TBL %s\n",symbol_Table[0]->name);
+
+    // // printf("pre loop \n");
+    for(int i = universalSymbolIndex - 1; i > 0; i--)
+    {
+        if(strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0 && symbol_Table[i]->level == universalLevel)
         {
             return i;
         }
