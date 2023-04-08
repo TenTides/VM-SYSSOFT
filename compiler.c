@@ -48,6 +48,10 @@ void printAssCodes();
 char *assemblyConvertOP(int OP, int M);
 void freeAll();
 
+// All this for recursive functions
+void addNewFunctionCallToFunctionTable(char *name, int jpxIdx);
+void ulitmateUpdateAllAddresses();
+
 //==========================================================================================================================
 //==========================================================================================================================
 
@@ -60,6 +64,7 @@ int universalCodeText = 0; // This keeps track of how many opcodes we have (This
 int variableCount = 0;        // This keeps track of how many Variables have been stored into the Symbol table
 int universalSymbolIndex = 2; // This keeps track of what index we must store into next. This also is where we start our search. Searching starts at universal Symbol Index and decrements until 0.
 int universalLevel = 0;
+int universalRecursiveTableIdx = 1;
 
 typedef struct
 {
@@ -80,13 +85,22 @@ typedef struct
     int M;  // L level
 } assembly_Node;
 
+typedef struct
+{
+    char name[12];
+    int nameInstancesJmpIdx[MAX_NAME_TABLE_SIZE];
+    int adr;
+} recursiveNameRecord;
+
 // Function Signitures for functions that will insert structs into the arrays below.
 namerecord_t *initializeNameRecord(int _kind, char *_name, int _val, int _level, int _adr, int _mark);
 assembly_Node *initializeAssemblyRecord(int OP, int L, int M);
+recursiveNameRecord *initializeRecursiveNameRecord(char *_name, int _adr);
 
 // Arrays that will hold the structs.
 namerecord_t *symbol_Table[MAX_NAME_TABLE_SIZE];
 assembly_Node *assembly_Code[MAX_NAME_TABLE_SIZE]; // this is where we will be storing the the assembly code
+recursiveNameRecord *functionCall_Table[MAX_NAME_TABLE_SIZE];
 
 int TOKEN = -1;
 //==========================================================================================================================
@@ -705,6 +719,10 @@ void PROGRAM()
     symbol_Table[0] = newCode;
     newCode = initializeNameRecord(3, "main", 0, 0, 3, 1); // hardset proc at the begining
     symbol_Table[1] = newCode;
+    printf("Just created main\n");
+    recursiveNameRecord *newProcedure = initializeRecursiveNameRecord("main", 3);
+    functionCall_Table[0] = newProcedure;
+
     // COMMMENTED OUT ASSUMED THAT BLOCK WILL DO IT NOW
     // assembly_Node* newAssCode;
     // newAssCode = initializeAssemblyRecord(7, 0, 3);
@@ -749,6 +767,9 @@ void PROGRAM()
         universalCodeText++;
 
         printf("No errors Detected. Compile executed Successfully.\n");
+
+        printf("\ncalling ulimateUpdateAllAddresses\n");
+        ulitmateUpdateAllAddresses();
         // Print Assembly code
         printAssCodes(); // will need to be changed for HW4
         printSymTbl();
@@ -815,6 +836,7 @@ int BLOCK()
 
 void PROC_DECLARATION()
 {
+    int address = -5;
     TOKEN = Get_TokenInteger();
     if (TOKEN == identsym)
     {
@@ -827,18 +849,31 @@ void PROC_DECLARATION()
         }
         // initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
         namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0);
+
         // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
         universalSymbolIndex++;
         // printSymTbl();
 
+        // Create a new function struct;
+        recursiveNameRecord *newProcedureRecord = initializeRecursiveNameRecord(nameIdent, -5);
+        printf("creating a new function in funcitonCall_Table with name %s\n", nameIdent);
+        int tempRecursiveTableIdx = universalRecursiveTableIdx;
+        functionCall_Table[universalRecursiveTableIdx] = newProcedureRecord;
+        universalRecursiveTableIdx++;
+
         TOKEN = Get_TokenInteger();
         if (TOKEN == semicolonsym)
         {
             // TOKEN = Get_TokenInteger(); // goes one block higher
             // printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
-            symbol_Table[tempPrcInd]->adr = BLOCK();
+            address = BLOCK();
+            symbol_Table[tempPrcInd]->adr = address;
+
+            // Store address in function struct;
+            printf("storing address %d in %s\n", address, nameIdent);
+            functionCall_Table[tempRecursiveTableIdx]->adr = address;
             // printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
             // printf("Perc Token %d\n",TOKEN);
 
@@ -1227,6 +1262,7 @@ void STATEMENT()
                 printf("Error: only variable values may be altered\n");
                 exit(0);
             }
+
             // printf("%d    CALL ADD\n",symbol_Table[symbolIndex]->adr);
 
             newCode = initializeAssemblyRecord(5, universalLevel - symbol_Table[symbolIndex]->level, symbol_Table[symbolIndex]->adr);
@@ -1234,6 +1270,9 @@ void STATEMENT()
             // printf("%d    CALL    L    M\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
+
+            printf("addNewFunctionCallFunction table with the name %s which in on line %d\n ", nameIdent, universalCodeText - 1);
+            addNewFunctionCallToFunctionTable(nameIdent, universalCodeText);
         }
         else
         {
@@ -1619,6 +1658,71 @@ namerecord_t *initializeNameRecord(int _kind, char *_name, int _val, int _level,
     new_record->adr = _adr;
     new_record->mark = _mark;
     return new_record;
+}
+
+recursiveNameRecord *initializeRecursiveNameRecord(char *_name, int _adr)
+{
+    recursiveNameRecord *newRecursiveNameRecord = malloc(sizeof(recursiveNameRecord));
+    strcpy(newRecursiveNameRecord->name, _name);
+    for (int i = 0; i < MAX_NAME_TABLE_SIZE; i++)
+    {
+        newRecursiveNameRecord->nameInstancesJmpIdx[i] = -1;
+    }
+
+    newRecursiveNameRecord->adr = _adr; // UniversalCodeText
+    return newRecursiveNameRecord;
+}
+
+void addNewFunctionCallToFunctionTable(char *name, int jpxIdx)
+{
+    int i = 0;
+    int j = 0;
+    int currentJmpIdx;
+
+    // Find the function struct with that name, and set its most recent indicie of nameInstanceJmpIdx to the jmpIdx.
+    for (i = universalRecursiveTableIdx - 1; i > 0; i--)
+    {
+        if (strcmp(functionCall_Table[i]->name, name) == 0)
+        {
+            for (j = 0; j < MAX_NAME_TABLE_SIZE; j++)
+            {
+                if (functionCall_Table[i]->nameInstancesJmpIdx[j] == -1)
+                {
+                    functionCall_Table[i]->nameInstancesJmpIdx[j] = jpxIdx - 1;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void ulitmateUpdateAllAddresses()
+{
+    int i = 0;
+    int j = 0;
+    int currentJmpIdx;
+
+    // For each Function struct update all of its function calls to the right address.
+    for (i = universalRecursiveTableIdx - 1; i > 0; i--)
+    {
+        printf("entered for loop when i is %d\n", i);
+        printf("Function struct being accessed is '%s'\n", functionCall_Table[i]->name);
+        // update all assembly_codes with that function name to the address.
+        for (j = 0; j < MAX_NAME_TABLE_SIZE; j++)
+        {
+            currentJmpIdx = functionCall_Table[i]->nameInstancesJmpIdx[j];
+            printf("When j is %d currentJmpIdx is %d\n", j, currentJmpIdx);
+            if (currentJmpIdx == -1)
+            {
+                return;
+            }
+            else if (currentJmpIdx != -1)
+            {
+                printf("updating assemblycode with JpmIdx %d with address %d\n", currentJmpIdx, functionCall_Table[i]->adr);
+                assembly_Code[currentJmpIdx]->M = functionCall_Table[i]->adr;
+            }
+        }
+    }
 }
 
 void printSymTbl()
