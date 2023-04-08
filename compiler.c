@@ -1438,28 +1438,7 @@ int SYMBOLTABLECHECK(char *name)
     // printf("post strcpy\n");
     return -1;
 }
-int SYMBOLTABLECHECKLEVEL(char *name)
-{
-    // printf("SYM TBL %s\n",name);
 
-    // // printf("pre strcpy\n");
-    strcpy(symbol_Table[0]->name, name);
-    // // printf("post strcpy\n");
-
-    // printf("SYM TBL %s\n",symbol_Table[0]->name);
-
-    // // printf("pre loop \n");
-    for (int i = universalSymbolIndex - 1; i > 0; i--)
-    {
-        if (strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
-        {
-            return i;
-        }
-    }
-
-    // printf("post strcpy\n");
-    return -1;
-}
 int SYMBOLTABLECHECKLEVEL(char *name)
 {
     // printf("SYM TBL %s\n",name);
@@ -1482,6 +1461,7 @@ int SYMBOLTABLECHECKLEVEL(char *name)
     // printf("post strcpy\n");
     return -1;
 }
+
 void SYMBOLTABLEDELETELEVEL(int level)
 {
     if (level == 0)
