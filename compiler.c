@@ -34,6 +34,7 @@ void VAR_DECLARATION(int *dx);
 
 int SYMBOLTABLECHECK(char *name);
 void SYMBOLTABLEDELETELEVEL(int level);
+int SYMBOLTABLECHECKLEVEL(char *name);
 
 // int SYMBOLTABLECHECK(char* name, int level);
 
@@ -757,10 +758,10 @@ void PROGRAM()
 int BLOCK()
 {
     TOKEN = Get_TokenInteger();
-    printf("Block Enter Area %d\n", TOKEN);
+    // printf("Block Enter Area %d\n",TOKEN);
 
     // universalLevel++;
-    int dx = 2; // 2 or 3? I think 3
+    int dx = 2; // 2 or 3? I think 2
     assembly_Node *newCode = initializeAssemblyRecord(7, 0, 0);
     int jmpIdx = universalCodeText;
     // printf("%d    JMP    0    %d\n",universalCodeText,loopIdx*3);
@@ -778,7 +779,7 @@ int BLOCK()
         // printf("Var Block Enter Area %d\n",TOKEN);
         VAR_DECLARATION(&dx); // handles looping aspect
         TOKEN = Get_TokenInteger();
-        printSymTbl();
+        // printSymTbl();
     }
     while (procsym == TOKEN)
     {
@@ -795,7 +796,7 @@ int BLOCK()
     assembly_Code[jmpIdx]->M = universalCodeText * 3; // fixing up jmp address
     // dx will be flexible to any number of declarations hence why the declarations need to be altered
 
-    newCode = initializeAssemblyRecord(6, 0, (dx));
+    newCode = initializeAssemblyRecord(6, 0, (dx + 1));
     // printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
     assembly_Code[universalCodeText] = newCode;
     // int incrementAddress = universalCodeText;
@@ -819,13 +820,13 @@ void PROC_DECLARATION()
     {
         // grab identifier function that grabs and saves variable
         char *nameIdent = GET_Token();
-        if (SYMBOLTABLECHECK(nameIdent) != -1) // needs changing
+        if (SYMBOLTABLECHECKLEVEL(nameIdent) != -1) // needs changing
         {
             printf("Error: symbol name has already been declared\n");
             exit(0);
         }
         // initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0); // slides don't even care to tell me what the procedure address is ADDRESS MISSING
+        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0);
         // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
@@ -836,7 +837,11 @@ void PROC_DECLARATION()
         if (TOKEN == semicolonsym)
         {
             // TOKEN = Get_TokenInteger(); // goes one block higher
-            symbol_Table[tempPrcInd]->adr = BLOCK(); // needs level
+            // printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
+            symbol_Table[tempPrcInd]->adr = BLOCK();
+            // printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
+            // printf("Perc Token %d\n",TOKEN);
+
             TOKEN = Get_TokenInteger();
             if (TOKEN != semicolonsym)
             {
@@ -931,7 +936,7 @@ void CONST_DECLARATION()
         }
     }
 }
-// changed
+
 void VAR_DECLARATION(int *dx)
 {
     // printf("Var enter Area %d\n",TOKEN);
@@ -950,7 +955,7 @@ void VAR_DECLARATION(int *dx)
             // Grab identifier, function that grabs and saves variable
             char *nameIdent = GET_Token();
             // printf("Var Identifier Name %s\n",nameIdent);
-            if (SYMBOLTABLECHECK(nameIdent) != -1)
+            if (SYMBOLTABLECHECKLEVEL(nameIdent) != -1)
             {
                 // VERIFIED
                 printf("Error: symbol name has already been declared\n");
@@ -996,67 +1001,6 @@ void VAR_DECLARATION(int *dx)
     }
     (*dx) += variableCount;
 }
-// void VAR_DECLARATION()
-// {
-//     //printf("Var enter Area %d\n",TOKEN);
-
-//     // checking until semicolon
-//     //TOKEN = Get_TokenInteger();
-//     while(1){
-//         //check for identifier
-//         //printf("var Before call %d\n",TOKEN);
-//         TOKEN = Get_TokenInteger();
-//         //printf(" Var 1 token %d\n",TOKEN);
-//         if(TOKEN == identsym)
-//         {
-//             // Grab identifier, function that grabs and saves variable
-//             char* nameIdent = GET_Token();
-//             //printf("Var Identifier Name %s\n",nameIdent);
-//             if(SYMBOLTABLECHECK(nameIdent) != -1)
-//             {
-//                 // VERIFIED
-//                 printf("Error: symbol name has already been declared\n");
-//                 exit(0);
-//             }
-//             // Create named object for record
-//             //printf("Block Var name Pass \n");
-//             variableCount++; // might cause a problem
-//             namerecord_t* newVar = initializeNameRecord(2 ,nameIdent,0, 0, variableCount + 2,  0);
-//             // Store object in main name array.
-//             symbol_Table[universalSymbolIndex] = newVar;
-//             universalSymbolIndex++;
-//             free(nameIdent);// must free becuase we used Get_Token().
-//             // increment VAR counter
-
-//             // The addresses of the variables added to name table MUST be
-//             // correct with regards to what is already there (var# +2)
-//             TOKEN = Get_TokenInteger();
-//             if(TOKEN == commasym)
-//             {
-//                 continue;
-//             }
-//             else if (TOKEN == semicolonsym)
-//             {
-//                 break;
-//             }
-//             else
-//             {
-//                 // VERIFIED
-//                 printf("Error: constant and variable declarations must be followed by a semicolon\n");
-//                 //Error
-//                 exit(0);
-//             }
-//         }
-//         else
-//         {
-//             //NO IDENTIFIER, INVALID TOKEN
-//             // VERIFIED
-//             printf("Error: const, var, and read keywords must be followed by identifier\n");
-//             //Error
-//             exit(0);
-//         }
-//     }
-// }
 
 void STATEMENT()
 {
@@ -1112,6 +1056,10 @@ void STATEMENT()
         // printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
         EXPRESSION();
         // printf("Statement Identifier Area Post Expression %d\n",TOKEN);
+        if (TOKEN == identsym)
+        {
+            STATEMENT();
+        }
 
         M = symbol_Table[symbolIndex]->adr;
         L = universalLevel - symbol_Table[symbolIndex]->level;
@@ -1130,7 +1078,7 @@ void STATEMENT()
             //     printf("Statement enter in Begin %d\n",TOKEN);
             // else
             //     printf("Statement re-entering loop in Begin %d\n",TOKEN);
-
+            // printf("Statement pre in Begin  %d\n",TOKEN);
             TOKEN = Get_TokenInteger();
             // printf("pre Statement %d\n", TOKEN);
             if (TOKEN != -11)
@@ -1144,8 +1092,15 @@ void STATEMENT()
                 break;
             }
         }
+        // printf("Statement Post near end  %d\n",TOKEN);
+
         if (TOKEN != endsym)
         {
+            // char* name = GET_Token();
+            // printf("Statement Post in end error  %s\n",name);
+            // TOKEN = Get_TokenInteger();
+            // printf("Statement Post in end error  %d\n",TOKEN);
+
             printf("Error: begin must be followed by end\n");
             // printf("False Exit\n");
             exit(0);
@@ -1272,7 +1227,10 @@ void STATEMENT()
                 printf("Error: only variable values may be altered\n");
                 exit(0);
             }
+            // printf("%d    CALL ADD\n",symbol_Table[symbolIndex]->adr);
+
             newCode = initializeAssemblyRecord(5, universalLevel - symbol_Table[symbolIndex]->level, symbol_Table[symbolIndex]->adr);
+            // if(newCode->adr)
             // printf("%d    CALL    L    M\n",universalCodeText);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
@@ -1283,6 +1241,8 @@ void STATEMENT()
             exit(0);
         }
         TOKEN = Get_TokenInteger(); // <careful with this one
+        // printf("Statement Post in CALL  %d\n",TOKEN);
+
         break;
 
         //-----------------------------------------------------------------------------------------
@@ -1470,6 +1430,50 @@ int SYMBOLTABLECHECK(char *name)
     for (int i = universalSymbolIndex - 1; i > 0; i--)
     {
         if (strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
+        {
+            return i;
+        }
+    }
+
+    // printf("post strcpy\n");
+    return -1;
+}
+int SYMBOLTABLECHECKLEVEL(char *name)
+{
+    // printf("SYM TBL %s\n",name);
+
+    // // printf("pre strcpy\n");
+    strcpy(symbol_Table[0]->name, name);
+    // // printf("post strcpy\n");
+
+    // printf("SYM TBL %s\n",symbol_Table[0]->name);
+
+    // // printf("pre loop \n");
+    for (int i = universalSymbolIndex - 1; i > 0; i--)
+    {
+        if (strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0)
+        {
+            return i;
+        }
+    }
+
+    // printf("post strcpy\n");
+    return -1;
+}
+int SYMBOLTABLECHECKLEVEL(char *name)
+{
+    // printf("SYM TBL %s\n",name);
+
+    // // printf("pre strcpy\n");
+    strcpy(symbol_Table[0]->name, name);
+    // // printf("post strcpy\n");
+
+    // printf("SYM TBL %s\n",symbol_Table[0]->name);
+
+    // // printf("pre loop \n");
+    for (int i = universalSymbolIndex - 1; i > 0; i--)
+    {
+        if (strcmp(symbol_Table[i]->name, symbol_Table[0]->name) == 0 && i != 0 && symbol_Table[i]->level == universalLevel)
         {
             return i;
         }
@@ -2049,7 +2053,7 @@ int main(int argc, char *argv[])
 
     // printf("\n%d",isStatementReserved("read"));
 
-    printf("\n%s\n\n", global_Lexeme);
+    // printf("\n%s\n\n",global_Lexeme);
 
     PROGRAM();
     outputAssemblyToFile();
