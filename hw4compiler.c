@@ -984,6 +984,7 @@ void outputAssemblyToFile()
     fclose(file);
     // printf("SUCCESS!\n");
 }
+
 char *GET_Token()
 {
     // printf("\n\nEntering the GET_Token\n");
