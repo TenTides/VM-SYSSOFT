@@ -1250,7 +1250,7 @@ void PROGRAM()
 int BLOCK()
 {
     TOKEN = Get_TokenInteger();
-    // printf("Block Enter Area %d\n",TOKEN);
+    //printf("Block Enter Area %d\n",TOKEN);
 
     // universalLevel++;
     int dx = 2; // 2 or 3? I think 2
@@ -1363,6 +1363,11 @@ void PROC_DECLARATION()
             printf("Error: procedure, constant, and variable declarations must be followed by a semicolon\n");
             exit(0);
         }
+    }
+    else
+    {
+            printf("Error: procedure keywords must be followed by identifier\n");           
+            exit(0);
     }
 }
 
@@ -1733,7 +1738,7 @@ void STATEMENT()
             }
             if (symbol_Table[symbolIndex]->kind != 3)
             {
-                printf("Error: only variable values may be altered\n");
+                printf("Error: only procedures may be called\n");
                 exit(0);
             }
 
