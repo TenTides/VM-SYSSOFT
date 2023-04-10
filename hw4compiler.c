@@ -1377,7 +1377,7 @@ void CONST_DECLARATION()
         {
             // grab identifier function that grabs and saves variable
             char *nameIdent = GET_Token();
-            if (SYMBOLTABLECHECK(nameIdent) != -1)
+            if (SYMBOLTABLECHECKLEVEL(nameIdent) != -1)
             {
                 // VERIFIED
                 printf("Error: symbol name has already been declared\n");
