@@ -1237,7 +1237,6 @@ int BLOCK()
     }
     while (procsym == TOKEN)
     {
-        // lv and dx
         // printSymTbl();
 
         universalLevel++;
@@ -1246,14 +1245,12 @@ int BLOCK()
         universalLevel--;
         TOKEN = Get_TokenInteger();
     }
-    //}while(TOKEN = constsym || TOKEN = procsym || TOKEN = varsym)
     assembly_Code[jmpIdx]->M = universalCodeText * 3; // fixing up jmp address
     // dx will be flexible to any number of declarations hence why the declarations need to be altered
 
     newCode = initializeAssemblyRecord(6, 0, (dx + 1));
     // printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
     assembly_Code[universalCodeText] = newCode;
-    // int incrementAddress = universalCodeText;
     universalCodeText++;
     STATEMENT();
 
@@ -1263,10 +1260,6 @@ int BLOCK()
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
     }
-    // clean house? for symbol table?
-    // eliminate level? <--- to be implemented
-    // SYMBOLTABLEDELETELEVEL(universalLevel);
-    // universalLevel--;
     return assembly_Code[jmpIdx]->M; // will this work?
 }
 
@@ -1284,9 +1277,8 @@ void PROC_DECLARATION()
             exit(0);
         }
         // initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0);
+        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0); //-5 is a junk value
 
-        // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
         universalSymbolIndex++;
@@ -1302,13 +1294,9 @@ void PROC_DECLARATION()
         TOKEN = Get_TokenInteger();
         if (TOKEN == semicolonsym)
         {
-            // TOKEN = Get_TokenInteger(); // goes one block higher
             // printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
             address = BLOCK();
             symbol_Table[tempPrcInd]->adr = address;
-
-            // Store address in function struct;
-            // printf("storing address %d in %s\n", address, nameIdent);
             functionCall_Table[tempRecursiveTableIdx]->adr = address;
             // printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
             // printf("Perc Token %d\n",TOKEN);
@@ -1364,7 +1352,6 @@ void CONST_DECLARATION()
                     //  call initialize add in the value and the identifer name
 
                     namerecord_t *newConst = initializeNameRecord(1, nameIdent, Get_TokenInteger(), universalLevel, 0, 0);
-                    // Store object in main name array.
                     symbol_Table[universalSymbolIndex] = newConst;
                     universalSymbolIndex++;
 
@@ -1415,10 +1402,6 @@ void CONST_DECLARATION()
 
 void VAR_DECLARATION(int *dx)
 {
-    // printf("Var enter Area %d\n",TOKEN);
-
-    // checking until semicolon
-    // TOKEN = Get_TokenInteger();
     variableCount = 0;
     while (1)
     {
@@ -1572,11 +1555,6 @@ void STATEMENT()
 
         if (TOKEN != endsym)
         {
-            // char* name = GET_Token();
-            // printf("Statement Post in end error  %s\n",name);
-            // TOKEN = Get_TokenInteger();
-            // printf("Statement Post in end error  %d\n",TOKEN);
-
             printf("Error: begin must be followed by end\n");
             // printf("False Exit\n");
             exit(0);
@@ -1584,7 +1562,7 @@ void STATEMENT()
 
         break;
         //-----------------------------------------------------------------------------------------
-    case ifsym: // FIXXXXXX MEEE!!!!!! look at pg 22 of newest slides 000
+    case ifsym: 
         TOKEN = Get_TokenInteger();
         CONDITION();
         // emit jpc, add to assembly code struct array
@@ -1608,7 +1586,7 @@ void STATEMENT()
         // code[jpcIdx].M = current code index
         break;
         //-----------------------------------------------------------------------------------------
-    case whilesym: // FIXXXXXX MEEE!!!!!! look at pg 24 of newest slides
+    case whilesym: 
         TOKEN = Get_TokenInteger();
         int loopIdx = universalCodeText;
         CONDITION();
@@ -2536,8 +2514,6 @@ int main(int argc, char *argv[])
     }
     printSourceCode(argv[1]);
     printf("\n");
-
-    // printf("\n%d",isStatementReserved("read"));
 
     // printf("\n%s\n\n",global_Lexeme);
 
