@@ -1,7 +1,7 @@
 // Team Leader: Tyler Crawford
 // Member: Nelson Herrera Gamboa
 // Class: COP3402
-// Date of Last Edit: 3/8/2023
+// Date of Last Edit: 4/11/2023
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,13 +30,9 @@ int Get_TokenInteger();
 void CONST_DECLARATION();
 void PROC_DECLARATION();
 void VAR_DECLARATION(int *dx);
-// void VAR_DECLARATION();
-
 int SYMBOLTABLECHECK(char *name);
 void SYMBOLTABLEDELETELEVEL(int level);
 int SYMBOLTABLECHECKLEVEL(char *name);
-
-// int SYMBOLTABLECHECK(char* name, int level);
 
 void EXPRESSION();
 void STATEMENT();
@@ -790,25 +786,7 @@ char *lexicalParse(char *codeLine)
                     }
                 }
             }
-            //    if(token == 2 && characterInSymbolTableBS(word[0], symbolTableOrdered) == -1)
-            //    {
-            //         start = start + 1;
-            //    }
         }
-        // else
-        // {
-        //     if(current == -1)
-        //     {
-        //         char invalid_string[4];
-        //         invalid_string[0] = '2';
-        //         invalid_string[1] = ' ';
-        //         invalid_string[2] = codeLine[i];
-        //         invalid_string[3] = '\0';
-        //         strcat(parsedString, invalid_string);
-        //         strcat(parsedString, " ");
-        //         //continue;
-        //     }
-        // }
     }
     return parsedString;
 }
@@ -1116,17 +1094,6 @@ char *GET_Token()
             }
         }
 
-        // for (int j = 0; j < 15; j++) {
-        //     if (specialTerminalSymbolsTokens[j] == tokenToInt)
-        //     {
-        //         // store token in retval
-
-        //         strcpy(RETVAL, token);
-        //         memset(token, '\0', 1000);
-        //         break;
-        //     }
-        // }
-
         // printf("We just left the specialSymbolTokens for loop token is %s\n", token);
         // printf("We are about to check the resWordsTokens for loop token is %s\n", token);
         // printf("PASSING\n");
@@ -1191,11 +1158,6 @@ void PROGRAM()
     recursiveNameRecord *newProcedure = initializeRecursiveNameRecord("main", 3);
     functionCall_Table[0] = newProcedure;
 
-    // COMMMENTED OUT ASSUMED THAT BLOCK WILL DO IT NOW
-    // assembly_Node* newAssCode;
-    // newAssCode = initializeAssemblyRecord(7, 0, 3);
-    // assembly_Code[0] = newAssCode;
-
     while (TOKEN != endsym)
     {
         BLOCK();
@@ -1239,8 +1201,8 @@ void PROGRAM()
         // printf("\ncalling ulimateUpdateAllAddresses\n");
         ulitmateUpdateAllAddresses();
         // Print Assembly code
-        printAssCodes(); // will need to be changed for HW4
-        printSymTbl();
+        printAssCodes(); 
+        //printSymTbl(); For debugging
         outputAssemblyToFile();
         // printf("\n Executable Output\n\n ");
         mainVM();
