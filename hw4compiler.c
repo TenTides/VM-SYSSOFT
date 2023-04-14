@@ -600,6 +600,7 @@ char specialTerminalSymbolsOrdered[] = {'\t', '\r', ' ', '(', ')', '*', '+', ','
 int specialTerminalSymbolsTokens[] = {-3, -2, -1, lparentsym, rparentsym, multsym, plussym, commasym, minussym, periodsym, slashsym, 0, semicolonsym, lessym, eqsym, gtrsym, 0}; // -1 is for spaces and 0 is for colons and -2 for tabs,
 int halt_flag = 1;
 int EndProgramFlag = 1;
+int conditionFlag = 0;
 
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
@@ -1791,6 +1792,7 @@ void CONDITION()
     // printf("Post grab CONDITION with: %d\n",TOKEN);
 
     assembly_Node *newCode;
+    conditionFlag = 1;
     if (TOKEN == oddsym)
     {
         TOKEN = Get_TokenInteger();
@@ -1871,6 +1873,7 @@ void CONDITION()
             //-----------------------------------------------------------------------------------------
         }
     }
+    conditionFlag = 0;
 }
 
 int SYMBOLTABLECHECK(char *name)
@@ -1968,13 +1971,13 @@ void TERM()
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
         }
-        else if (TOKEN >= 8 && TOKEN <= 14)
+        else if (TOKEN >= 8 && TOKEN <= 14 && conditionFlag == 0)
         {
             printf("Error: arithemetic operations cannot use relational operators\n");
             exit(0);
         }
     }
-    if (TOKEN >= 8 && TOKEN <= 14)
+    if (TOKEN >= 8 && TOKEN <= 14 && conditionFlag == 0)
     {
         printf("Error: arithemetic operations cannot use relational operators\n");
         exit(0);
