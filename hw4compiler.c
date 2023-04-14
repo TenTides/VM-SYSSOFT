@@ -1196,7 +1196,7 @@ void PROGRAM()
         assembly_Code[universalCodeText] = newAssCode;
         universalCodeText++;
 
-        // printf("No errors Detected. Compile executed Successfully.\n");
+        printf("No errors Detected. Compile executed Successfully.\n");
 
         // printf("\ncalling ulimateUpdateAllAddresses\n");
         ulitmateUpdateAllAddresses();
