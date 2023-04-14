@@ -1118,7 +1118,7 @@ char *GET_Token()
     free(token);
     // printf("about to return\n");
     universialIndex++;
-
+    //if(retLang )
     // printf("This is RETVAL before returning %s\n", RETVAL);
     return RETVAL;
 }
@@ -1350,7 +1350,6 @@ void CONST_DECLARATION()
                     // store number in from reference
                     // main array name record addition
                     //  call initialize add in the value and the identifer name
-
                     namerecord_t *newConst = initializeNameRecord(1, nameIdent, Get_TokenInteger(), universalLevel, 0, 0);
                     symbol_Table[universalSymbolIndex] = newConst;
                     universalSymbolIndex++;
@@ -1969,6 +1968,16 @@ void TERM()
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
         }
+        else if (TOKEN >= 8 && TOKEN <= 14)
+        {
+            printf("Error: arithemetic operations cannot use relational operators\n");
+            exit(0);
+        }
+    }
+    if (TOKEN >= 8 && TOKEN <= 14)
+    {
+        printf("Error: arithemetic operations cannot use relational operators\n");
+        exit(0);
     }
 }
 
@@ -2001,7 +2010,7 @@ void FACTOR()
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
         }
-        else // 2 = var
+        else if (symbol_Table[symIdx]->kind == 2)// 2 = var
         {
             // emit LIT (M = symbol_Table[symIdx].Value)
             int M = symbol_Table[symIdx]->adr;
@@ -2011,6 +2020,11 @@ void FACTOR()
             // printf("%d    LOD    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
+        }
+        else
+        {
+            printf("Error: procedures cannot be used in expressions or factor\n");
+            exit(0);
         }
         //  printf("TOKEN PRE LOD: %d\n",TOKEN);
         TOKEN = Get_TokenInteger();
@@ -2353,7 +2367,8 @@ int main(int argc, char *argv[])
     // I commented out the print statements from everything in this
     // except the error cases, that way exiting on errors will be easier
     // and the only things that print on exit.
-
+    printSourceCode(argv[1]);
+    printf("\n");
     if (errorFlag != 0)
     {
         length = strlen(codePL);
@@ -2385,7 +2400,10 @@ int main(int argc, char *argv[])
                 if (strcmp(token, "0") == 0)
                 {
                     EndProgramFlag = 0;
-                    printf("%-9s%5s\n", ":", " Error: symbol invalid when not followed by =");
+
+                    printf("':' Error: symbol invalid when not followed by =\n");
+                    exit(0);
+
                     memset(token, '\0', 1000);
                     continue;
                 }
@@ -2425,7 +2443,10 @@ int main(int argc, char *argv[])
                 if (strcmp(token, "-5") == 0)
                 {
                     EndProgramFlag = 0;
-                    printf("%-9s%5s\n", "/*", "Error: Unresolved In Line Comment Error");
+
+                    printf("/* Error: Unresolved In Line Comment Error\n");
+                    exit(0);
+
                     memset(token, '\0', 1000);
                     continue;
                 }
@@ -2439,7 +2460,8 @@ int main(int argc, char *argv[])
                     if (valid == -3)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, "Error: Invalid Number, exceeds max digits of 5");
+                        printf("Error: Invalid Number, exceeds max digits of 5\n");
+                        exit(0);
                     }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
@@ -2455,7 +2477,9 @@ int main(int argc, char *argv[])
                     if (strlen(word) == 1 && characterInSymbolTableBS(word[0], symbolTableOrdered) == -1)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, "Error:  Invalid Symbol");
+
+                        printf("Error:  Invalid Symbol: %s\n",word);
+                        exit(0);
                     }
                     else
                     {
@@ -2463,12 +2487,14 @@ int main(int argc, char *argv[])
                         if (valid == -1)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, exceeds max length of 11");
+                            printf("Error: Invalid Identifier, exceeds max length of 11\n");
+                            exit(0);
                         }
                         else if (valid == -2)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, starts with an Integer");
+                            printf("Error: Invalid Identifier, starts with an Integer\n");
+                            exit(0);
                         }
                     }
                     memset(token, '\0', 1000);
@@ -2512,8 +2538,7 @@ int main(int argc, char *argv[])
         free(token);
         free(word);
     }
-    printSourceCode(argv[1]);
-    printf("\n");
+  
 
     // printf("\n%s\n\n",global_Lexeme);
 

@@ -1,13 +1,14 @@
-Invar f, n;
+/* Only procedures can be called */
+var f, n;
 procedure b; 
         var ans1;  
-        procedure ; 
+        procedure a; 
             const b = 6;
             begin
                 ans1 := 5;
             end;
         begin
-            call a;
+            call ans1;
             ans1:=n;
             n:= n-1;
         end;
