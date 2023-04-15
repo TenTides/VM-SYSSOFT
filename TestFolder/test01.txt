@@ -1,7 +1,7 @@
 var x, y, z;
 begin
     z := 34;       /* <--- what kind of error is this supposed to give? */
-    y := z / 54
+    y := z / 54;
     write y;
-    write z
+    write z;
 end.

@@ -1512,14 +1512,9 @@ void STATEMENT()
         }
         TOKEN = Get_TokenInteger();
 
-        // printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
+        //printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
         EXPRESSION();
-        // printf("Statement Identifier Area Post Expression %d\n",TOKEN);
-        if (TOKEN == identsym)
-        {
-            STATEMENT();
-        }
-
+        //printf("Statement Identifier Area Post Expression %d\n",TOKEN);
         M = symbol_Table[symbolIndex]->adr;
         L = universalLevel - symbol_Table[symbolIndex]->level;
 
@@ -1528,6 +1523,10 @@ void STATEMENT()
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
         // emit STO (M = table[symIdx].addr)
+        if (TOKEN == identsym)
+        {
+            STATEMENT();
+        }
         break;
         //-----------------------------------------------------------------------------------------
     case beginsym:
@@ -2308,6 +2307,7 @@ void printSourceCode(char *filename)
         strcpy(line, buffer);
         printf("%s\n", line);
         free(line);
+        buffer[0] = '\0';
     }
 
     return;
@@ -2345,11 +2345,9 @@ int main(int argc, char *argv[])
     {
         fscanf(fp, "%c", &tyler);
         length = strlen(buffer);
-
         char *line = (char *)malloc(sizeof(char) * (length + 1));
         line[0] = '\0';
         strcpy(line, buffer);
-
         line = lexicalParse(line); // lex parse
         if (line != NULL)
         {
@@ -2360,8 +2358,8 @@ int main(int argc, char *argv[])
             errorFlag = 0;
             break;
         }
-
         free(line);
+        buffer[0] = '\0';
     }
 
     // =========================================
@@ -2543,7 +2541,7 @@ int main(int argc, char *argv[])
     }
   
 
-    // printf("\n%s\n\n",global_Lexeme);
+    //printf("\n%s\n\n",global_Lexeme);
 
     PROGRAM();
     freeAll();

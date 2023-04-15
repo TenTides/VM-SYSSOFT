@@ -1,4 +1,21 @@
 var x, y;
+procedure a;
+    var x;
+    begin
+
+
+
+
+
+
+
+
+
+
+
+
+
+    end;
 begin
-    x := y*2;
+    call a;
 end.
