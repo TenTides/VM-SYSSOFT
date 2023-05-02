@@ -1,4 +1,4 @@
-# VM-SYSSOFT VM
+# Virtual Machine
 Team Leader: Tyler Crawford   
 Member: Nelson Herrera Gamboa
 Class: COP3402    
