@@ -1,7 +1,7 @@
 // Team Leader: Tyler Crawford
 // Member: Nelson Herrera Gamboa
 // Class: COP3402
-// Date of Last Edit: 3/8/2023
+// Date of Last Edit: 4/11/2023
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,13 +30,9 @@ int Get_TokenInteger();
 void CONST_DECLARATION();
 void PROC_DECLARATION();
 void VAR_DECLARATION(int *dx);
-// void VAR_DECLARATION();
-
 int SYMBOLTABLECHECK(char *name);
 void SYMBOLTABLEDELETELEVEL(int level);
 int SYMBOLTABLECHECKLEVEL(char *name);
-
-// int SYMBOLTABLECHECK(char* name, int level);
 
 void EXPRESSION();
 void STATEMENT();
@@ -604,6 +600,7 @@ char specialTerminalSymbolsOrdered[] = {'\t', '\r', ' ', '(', ')', '*', '+', ','
 int specialTerminalSymbolsTokens[] = {-3, -2, -1, lparentsym, rparentsym, multsym, plussym, commasym, minussym, periodsym, slashsym, 0, semicolonsym, lessym, eqsym, gtrsym, 0}; // -1 is for spaces and 0 is for colons and -2 for tabs,
 int halt_flag = 1;
 int EndProgramFlag = 1;
+int conditionFlag = 0;
 
 //==================================================================================================================================================================//
 //==================================================================================================================================================================//
@@ -790,25 +787,7 @@ char *lexicalParse(char *codeLine)
                     }
                 }
             }
-            //    if(token == 2 && characterInSymbolTableBS(word[0], symbolTableOrdered) == -1)
-            //    {
-            //         start = start + 1;
-            //    }
         }
-        // else
-        // {
-        //     if(current == -1)
-        //     {
-        //         char invalid_string[4];
-        //         invalid_string[0] = '2';
-        //         invalid_string[1] = ' ';
-        //         invalid_string[2] = codeLine[i];
-        //         invalid_string[3] = '\0';
-        //         strcat(parsedString, invalid_string);
-        //         strcat(parsedString, " ");
-        //         //continue;
-        //     }
-        // }
     }
     return parsedString;
 }
@@ -1116,17 +1095,6 @@ char *GET_Token()
             }
         }
 
-        // for (int j = 0; j < 15; j++) {
-        //     if (specialTerminalSymbolsTokens[j] == tokenToInt)
-        //     {
-        //         // store token in retval
-
-        //         strcpy(RETVAL, token);
-        //         memset(token, '\0', 1000);
-        //         break;
-        //     }
-        // }
-
         // printf("We just left the specialSymbolTokens for loop token is %s\n", token);
         // printf("We are about to check the resWordsTokens for loop token is %s\n", token);
         // printf("PASSING\n");
@@ -1151,7 +1119,7 @@ char *GET_Token()
     free(token);
     // printf("about to return\n");
     universialIndex++;
-
+    //if(retLang )
     // printf("This is RETVAL before returning %s\n", RETVAL);
     return RETVAL;
 }
@@ -1191,11 +1159,6 @@ void PROGRAM()
     recursiveNameRecord *newProcedure = initializeRecursiveNameRecord("main", 3);
     functionCall_Table[0] = newProcedure;
 
-    // COMMMENTED OUT ASSUMED THAT BLOCK WILL DO IT NOW
-    // assembly_Node* newAssCode;
-    // newAssCode = initializeAssemblyRecord(7, 0, 3);
-    // assembly_Code[0] = newAssCode;
-
     while (TOKEN != endsym)
     {
         BLOCK();
@@ -1234,13 +1197,13 @@ void PROGRAM()
         assembly_Code[universalCodeText] = newAssCode;
         universalCodeText++;
 
-        // printf("No errors Detected. Compile executed Successfully.\n");
+        printf("No errors Detected. Compile executed Successfully.\n");
 
         // printf("\ncalling ulimateUpdateAllAddresses\n");
         ulitmateUpdateAllAddresses();
         // Print Assembly code
-        printAssCodes(); // will need to be changed for HW4
-        printSymTbl();
+        printAssCodes(); 
+        //printSymTbl(); For debugging
         outputAssemblyToFile();
         // printf("\n Executable Output\n\n ");
         mainVM();
@@ -1250,7 +1213,7 @@ void PROGRAM()
 int BLOCK()
 {
     TOKEN = Get_TokenInteger();
-    // printf("Block Enter Area %d\n",TOKEN);
+    //printf("Block Enter Area %d\n",TOKEN);
 
     // universalLevel++;
     int dx = 2; // 2 or 3? I think 2
@@ -1275,7 +1238,6 @@ int BLOCK()
     }
     while (procsym == TOKEN)
     {
-        // lv and dx
         // printSymTbl();
 
         universalLevel++;
@@ -1284,14 +1246,12 @@ int BLOCK()
         universalLevel--;
         TOKEN = Get_TokenInteger();
     }
-    //}while(TOKEN = constsym || TOKEN = procsym || TOKEN = varsym)
     assembly_Code[jmpIdx]->M = universalCodeText * 3; // fixing up jmp address
     // dx will be flexible to any number of declarations hence why the declarations need to be altered
 
     newCode = initializeAssemblyRecord(6, 0, (dx + 1));
     // printf("%d    INC    0    %d\n",universalCodeText, (3+variableCount));
     assembly_Code[universalCodeText] = newCode;
-    // int incrementAddress = universalCodeText;
     universalCodeText++;
     STATEMENT();
 
@@ -1301,10 +1261,6 @@ int BLOCK()
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
     }
-    // clean house? for symbol table?
-    // eliminate level? <--- to be implemented
-    // SYMBOLTABLEDELETELEVEL(universalLevel);
-    // universalLevel--;
     return assembly_Code[jmpIdx]->M; // will this work?
 }
 
@@ -1322,9 +1278,8 @@ void PROC_DECLARATION()
             exit(0);
         }
         // initializeNameRecord(int _kind, char* _name, int _val, int _level, int _adr, int _mark);
-        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0);
+        namerecord_t *newPrc = initializeNameRecord(3, nameIdent, 0, universalLevel - 1, -5, 0); //-5 is a junk value
 
-        // Store object in main name array.
         int tempPrcInd = universalSymbolIndex;
         symbol_Table[universalSymbolIndex] = newPrc;
         universalSymbolIndex++;
@@ -1340,13 +1295,9 @@ void PROC_DECLARATION()
         TOKEN = Get_TokenInteger();
         if (TOKEN == semicolonsym)
         {
-            // TOKEN = Get_TokenInteger(); // goes one block higher
             // printf("Perc AD pre %d\n",symbol_Table[tempPrcInd]->adr);
             address = BLOCK();
             symbol_Table[tempPrcInd]->adr = address;
-
-            // Store address in function struct;
-            // printf("storing address %d in %s\n", address, nameIdent);
             functionCall_Table[tempRecursiveTableIdx]->adr = address;
             // printf("Perc AD post %d\n",symbol_Table[tempPrcInd]->adr);
             // printf("Perc Token %d\n",TOKEN);
@@ -1364,6 +1315,11 @@ void PROC_DECLARATION()
             exit(0);
         }
     }
+    else
+    {
+            printf("Error: procedure keywords must be followed by identifier\n");           
+            exit(0);
+    }
 }
 
 // hasn't changed too much
@@ -1377,7 +1333,7 @@ void CONST_DECLARATION()
         {
             // grab identifier function that grabs and saves variable
             char *nameIdent = GET_Token();
-            if (SYMBOLTABLECHECK(nameIdent) != -1)
+            if (SYMBOLTABLECHECKLEVEL(nameIdent) != -1)
             {
                 // VERIFIED
                 printf("Error: symbol name has already been declared\n");
@@ -1395,9 +1351,7 @@ void CONST_DECLARATION()
                     // store number in from reference
                     // main array name record addition
                     //  call initialize add in the value and the identifer name
-
                     namerecord_t *newConst = initializeNameRecord(1, nameIdent, Get_TokenInteger(), universalLevel, 0, 0);
-                    // Store object in main name array.
                     symbol_Table[universalSymbolIndex] = newConst;
                     universalSymbolIndex++;
 
@@ -1448,10 +1402,6 @@ void CONST_DECLARATION()
 
 void VAR_DECLARATION(int *dx)
 {
-    // printf("Var enter Area %d\n",TOKEN);
-
-    // checking until semicolon
-    // TOKEN = Get_TokenInteger();
     variableCount = 0;
     while (1)
     {
@@ -1562,14 +1512,9 @@ void STATEMENT()
         }
         TOKEN = Get_TokenInteger();
 
-        // printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
+        //printf("Statement Identifier Area Pre Expression %d\n",TOKEN);
         EXPRESSION();
-        // printf("Statement Identifier Area Post Expression %d\n",TOKEN);
-        if (TOKEN == identsym)
-        {
-            STATEMENT();
-        }
-
+        //printf("Statement Identifier Area Post Expression %d\n",TOKEN);
         M = symbol_Table[symbolIndex]->adr;
         L = universalLevel - symbol_Table[symbolIndex]->level;
 
@@ -1578,6 +1523,10 @@ void STATEMENT()
         assembly_Code[universalCodeText] = newCode;
         universalCodeText++;
         // emit STO (M = table[symIdx].addr)
+        if (TOKEN == identsym)
+        {
+            STATEMENT();
+        }
         break;
         //-----------------------------------------------------------------------------------------
     case beginsym:
@@ -1605,11 +1554,6 @@ void STATEMENT()
 
         if (TOKEN != endsym)
         {
-            // char* name = GET_Token();
-            // printf("Statement Post in end error  %s\n",name);
-            // TOKEN = Get_TokenInteger();
-            // printf("Statement Post in end error  %d\n",TOKEN);
-
             printf("Error: begin must be followed by end\n");
             // printf("False Exit\n");
             exit(0);
@@ -1617,7 +1561,7 @@ void STATEMENT()
 
         break;
         //-----------------------------------------------------------------------------------------
-    case ifsym: // FIXXXXXX MEEE!!!!!! look at pg 22 of newest slides 000
+    case ifsym: 
         TOKEN = Get_TokenInteger();
         CONDITION();
         // emit jpc, add to assembly code struct array
@@ -1641,7 +1585,7 @@ void STATEMENT()
         // code[jpcIdx].M = current code index
         break;
         //-----------------------------------------------------------------------------------------
-    case whilesym: // FIXXXXXX MEEE!!!!!! look at pg 24 of newest slides
+    case whilesym: 
         TOKEN = Get_TokenInteger();
         int loopIdx = universalCodeText;
         CONDITION();
@@ -1733,7 +1677,7 @@ void STATEMENT()
             }
             if (symbol_Table[symbolIndex]->kind != 3)
             {
-                printf("Error: only variable values may be altered\n");
+                printf("Error: only procedures may be called\n");
                 exit(0);
             }
 
@@ -1847,6 +1791,7 @@ void CONDITION()
     // printf("Post grab CONDITION with: %d\n",TOKEN);
 
     assembly_Node *newCode;
+    conditionFlag = 1;
     if (TOKEN == oddsym)
     {
         TOKEN = Get_TokenInteger();
@@ -1927,6 +1872,7 @@ void CONDITION()
             //-----------------------------------------------------------------------------------------
         }
     }
+    conditionFlag = 0;
 }
 
 int SYMBOLTABLECHECK(char *name)
@@ -2024,6 +1970,16 @@ void TERM()
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
         }
+        else if (TOKEN >= 8 && TOKEN <= 14 && conditionFlag == 0)
+        {
+            printf("Error: arithemetic operations cannot use relational operators\n");
+            exit(0);
+        }
+    }
+    if (TOKEN >= 8 && TOKEN <= 14 && conditionFlag == 0)
+    {
+        printf("Error: arithemetic operations cannot use relational operators\n");
+        exit(0);
     }
 }
 
@@ -2056,7 +2012,7 @@ void FACTOR()
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
         }
-        else // 2 = var
+        else if (symbol_Table[symIdx]->kind == 2)// 2 = var
         {
             // emit LIT (M = symbol_Table[symIdx].Value)
             int M = symbol_Table[symIdx]->adr;
@@ -2066,6 +2022,11 @@ void FACTOR()
             // printf("%d    LOD    0    %d\n",universalCodeText,M);
             assembly_Code[universalCodeText] = newCode;
             universalCodeText++;
+        }
+        else
+        {
+            printf("Error: procedures cannot be used in expressions or factor\n");
+            exit(0);
         }
         //  printf("TOKEN PRE LOD: %d\n",TOKEN);
         TOKEN = Get_TokenInteger();
@@ -2346,6 +2307,7 @@ void printSourceCode(char *filename)
         strcpy(line, buffer);
         printf("%s\n", line);
         free(line);
+        buffer[0] = '\0';
     }
 
     return;
@@ -2383,11 +2345,9 @@ int main(int argc, char *argv[])
     {
         fscanf(fp, "%c", &tyler);
         length = strlen(buffer);
-
         char *line = (char *)malloc(sizeof(char) * (length + 1));
         line[0] = '\0';
         strcpy(line, buffer);
-
         line = lexicalParse(line); // lex parse
         if (line != NULL)
         {
@@ -2398,8 +2358,8 @@ int main(int argc, char *argv[])
             errorFlag = 0;
             break;
         }
-
         free(line);
+        buffer[0] = '\0';
     }
 
     // =========================================
@@ -2408,7 +2368,8 @@ int main(int argc, char *argv[])
     // I commented out the print statements from everything in this
     // except the error cases, that way exiting on errors will be easier
     // and the only things that print on exit.
-
+    printSourceCode(argv[1]);
+    printf("\n");
     if (errorFlag != 0)
     {
         length = strlen(codePL);
@@ -2440,7 +2401,10 @@ int main(int argc, char *argv[])
                 if (strcmp(token, "0") == 0)
                 {
                     EndProgramFlag = 0;
-                    printf("%-9s%5s\n", ":", " Error: symbol invalid when not followed by =");
+
+                    printf("':' Error: symbol invalid when not followed by =\n");
+                    exit(0);
+
                     memset(token, '\0', 1000);
                     continue;
                 }
@@ -2480,7 +2444,10 @@ int main(int argc, char *argv[])
                 if (strcmp(token, "-5") == 0)
                 {
                     EndProgramFlag = 0;
-                    printf("%-9s%5s\n", "/*", "Error: Unresolved In Line Comment Error");
+
+                    printf("/* Error: Unresolved In Line Comment Error\n");
+                    exit(0);
+
                     memset(token, '\0', 1000);
                     continue;
                 }
@@ -2494,7 +2461,8 @@ int main(int argc, char *argv[])
                     if (valid == -3)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, "Error: Invalid Number, exceeds max digits of 5");
+                        printf("Error: Invalid Number, exceeds max digits of 5\n");
+                        exit(0);
                     }
                     memset(token, '\0', 1000);
                     memset(word, '\0', 1000);
@@ -2510,7 +2478,9 @@ int main(int argc, char *argv[])
                     if (strlen(word) == 1 && characterInSymbolTableBS(word[0], symbolTableOrdered) == -1)
                     {
                         EndProgramFlag = 0;
-                        printf("%-9s%5s\n", word, "Error:  Invalid Symbol");
+
+                        printf("Error:  Invalid Symbol: %s\n",word);
+                        exit(0);
                     }
                     else
                     {
@@ -2518,12 +2488,14 @@ int main(int argc, char *argv[])
                         if (valid == -1)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, exceeds max length of 11");
+                            printf("Error: Invalid Identifier, exceeds max length of 11\n");
+                            exit(0);
                         }
                         else if (valid == -2)
                         {
                             EndProgramFlag = 0;
-                            printf("%-9s%5s\n", word, "Error: Invalid Identifier, starts with an Integer");
+                            printf("Error: Invalid Identifier, starts with an Integer\n");
+                            exit(0);
                         }
                     }
                     memset(token, '\0', 1000);
@@ -2567,12 +2539,9 @@ int main(int argc, char *argv[])
         free(token);
         free(word);
     }
-    printSourceCode(argv[1]);
-    printf("\n");
+  
 
-    // printf("\n%d",isStatementReserved("read"));
-
-    // printf("\n%s\n\n",global_Lexeme);
+    //printf("\n%s\n\n",global_Lexeme);
 
     PROGRAM();
     freeAll();
