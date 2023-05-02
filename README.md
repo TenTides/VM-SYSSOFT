@@ -34,7 +34,7 @@ This project involves creating a virtual machine and a compiler, with an embedde
 * Passing no input file will result in an error output to the terminal.
 
 
-
+***
 
 # Virtual Machine
 Team Leader: Tyler Crawford   
