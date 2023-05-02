@@ -1,6 +1,5 @@
 # Virtual Machine and Compiler Project
 Team Members: Tyler Crawford and Nelson Herrera Gamboa
-Class: COP3402
 Last Edit Dates: Various (from 1/27/2023 to 4/8/2023)
 ***
 Project Overview:
@@ -38,8 +37,7 @@ This project involves creating a virtual machine and a compiler, with an embedde
 
 # Virtual Machine
 Team Leader: Tyler Crawford   
-Member: Nelson Herrera Gamboa
-Class: COP3402    
+Member: Nelson Herrera Gamboa  
 Date of Last Edit: 1/27/2023
 
 To properly run or vm, the file must be properly 
@@ -59,8 +57,7 @@ the program reaches EOP command and halts.
 
 # LEX-SYSSOFT LEX Scanner
 Team Leader: Tyler Crawford   
-Member: Nelson Herrera Gamboa
-Class: COP3402    
+Member: Nelson Herrera Gamboa  
 Date of Last Edit: 2/14/2023
 
 To properly run or vm, the file must be properly 
@@ -142,8 +139,7 @@ Lexeme List:
 
 # LEX-SYSSOFT Parse Code Generator
 Team Leader: Tyler Crawford   
-Member: Nelson Herrera Gamboa
-Class: COP3402    
+Member: Nelson Herrera Gamboa 
 Date of Last Edit: 3/8/2023
 
 To properly run our Parse Code Generator, the file must be properly 
