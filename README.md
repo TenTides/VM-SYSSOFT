@@ -7,31 +7,31 @@ Project Overview:
 This project involves creating a virtual machine and a compiler, with an embedded lexigraphical analyzer and parse code generator. The system is developed in C and contains multiple components: Virtual Machine (VM), LEX-SYSSOFT LEX Scanner, LEX-SYSSOFT Parse Code Generator, and COMPILER-SYSSOFT COMPILER.
 
 1. Virtual Machine (VM):
-Compile using "gcc -g vm.c" to create the executable.
-To run, use "./a.out input.txt" format.
+*Compile using "gcc -g vm.c" to create the executable.
+*To run, use "./a.out input.txt" format.
 Input files are processed during runtime, and the program halts when it reaches the EOP command.
-Passing no input file will result in a segmentation fault.
+*Passing no input file will result in a segmentation fault.
 
 2. LEX-SYSSOFT LEX Scanner:
-Compile using "gcc -g lex.c" to create the executable.
-To run, use "./a.out input.txt" format.
-The scanner tokenizes the code and outputs a lexeme list.
-Passing no input file will result in a segmentation fault.
+*Compile using "gcc -g lex.c" to create the executable.
+*To run, use "./a.out input.txt" format.
+*The scanner tokenizes the code and outputs a lexeme list.
+*Passing no input file will result in a segmentation fault.
 
 3. LEX-SYSSOFT Parse Code Generator:
-Compile using "gcc -g parsecodegen.c" to create the executable.
-To run, use "./a.out input.txt" format.
-The generator halts on syntax errors and outputs error messages.
-If successful, assembly codes are printed to "outputAssemblyCode.txt".
-Passing no input file will result in an error output to the terminal.
+*Compile using "gcc -g parsecodegen.c" to create the executable.
+*To run, use "./a.out input.txt" format.
+*The generator halts on syntax errors and outputs error messages.
+*If successful, assembly codes are printed to "outputAssemblyCode.txt".
+*Passing no input file will result in an error output to the terminal.
 
 
 4. COMPILER-SYSSOFT COMPILER:
-Compile using "gcc -g h4compiler.c" to create the executable.
-To run, use "./a.out input.txt" format.
-The compiler halts on syntax errors and outputs error messages.
-If successful, assembly codes are printed to "elf.txt", and the VM executes the code, displaying the process on the screen.
-Passing no input file will result in an error output to the terminal.
+*Compile using "gcc -g h4compiler.c" to create the executable.
+*To run, use "./a.out input.txt" format.
+*The compiler halts on syntax errors and outputs error messages.
+*If successful, assembly codes are printed to "elf.txt", and the VM executes the code, displaying the process on the screen.
+*Passing no input file will result in an error output to the terminal.
 
 
 
