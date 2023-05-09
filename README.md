@@ -165,7 +165,7 @@ Member: Nelson Herrera Gamboa
 Class: COP3402    
 Date of Last Edit: 4/8/2023
 
-To properly run our Parse Code Generator, the file must be properly 
+To properly run our compiler, the file must be properly 
 compliled first. Use "gcc -g h4compiler.c" 
 to generate a file from the h4compiler.c file to run.
 
