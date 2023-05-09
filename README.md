@@ -40,7 +40,7 @@ Team Leader: Tyler Crawford
 Member: Nelson Herrera Gamboa  
 Date of Last Edit: 1/27/2023
 
-To properly run or vm, the file must be properly 
+To properly run our vm, the file must be properly 
 compliled first. Use "gcc -g vm.c" 
 to generate a file from the vm.c file to run.
 
@@ -60,7 +60,7 @@ Team Leader: Tyler Crawford
 Member: Nelson Herrera Gamboa  
 Date of Last Edit: 2/14/2023
 
-To properly run or vm, the file must be properly 
+To properly run our vm, the file must be properly 
 compliled first. Use "gcc -g lex.c" 
 to generate a file from the vm.c file to run.
 
